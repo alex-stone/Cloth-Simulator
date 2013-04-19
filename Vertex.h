@@ -9,6 +9,8 @@ class Vertex {
   private:
     // TODO: Vertex Properties:
     // Position - Coordinate
+    float x, y, z;
+
     // Velocity - Vector
     // Acceleration - Vector
     //     Force's Calculated for Each Vertex
@@ -20,8 +22,8 @@ class Vertex {
     // 4 Bend Springs: 2nd Horizontal & Vertical
 
     // TODO: Variables
-    // Bool fixed
-    // Float mass
+    bool fixed;
+    float mass;
 
   public:
     // Constructors:
@@ -31,6 +33,16 @@ class Vertex {
     // Cloth Vertex Coordinate
     // Connections 
     // Fixed Or Not
+
+    Vertex(float a, float b, float c);
+
+
+    // Getters
+    float getX() { return x; };
+    float getY() { return y; };
+    float getZ() { return z; };
+
+
 
 };
 
