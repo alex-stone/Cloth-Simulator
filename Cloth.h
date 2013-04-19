@@ -7,8 +7,13 @@
 
 class Cloth {
   private:
+    int width;   // Number of Vertices
+    int height;  // Number of Vertices 
+
     // Vertices:
     // 2D array of Vertices 
+    
+    Vertex** vertices;
            
     // Color: 
 
@@ -24,6 +29,8 @@ class Cloth {
     // Constructor Options:
     // Spring Constants
     // Stretch, Shear, Bend Constants 
+
+    
 
 }
 
