@@ -58,17 +58,38 @@ void initScene() {
     glutCreateWindow("CS184 - Final Project");
 
 
-
 }
 
 void myReshape(int w, int h) {
     viewport.w = w;
     viewport.h = h;
 
+    glViewport(0, 0, viewport.w, viewport.h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
 }
 
 void myDisplay() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glLoadIdentity();
+
+    
+    glBegin(GL_POINTS);
+
+    // Iterate through each vertex in the cloth;
+    for(int i = 0; i < cloth->width; i++) {
+        for(int j = 0; j < cloth->height; j++) {
+            Vertex* temp = cloth->getVertex(i, j); 
+            glVertex3f(temp->getX(), temp->getY(), temp->getZ());
+        }
+    }
+    
+    glEnd();
 
     glFlush();
     glutSwapBuffers();
