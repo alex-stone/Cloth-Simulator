@@ -64,9 +64,13 @@ void myReshape(int w, int h) {
     viewport.w = w;
     viewport.h = h;
 
+    float aspectRatio = (float) w / (float) h;
+
     glViewport(0, 0, viewport.w, viewport.h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
+
+    gluPerspective(45, aspectRatio, 1, 100);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -78,6 +82,7 @@ void myDisplay() {
 
     glLoadIdentity();
 
+    // Set Camera
     
     glBegin(GL_POINTS);
 
@@ -110,7 +115,8 @@ int main(int argc, char *argv[]) {
 
     initScene();
 
-    
+
+    // GLUT Loop    
     glutDisplayFunc(myDisplay);
     glutReshapeFunc(myReshape);
     glutKeyboardFunc(keyPress);
