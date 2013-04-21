@@ -35,7 +35,7 @@ class Vertex {
     // Fixed Or Not
 
     Vertex(float a, float b, float c);
-
+    Vertex(float a, float b, float c, bool isFixed);
 
     // Getters
     float getX() { return x; };
