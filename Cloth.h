@@ -22,6 +22,9 @@ class Cloth {
     // Bool Tearable
     // Bool Wireframe
 
+    // Private Functions:
+    initializeDefaultVertices();
+
   public:
     // Constructors:
     Cloth();
@@ -30,7 +33,14 @@ class Cloth {
     // Spring Constants
     // Stretch, Shear, Bend Constants 
 
-    
+    Cloth(int w, int h);
+
+
+    // Getters:
+    int getWidth() { return width; };;
+    int getHeight() { return height; };    
+    Vertex* getVertex(int i, int j) { return vertices[width][height] };
+
 
 }
 
