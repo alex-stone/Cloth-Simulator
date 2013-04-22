@@ -23,7 +23,9 @@ class Cloth {
     // Bool Wireframe
 
     // Private Functions:
-    initializeDefaultVertices();
+//    initializeDefaultVertices();
+    initializeTestCloth();
+
 
   public:
     // Constructors:
