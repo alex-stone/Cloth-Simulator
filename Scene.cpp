@@ -19,6 +19,9 @@
              
 #include <time.h>
 #include <math.h>
+#include "Cloth.h"
+#include "Vertex.h"
+#include "Spring.h"
 
 #define PI 3.14159265
 
