@@ -12,40 +12,30 @@ class Cloth {
     int width;   // Number of Vertices
     int height;  // Number of Vertices 
 
-    // Vertices:
-    // 2D array of Vertices 
-    
+    // 2D Arrray of Vertices:
     Vertex** vertices;
            
-    // Color: 
-
-    // Texture
-
-    // Bool Tearable
-    // Bool Wireframe
-
     // Private Functions:
 //    initializeDefaultVertices();
     void initializeTestCloth(int w, int h);
 
+    // TODO: Other Variables
+    //      bool tearable
+    //      bool wireframe
+    //      - Color, Texture
+    //      Spring Constants
 
   public:
     // Constructors:
     Cloth();
-    // TODO: Constructor Takes a list of Vertices
-    // Constructor Options:
-    // Spring Constants
-    // Stretch, Shear, Bend Constants 
-
     Cloth(int w, int h);
     Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, Vertex* downLeft);
-
+    // Other Constructors: Include Spring Constants
 
     // Getters:
     int getWidth() { return width; };
     int getHeight() { return height; };    
     Vertex getVertex(int i, int j) { return vertices[width][height]; };
-
 
 };
 
