@@ -1,6 +1,8 @@
 #include <iostream>
 #include <math.h>
+#include <glm/glm.hpp>
 #include "Vertex.h"
+
 
 //****************************************************
 // Vertex Class - Constructors
@@ -39,7 +41,9 @@ Vertex::Vertex(float a, float b, float c, bool isFixed) {
 // Vertex Class - Functions
 //****************************************************
 
+void connectStretch(Vertex a, int n) {
 
+}
 
 
 
