@@ -1,6 +1,7 @@
 #include <iostream>
 #include <math.h>
 #include <glm/glm.hpp>
+
 #include "Vertex.h"
 
 
@@ -8,9 +9,9 @@
 // Vertex Class - Constructors
 //****************************************************
 Vertex::Vertex() {
-    this->x = 0.0f;
-    this->y = 0.0f;
-    this->z = 0.0f;
+    this->position = glm::vec3(0.0f);
+    this->velocity = glm::vec3(0.0f);
+    this->acceleration = glm::vec3(0.0f);
 
     fixed = false;
     mass = 0.001f;  // Arbitrary Value
@@ -18,9 +19,9 @@ Vertex::Vertex() {
 }
 
 Vertex::Vertex(float a, float b, float c) {
-    this->x = a;
-    this->y = b;
-    this->z = c;
+    this->position = glm::vec3(a, b, c);
+    this->velocity = glm::vec3(0.0f);
+    this->acceleration = glm::vec3(0.0f);
 
     fixed = false;
     mass = 0.001f;
@@ -28,9 +29,9 @@ Vertex::Vertex(float a, float b, float c) {
 }
 
 Vertex::Vertex(float a, float b, float c, bool isFixed) {
-    this->x = a;
-    this->y = b;
-    this->z = c;
+    this->position = glm::vec3(a, b, c);
+    this->velocity = glm::vec3(0.0f);
+    this->acceleration = glm::vec3(0.0f);
 
     fixed = isFixed;
     mass = 0.001f;
