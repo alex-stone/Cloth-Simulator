@@ -87,13 +87,16 @@ void myDisplay() {
 
     // Set Camera
     
-    glBegin(GL_POINTS);
+    glBegin(GL_QUAD_STRIP);
 
     // Iterate through each vertex in the cloth;
-    for(int i = 0; i < cloth->width; i++) {
-        for(int j = 0; j < cloth->height; j++) {
-            Vertex* temp = cloth->getVertex(i, j); 
-            glVertex3f(temp->getX(), temp->getY(), temp->getZ());
+    for(int i = 0; i < cloth->getWidth(); i++) {
+        for(int j = 0; j < cloth->getHeight()-1; j++) {
+            Vertex temp = cloth->getVertex(i, j); 
+            glVertex3f(temp.getX(), temp.getY(), temp.getZ());
+            
+            temp = cloth->getVertex(i, j+1);
+            glVertex3f(temp.getX(), temp.getY(), temp.getZ());
         }
     }
     
