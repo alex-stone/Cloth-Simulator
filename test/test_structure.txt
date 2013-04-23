@@ -1,0 +1,16 @@
+# Number of Vertices 
+width height
+
+# 4 Corners of Cloth, (float, float, float):
+a b c
+d e f
+g h i
+j k l
+
+# 4 booleans if side or not side 1 = between pt 1 & 2
+side1_isFixed?
+side2_isFixed?
+side3_isFixed?
+side4_isFixed?
+
+
