@@ -20,6 +20,8 @@ class Cloth {
     //      bool tearable
     //      Spring Constants
     //      Dampening Constants
+    float springConstant;
+    float dampeningConstant;
 
   public:
     // Constructors:
@@ -35,7 +37,10 @@ class Cloth {
     // Width oriented vector
     Vertex* getVertex(int w, int h) { return vertexMatrix[h*width + w]; };
 
-    Vertex* getVertexMatrix(int i) { return vertexMatrix[i]; };
+    // Update Cloth:
+    void update(float timestep);
+
+    void connectSprings();
 
 };
 
