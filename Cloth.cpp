@@ -73,7 +73,12 @@ void Cloth::update(float timestep) {
 
 void Cloth::addExternalAccel(glm::vec3 externalForce) {
     
+    
     for(int i = 0; i < height*width; i++) {
+        std::cout << "AddExternalAccel Count = " << i << std::endl;
+        if(vertexMatrix[i] == NULL) {
+            std::cout << "VertexMatrix == NULL" << std::endl;
+        }
         vertexMatrix[i]->updateAccel(externalForce);
     }
 
@@ -124,21 +129,21 @@ void Cloth::connectSprings() {
             }
 
             // Connections to the Right
-            if(i <= width - 2) {
+            if(i <= width - 3) {
                 vert->connectBend(this->getVertex(i+2, j), 2);
                 vert->connectStretch(this->getVertex(i+1, j), 2);
             } else {
-                if(i == width - 1) {
+                if(i == width - 2) {
                     vert->connectStretch(this->getVertex(i+1, j), 2);
                 }
             }
 
             // Connections Downwards:
-            if(j <= height - 2) {
+            if(j <= height - 3) {
                 vert->connectBend(this->getVertex(i, j+2), 3);
                 vert->connectStretch(this->getVertex(i, j+1), 3);   
             } else {
-                if(j == height - 1) {
+                if(j == height - 2) {
                     vert->connectStretch(this->getVertex(i, j+1), 3);
                 }
             }
