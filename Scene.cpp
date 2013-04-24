@@ -136,21 +136,24 @@ void myDisplay() {
     glRotatef(theta, 1.0f, 0.0f, 0.0f);
     glRotatef(phi, 0.0f, 0.0f, 1.0f);
 
-    
-    glBegin(GL_QUAD_STRIP);
-
     // Iterate through each vertex in the cloth;
-    for(int i = 0; i < cloth->getWidth(); i++) {
-        for(int j = 0; j < cloth->getHeight()-1; j++) {
-            Vertex* temp = cloth->getVertex(i, j); 
+
+    for(int h = 0; h < cloth->getHeight()-1; h++) {
+    
+        glBegin(GL_QUAD_STRIP);
+ 
+        for(int w = 0; w < cloth->getWidth(); w++) {
+            
+            Vertex* temp = cloth->getVertex(w, h+1 );
             glVertex3f(temp->getPos().x, temp->getPos().y, temp->getPos().z);
             
-            temp = cloth->getVertex(i, j+1);
+            temp = cloth->getVertex(w, h);
             glVertex3f(temp->getPos().x, temp->getPos().y, temp->getPos().z);
+
+            
         }
+        glEnd();
     }
-    
-    glEnd();
 
     glFlush();
     glutSwapBuffers();
@@ -168,6 +171,13 @@ void myDisplay() {
 void keyPress(unsigned char key, int x, int y) {
     
     switch(key) {
+        case 'w':
+            wire = !wire;
+            if(wire) {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            } else {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            }
         case '+':
             zTranslate += Z_TRANSLATE_INC;
             break;
@@ -188,7 +198,7 @@ void keyPress(unsigned char key, int x, int y) {
 // On Arrow Key Press:
 //   
 //****************************************************
-void arroyKeyPress(int key, int x, int y) {
+void arrowKeyPress(int key, int x, int y) {
     bool shift = (glutGetModifiers() == GLUT_ACTIVE_SHIFT);
 
     switch(key) {
@@ -238,7 +248,6 @@ void loadCloth(char* input) {
     if(inpfile.good()) {
         inpfile >> width;
         inpfile >> height; 
-
         
         for(int i = 0; i < 4; i++) {
             float x,y,z;
@@ -253,10 +262,9 @@ void loadCloth(char* input) {
     }
     
     inpfile.close();
-
+    
     cloth = new Cloth(width, height, corners[0], corners[1], corners[2], corners[3]);
 
-   
 }
 
 int main(int argc, char *argv[]) {
@@ -280,8 +288,10 @@ int main(int argc, char *argv[]) {
     glutDisplayFunc(myDisplay);
     glutReshapeFunc(myReshape);
     glutKeyboardFunc(keyPress);
+    glutSpecialFunc(arrowKeyPress);
     glutMainLoop();
 
+    return 0;
 }
 
 
