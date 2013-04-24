@@ -111,6 +111,54 @@ void initScene() {
 }
 
 //****************************************************
+// GLUT 3D Setup
+//     - Sets all the openGL/GLUT Modes and views for
+//      Rendering 3D Objects
+//****************************************************
+void glut3DSetup() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+    glClearDepth(1.0f);
+    
+    if(light) {
+        glEnable(GL_LIGHTING);
+    }
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    
+    // Perspective Camera
+    gluPerspective(FOV_Y, aspectRatio, Z_NEAR, Z_FAR);
+    glMatrixMode(GL_MODELVIEW);
+    
+}
+
+//****************************************************
+// GLUT 2D Setup
+//     - Sets all the openGL/GLUT Modes and views for
+//      Rendering 2D Objects
+//      - Uses an Orthographic Camera
+//****************************************************
+void glut2DSetup() {
+    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glDisable(GL_LIGHTING);
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    
+    // Orthographic Camera
+    glOrtho(0.0, viewport.w, viewport.h, 0, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity(); 
+
+}
+
+//****************************************************
 // MyReshape 
 //     - reshape viewport if the window is resized
 //****************************************************
@@ -131,6 +179,13 @@ void myReshape(int w, int h) {
 
 }
 
+
+//****************************************************
+// Print HUD
+//      - Prints the Heads Up Display:
+//      Variables To be Printed:
+//          - Timestep
+//****************************************************
 void printHUD(float x, float y, float r, float g, float b, const char* text) {
     glColor3f(r,g,b);
     glRasterPos2f(x,y);
@@ -141,13 +196,18 @@ void printHUD(float x, float y, float r, float g, float b, const char* text) {
 
 }
 
+//****************************************************
+// DrawTestLine - Draws a line for each axis, (x,y,z)
+//      - Red for X-axis
+//      - Green for Y-axis
+//      - Blue for Z-axis
+//****************************************************
 void drawTestLine() {
     glBegin(GL_LINES);
     
         glColor3f(1.0f, 0.0f, 0.0f);
         glVertex3f(0.0f, 0.0f, 0.0f);
         glVertex3f(1.0f, 0.0f, 0.0f);
-    
     
         glColor3f(0.0f, 1.0f, 0.0f);
         glVertex3f(0.0f, 0.0f, 0.0f);
@@ -168,13 +228,12 @@ void drawTestLine() {
 void renderCloth() {
 
     for(int h = 0; h < cloth->getHeight()-1; h++) {
-
         glBegin(GL_QUAD_STRIP);
 
         for(int w = 0; w < cloth->getWidth(); w++) {
 
             glColor3f(1.0f, 1.0f, 1.0f);
-
+        
             Vertex* temp = cloth->getVertex(w, h+1 );
             glVertex3f(temp->getPos().x, temp->getPos().y, temp->getPos().z);
 
@@ -192,7 +251,8 @@ void renderCloth() {
 //     - reshape viewport if the window is resized
 //****************************************************
 void myDisplay() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glut3DSetup();
 
     // Zeroe's Out 
     glLoadIdentity();
@@ -205,29 +265,19 @@ void myDisplay() {
 
     // Iterate through each vertex in the cloth;
    
-    drawTestLine();
-    
-    //renderCloth(); 
-/*
-    for(int h = 0; h < cloth->getHeight()-1; h++) {
-    
-        glBegin(GL_QUAD_STRIP);
- 
-        for(int w = 0; w < cloth->getWidth(); w++) {
+    //drawTestLine();
    
-            glColor3f(1.0f, 1.0f, 1.0f);
+    // Renders 3D Objects 
+    renderCloth(); 
     
-            Vertex* temp = cloth->getVertex(w, h+1 );
-            glVertex3f(temp->getPos().x, temp->getPos().y, temp->getPos().z);
-          
-            temp = cloth->getVertex(w, h);
-            glVertex3f(temp->getPos().x, temp->getPos().y, temp->getPos().z);
+    glut2DSetup();
 
-            
-        }
-        glEnd();
-    }
-*/
+    // Renders 2D Objects
+    const char* output = "Theta = ";
+    printHUD(-2, -2, 1.0f, 1.0f, 1.0f, output);
+
+    glDepthMask(GL_TRUE);
+    
     // Setup For 2D:
 
 /*
