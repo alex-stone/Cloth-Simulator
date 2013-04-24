@@ -45,11 +45,16 @@ void connectStretch(Vertex a, int n) {
 
 //****************************************************
 // Force Calculation Functions
+//      - Use Euler's Methods to update Position & 
+//        Velocity
 //****************************************************
 void Vertex::update(float timestep) {
-
+    // x(i+1) = x(i) + v(i) * dT
+    if(!isFixed) {
+        position = position + velocity*timestep;
+        velocity = velocity + acceleration * timestep;
+    }
 }
-
 
 //****************************************************
 // Update Acceleration:
@@ -63,7 +68,6 @@ void Vertex::updateAccel(glm::vec3 externalForces) {
 
     // Net Acceleration = Sum of 3 vectors
     acceleration = spring + damp + externalForces;
-
 }
 
 //****************************************************
@@ -72,6 +76,8 @@ void Vertex::updateAccel(glm::vec3 externalForces) {
 //        12 of the springs.
 //****************************************************
 glm::vec3 Vertex::getSpringAccel() {
+    // Iterate through each spring connection and calculate force 
+    
 
 
 }
