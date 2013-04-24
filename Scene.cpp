@@ -141,9 +141,22 @@ void printHUD(float x, float y, float r, float g, float b, const char* text) {
 
 }
 
-void drawTestPt() {
-    glBegin(GL_POINTS);
-        glVertex3f(1.0f, 1.0f, 1.0f);
+void drawTestLine() {
+    glBegin(GL_LINES);
+    
+        glColor3f(1.0f, 0.0f, 0.0f);
+        glVertex3f(0.0f, 0.0f, 0.0f);
+        glVertex3f(1.0f, 0.0f, 0.0f);
+    
+    
+        glColor3f(0.0f, 1.0f, 0.0f);
+        glVertex3f(0.0f, 0.0f, 0.0f);
+        glVertex3f(0.0f, 1.0f, 0.0f);
+   
+        glColor3f(0.0f, 0.0f, 1.0f);
+        glVertex3f(0.0f, 0.0f, 0.0f);
+        glVertex3f(0.0f, 0.0f, 1.0f);
+    
     glEnd();
 
 }
@@ -192,10 +205,10 @@ void myDisplay() {
 
     // Iterate through each vertex in the cloth;
    
-    drawTestPt();
+    drawTestLine();
     
-    renderCloth(); 
-    /*
+    //renderCloth(); 
+/*
     for(int h = 0; h < cloth->getHeight()-1; h++) {
     
         glBegin(GL_QUAD_STRIP);
@@ -214,11 +227,10 @@ void myDisplay() {
         }
         glEnd();
     }
-    */
-
+*/
     // Setup For 2D:
 
-
+/*
     glDisable(GL_DEPTH_TEST);
 
     glMatrixMode(GL_PROJECTION);
@@ -234,7 +246,7 @@ void myDisplay() {
 
     const char* ThetaOutput = "Theta = ";
     printHUD(-2,-2 , 1.0f, 1.0f, 1.0f, ThetaOutput);
-
+*/
     glFlush();
     glutSwapBuffers();
 }
@@ -258,13 +270,13 @@ void keyPress(unsigned char key, int x, int y) {
             } else {
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             }
+            break;
         case '+':
             zTranslate += Z_TRANSLATE_INC;
             break;
         case '-':
             zTranslate -= Z_TRANSLATE_INC;
             break;
-    
         case ' ':
             std::exit(1);
             break;
@@ -288,24 +300,28 @@ void arrowKeyPress(int key, int x, int y) {
             } else {
                 phi -= ROTATE_INC;
             }
+            break;
         case 101:   // Up Arrow
             if(shift) {
                 yTranslate += TRANSLATE_INC;
             } else {
                 theta -= ROTATE_INC;
             }
+            break;
         case 102:   // Right Arrow
             if(shift) {
                 xTranslate += TRANSLATE_INC;
             } else {
                 phi += ROTATE_INC;
             }
+            break;
         case 103:   // Down Arrow
             if(shift) {
                 yTranslate -= TRANSLATE_INC;
             } else {
                 theta += ROTATE_INC;
             }
+            break;
     }
 
     myDisplay();
