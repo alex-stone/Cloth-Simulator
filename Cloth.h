@@ -42,6 +42,7 @@ class Cloth {
 
     void addExternalForce(glm::vec3 externalForce);
 
+    void setFixedCorners(bool c1, bool c2, bool c3, bool c4);
     void connectSprings();
 
 };

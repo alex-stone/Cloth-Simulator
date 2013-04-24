@@ -78,6 +78,25 @@ void Cloth::addExternalForce(glm::vec3 externalForce) {
 
 }
 
+void Cloth::setFixedCorners(bool c1, bool c2, bool c3, bool c4) {
+    
+    if(c1) {
+        this->getVertex(0, 0)->setFixedVertex(true);
+    }
+
+    if(c2) {
+        this->getVertex(width-1, 0)->setFixedVertex(true);
+    } 
+
+    if(c3) {
+        this->getVertex(width-1, height-1)->setFixedVertex(true);
+    }
+
+    if(c4) {
+        this->getVertex(0, height-1)->setFixedVertex(true);
+    }
+}
+
 void Cloth::connectSprings() {
     for(int i = 0; i < width; i++) {
         for(int j = 0; j < height; j++) {

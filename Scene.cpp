@@ -414,6 +414,7 @@ void loadCloth(const char* input) {
     std::ifstream inpfile(input, ifstream::in);
     
     int width, height;
+    bool c1, c2, c3, c4;
 
     Vertex* corners[4];
 
@@ -429,13 +430,28 @@ void loadCloth(const char* input) {
 
             corners[i] = new Vertex(x,y,z);
 
+            corners[i]->printPosition();
         }
+
+        std::string temp;
+    
+        inpfile >> temp;
+        c1 = (temp == "true");
+        inpfile >> temp;
+        c2 = (temp == "true");
+        inpfile >> temp;
+        c3 = (temp == "true");
+        inpfile >> temp;
+        c4 = (temp == "true");
 
     }
     
     inpfile.close();
+   
+    std::cout << "c1 = " << c1 << "   c2 = " << c2 << "  c3 = " << c3 << "  c4 " << c4 << std::endl;
     
     cloth = new Cloth(width, height, corners[0], corners[1], corners[2], corners[3]);
+    cloth->setFixedCorners(c1, c2, c3, c4);
 
 }
 
