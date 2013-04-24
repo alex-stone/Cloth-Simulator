@@ -28,6 +28,7 @@ class Vertex {
     float bendRestDist;
 
     // TODO: Variables
+    float lastTimeUpdated;
     bool fixed;
     float mass;
 
@@ -50,6 +51,9 @@ class Vertex {
     glm::vec3 getVelocity() { return velocity; };
     glm::vec3 getAccel() { return acceleration; };
 
+    void setSpringRestLengths(float stretch, float bend, float shear);
+    void setFixedVertex(bool isFixed);
+
     // Connect Vertex a, to this Vertex, in direction n
     void connectStretch(Vertex* a, int n);
     void connectShear(Vertex* a , int n);
@@ -60,9 +64,11 @@ class Vertex {
     void updateAccel(glm::vec3 externalForces);
     glm::vec3 getSpringAccel();
     glm::vec3 getDampAccel();
+    glm::vec3 getAccelFromSpring(float restLength, glm::vec3 springVec);
 
     // Direction To Vertex:
     glm::vec3 vectorTo(Vertex* a);
+
 
     // Force Calculation Functions
     //      External Forces:
