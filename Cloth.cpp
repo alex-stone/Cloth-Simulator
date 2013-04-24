@@ -41,11 +41,11 @@ Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, V
 
     glm::vec3 vertStep = vertVec / (float)(h-1);
     glm::vec3 horizStep = horizVec / (float)(w-1);
-    
+   
     // Iterate through and create each Vertex
-    for(int i = 0; i < w; i++) {
-        for(int j = 0; j < h; j++) {
-            glm::vec3 temp = upLeft->getPos() + ((float)i * horizStep) + ((float)j * vertStep);
+    for(int i = 0; i < h; i++) {
+        for(int j = 0; j < w; j++) {
+            glm::vec3 temp = upLeft->getPos() + ((float)i * vertStep) + ((float)j * horizStep);
             
             //I*W + j indexes vertexMatrix like a 2D array vertexMatrix[i][j]; 
             vertexMatrix[i*w + j] = new Vertex(temp.x, temp.y, temp.z);
