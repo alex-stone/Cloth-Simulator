@@ -22,7 +22,6 @@ Cloth::Cloth(int w, int h) {
 
 }
 
-
 //****************************************************
 // Cloth Constructor called from Parser
 //          - Takes the 4 corners, and divides Cloth
@@ -30,19 +29,23 @@ Cloth::Cloth(int w, int h) {
 //
 //****************************************************
 Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, Vertex* downLeft) {
-   // Vertex **vertices = new Vertex*[w];
-  
     // Sets the size of the vector to W*H 
     vertexMatrix.resize(w * h); 
-    
-    
+
+    // Set Dimensions of Cloth
+    this->width = w;
+    this->height = h;
 
     glm::vec3 vertVec = upLeft->vectorTo(downLeft);
     glm::vec3 horizVec = upLeft->vectorTo(upRight);
 
     glm::vec3 vertStep = vertVec / (float)(h-1);
     glm::vec3 horizStep = horizVec / (float)(w-1);
-  
+
+    std::cout << "Cloth: Width = " << w << std::endl;  
+    std::cout << "Cloth: Height = " << h << std::endl;  
+
+
     
     // Iterate through and create each Vertex
     for(int i = 0; i < w; i++) {
@@ -55,7 +58,8 @@ Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, V
         }
     }
 
-    
+    std::cout << "Cloth After Constructor: Width = " << w << std::endl;
+        
 
 }
 
