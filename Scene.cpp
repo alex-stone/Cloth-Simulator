@@ -99,19 +99,26 @@ void initScene() {
     smooth = false;
     light = false;
 
+    // Initializes Wireframe to be ON 
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glShadeModel(GL_FLAT);
+
     glEnable(GL_DEPTH_TEST);
     glClearDepth(1.0f);
 
     glDepthFunc(GL_LEQUAL);
-
     
 }
 
+//****************************************************
+// MyReshape 
+//     - reshape viewport if the window is resized
+//****************************************************
 void myReshape(int w, int h) {
     viewport.w = w;
     viewport.h = h;
 
-    float aspectRatio = (float) w / (float) h;
+    aspectRatio = ((GLdouble) w / (GLdouble) h);
 
     glViewport(0, 0, viewport.w, viewport.h);
     glMatrixMode(GL_PROJECTION);
@@ -124,6 +131,53 @@ void myReshape(int w, int h) {
 
 }
 
+void printHUD(float x, float y, float r, float g, float b, const char* text) {
+    glColor3f(r,g,b);
+    glRasterPos2f(x,y);
+    while(*text) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_10, *text);
+        text++;
+    }
+
+}
+
+void drawTestPt() {
+    glBegin(GL_POINTS);
+        glVertex3f(1.0f, 1.0f, 1.0f);
+    glEnd();
+
+}
+
+//****************************************************
+// RenderCloth
+//      - Render's the Cloth
+//****************************************************
+void renderCloth() {
+
+    for(int h = 0; h < cloth->getHeight()-1; h++) {
+
+        glBegin(GL_QUAD_STRIP);
+
+        for(int w = 0; w < cloth->getWidth(); w++) {
+
+            glColor3f(1.0f, 1.0f, 1.0f);
+
+            Vertex* temp = cloth->getVertex(w, h+1 );
+            glVertex3f(temp->getPos().x, temp->getPos().y, temp->getPos().z);
+
+            temp = cloth->getVertex(w, h);
+            glVertex3f(temp->getPos().x, temp->getPos().y, temp->getPos().z);
+
+        }
+
+        glEnd();
+    }
+}
+
+//****************************************************
+// MyDisplay 
+//     - reshape viewport if the window is resized
+//****************************************************
 void myDisplay() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -132,21 +186,27 @@ void myDisplay() {
 
     // Set Camera
     glTranslatef(xTranslate, yTranslate, zTranslate);
-    
+   
     glRotatef(theta, 1.0f, 0.0f, 0.0f);
     glRotatef(phi, 0.0f, 0.0f, 1.0f);
 
     // Iterate through each vertex in the cloth;
-
+   
+    drawTestPt();
+    
+    renderCloth(); 
+    /*
     for(int h = 0; h < cloth->getHeight()-1; h++) {
     
         glBegin(GL_QUAD_STRIP);
  
         for(int w = 0; w < cloth->getWidth(); w++) {
-            
+   
+            glColor3f(1.0f, 1.0f, 1.0f);
+    
             Vertex* temp = cloth->getVertex(w, h+1 );
             glVertex3f(temp->getPos().x, temp->getPos().y, temp->getPos().z);
-            
+          
             temp = cloth->getVertex(w, h);
             glVertex3f(temp->getPos().x, temp->getPos().y, temp->getPos().z);
 
@@ -154,6 +214,26 @@ void myDisplay() {
         }
         glEnd();
     }
+    */
+
+    // Setup For 2D:
+
+
+    glDisable(GL_DEPTH_TEST);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity;
+
+    glOrtho(0, viewport.w, 0, viewport.h, -1, 1);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+    const char* ThetaOutput = "Theta = ";
+    printHUD(-2,-2 , 1.0f, 1.0f, 1.0f, ThetaOutput);
 
     glFlush();
     glutSwapBuffers();
@@ -238,7 +318,7 @@ void arrowKeyPress(int key, int x, int y) {
 //      - First line Width Height
 //      - Next 4 lines four corners of cloth
 //****************************************************
-void loadCloth(char* input) {
+void loadCloth(const char* input) {
     std::ifstream inpfile(input, ifstream::in);
     
     int width, height;
@@ -275,7 +355,7 @@ int main(int argc, char *argv[]) {
     if(argc == 2) {
         loadCloth(argv[1]);
     } else {
-        char* inputFile = "test/cloth.test"; 
+        const char* inputFile = "test/cloth.test"; 
         loadCloth(inputFile);
     }
 
