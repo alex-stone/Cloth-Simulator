@@ -12,6 +12,10 @@ Vertex::Vertex() {
     this->position = glm::vec3(0.0f);
     this->velocity = glm::vec3(0.0f);
     this->acceleration = glm::vec3(0.0f);
+    
+    stretch = new Vertex*[4];
+    shear = new Vertex*[4];
+    bend = new Vertex*[4];
 
     fixed = false;
     mass = 0.001f;  // Arbitrary Value
@@ -22,6 +26,10 @@ Vertex::Vertex(float a, float b, float c) {
     this->velocity = glm::vec3(0.0f);
     this->acceleration = glm::vec3(0.0f);
 
+    stretch = new Vertex*[4];
+    shear = new Vertex*[4];
+    bend = new Vertex*[4];
+
     fixed = false;
     mass = 0.001f;
 }
@@ -31,6 +39,10 @@ Vertex::Vertex(float a, float b, float c, bool isFixed) {
     this->velocity = glm::vec3(0.0f);
     this->acceleration = glm::vec3(0.0f);
 
+    stretch = new Vertex*[4];
+    shear = new Vertex*[4];
+    bend = new Vertex*[4];
+
     fixed = isFixed;
     mass = 0.001f;
 }
@@ -39,8 +51,16 @@ Vertex::Vertex(float a, float b, float c, bool isFixed) {
 // Vertex Class - Functions
 //****************************************************
 
-void connectStretch(Vertex a, int n) {
+void Vertex::connectStretch(Vertex* a, int n) {
+    stretch[n] = a;
+}
 
+void Vertex::connectShear(Vertex* a, int n) {
+    shear[n] = a;
+}
+
+void Vertex::connectBend(Vertex* a, int n) {
+    bend[n] = a;
 }
 
 //****************************************************
@@ -50,7 +70,7 @@ void connectStretch(Vertex a, int n) {
 //****************************************************
 void Vertex::update(float timestep) {
     // x(i+1) = x(i) + v(i) * dT
-    if(!isFixed) {
+    if(!fixed) {
         position = position + velocity*timestep;
         velocity = velocity + acceleration * timestep;
     }
@@ -78,11 +98,15 @@ void Vertex::updateAccel(glm::vec3 externalForces) {
 glm::vec3 Vertex::getSpringAccel() {
     // Iterate through each spring connection and calculate force 
     
+    glm::vec3 temp(0, 0, 0);
 
-
+    return temp;
 }
 
 glm::vec3 Vertex::getDampAccel() {
+    glm::vec3 temp(0, 0, 0);
+
+    return temp;
 
 }
 

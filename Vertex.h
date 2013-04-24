@@ -16,17 +16,22 @@ class Vertex {
 
     // TODO: Spring Connections:
     // 4 Stretch Spring: Left, Up, Right, Down
-    Vertex* stretch[4];
+    Vertex** stretch;
+    float stretchRestDist;
 
     // 4 Shear Springs: Up-Left, Up-Right, Down-Right, Down-Left
-    Vertex* shear[4];
+    Vertex** shear;
+    float shearRestDist;
     
     // 4 Bend Springs: Left, Up, Right, Down
-    Vertex* bend[4];
+    Vertex** bend;
+    float bendRestDist;
 
     // TODO: Variables
     bool fixed;
     float mass;
+
+    float springConstant;
 
   public:
     // Constructors:
@@ -46,9 +51,9 @@ class Vertex {
     glm::vec3 getAccel() { return acceleration; };
 
     // Connect Vertex a, to this Vertex, in direction n
-    void connectStretch(Vertex a, int n);
-    void connectShear(Vertex a , int n);
-    void connectBend(Vertex a, int n);
+    void connectStretch(Vertex* a, int n);
+    void connectShear(Vertex* a , int n);
+    void connectBend(Vertex* a, int n);
 
     // Force Calculation Functions:
     void update(float timestep);
