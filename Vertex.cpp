@@ -25,7 +25,7 @@ Vertex::Vertex() {
 
     fixed = false;
     mass = 1.0f;  // Arbitrary Value
-    springConstant = 0.9f;
+    springConstant = 40.0f;
     lastTimeUpdated = 0.0f;
 }
 
@@ -46,7 +46,7 @@ Vertex::Vertex(float a, float b, float c) {
 
     fixed = false;
     mass = 1.0f;
-    springConstant = 0.5f;
+    springConstant = 40.0f;
     lastTimeUpdated = 0.0f;
 }
 
@@ -67,7 +67,7 @@ Vertex::Vertex(float a, float b, float c, bool isFixed) {
     
     fixed = isFixed;
     mass = 1.0f;
-    springConstant = 0.5f;
+    springConstant = 40.0f;
     lastTimeUpdated = 0.0f;
 }
 
@@ -143,7 +143,7 @@ glm::vec3 Vertex::getAccelFromSpring(float restLength, glm::vec3 springVec) {
     glm::vec3 returnVec = glm::normalize(springVec);
     
     // ReturnVec = (k * x) * direction
-    returnVec = returnVec * (springConstant * diff) / (10*mass);
+    returnVec = returnVec * (springConstant * diff) / mass;
 
     return returnVec;
 }
@@ -160,6 +160,7 @@ glm::vec3 Vertex::getSpringAccel() {
 
     for(int i = 0; i < 4; i++) {
         if(stretch[i] != NULL) {
+            stretch[i]->printPosition();
             returnVec += getAccelFromSpring(stretchRestDist, this->vectorTo(stretch[i]));
         }
 /*
@@ -196,7 +197,6 @@ glm::vec3 Vertex::vectorTo(Vertex* a) {
 
 void Vertex::printPosition() {
     std::cout << "(" << position.x << ", " << position.y << ", " << position.z << ")" << std::endl;
-
 }
 
 
