@@ -43,7 +43,7 @@ Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, V
     glm::vec3 horizStep = horizVec / (float)(w-1);
 
     // Set Spring Rest Lengths   
-    float stretchLength = glm::length(vertStep);
+    float stretchLength = glm::length(horizStep);
     float bendLength = 2 * stretchLength;
     float shearLength = sqrt(2 * stretchLength * stretchLength);
 
@@ -71,7 +71,7 @@ void Cloth::update(float timestep) {
 
 }
 
-void Cloth::addExternalForce(glm::vec3 externalForce) {
+void Cloth::addExternalAccel(glm::vec3 externalForce) {
     
     for(int i = 0; i < height*width; i++) {
         vertexMatrix[i]->updateAccel(externalForce);
