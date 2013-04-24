@@ -269,8 +269,6 @@ void renderCloth() {
 void myDisplay() {
 
 
-    
-
     glut3DSetup();
 
     // Zeroe's Out 
@@ -280,7 +278,7 @@ void myDisplay() {
     glTranslatef(xTranslate, yTranslate, zTranslate);
    
     glRotatef(theta, 1.0f, 0.0f, 0.0f);
-    glRotatef(phi, 0.0f, 0.0f, 1.0f);
+    glRotatef(phi, 0.0f, 1.0f, 0.0f);
 
     // Iterate through each vertex in the cloth;
    
@@ -447,8 +445,6 @@ void loadCloth(const char* input) {
     }
     
     inpfile.close();
-   
-    std::cout << "c1 = " << c1 << "   c2 = " << c2 << "  c3 = " << c3 << "  c4 " << c4 << std::endl;
     
     cloth = new Cloth(width, height, corners[0], corners[1], corners[2], corners[3]);
     cloth->setFixedCorners(c1, c2, c3, c4);
