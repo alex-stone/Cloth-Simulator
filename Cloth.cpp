@@ -63,6 +63,14 @@ Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, V
 
 }
 
+void Cloth::updateCloth(float t) {
+    for (int i=0; i<vertexMatrix.size(); i++)
+    {
+        vertexMatrix[i].updateVertex(t);
+    }
+}
+
+
 /*
 void Cloth::initializeTestCloth(int w, int h) {
     vertices = new Vertex[w][h];

@@ -10,8 +10,9 @@
 
 class Cloth {
   private:
-    int width;   // Number of Vertices
-    int height;  // Number of Vertices 
+    int width;   // cloth width
+    int height;  // cloth height
+    
 
     // 2D Array of Vertices
     //      Size = W*H
