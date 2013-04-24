@@ -42,8 +42,9 @@ Cloth*      cloth;
 // OpenGL Drawing Variables
 bool wire;
 bool smooth;
-bool paused;
+bool running;   // Is simulation running in real-time or paused for step through
 bool light;
+
 
 // OpenGL Perspective Variables & Constants:
 GLdouble aspectRatio;
@@ -69,7 +70,8 @@ const float STEP = 0.01f;
 
 
 // Forces:
-glm::vec3 gravity(0.0f, -1.0f, 0.0f);
+bool gravity;
+glm::vec3 gravityForce(0.0f, -1.0f, 0.0f);
 
 // Want a key to step through the Animation
 
@@ -102,6 +104,9 @@ void initScene() {
     wire = true;
     smooth = false;
     light = false;
+    running = false;
+    
+    gravity = true;
 
     // Initializes Wireframe to be ON 
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -237,7 +242,7 @@ void renderCloth() {
         for(int w = 0; w < cloth->getWidth(); w++) {
 
             glColor3f(1.0f, 1.0f, 1.0f);
-        
+            
             Vertex* temp = cloth->getVertex(w, h+1 );
             glVertex3f(temp->getPos().x, temp->getPos().y, temp->getPos().z);
 
@@ -270,6 +275,7 @@ void myDisplay() {
 
 
     glut3DSetup();
+    
 
     // Zeroe's Out 
     glLoadIdentity();
@@ -321,6 +327,10 @@ void myDisplay() {
 //****************************************************
 // On keyPress:
 //   if key:
+//      'r':  Toggle Run Simulation / Pause Simulation 
+//      'g':  Toggle Gravity
+//      TODO:' ':  Toggle Wind
+//      't':  Step through by timestep
 //      's':  Toggle Flat & Smooth Shading
 //      'w':  Toggle Filled & Wire Framing
 //      '+':  Zoom In
@@ -330,12 +340,20 @@ void myDisplay() {
 void keyPress(unsigned char key, int x, int y) {
     
     switch(key) {
+        case 'r':
+            running = !running;
+            break;
+        case 'g':
+            gravity = !gravity;
+            // Redo Forces?
+            break;
         case 't':
-            timestep += STEP;
-
-            cloth->addExternalAccel(gravity);
-            cloth->update(timestep);     
-
+            if(!running) {
+                timestep += STEP;
+                if(gravity)
+                    cloth->addExternalAccel(gravityForce);
+                cloth->update(timestep);     
+            }
             break;
         case 'w':
             wire = !wire;
