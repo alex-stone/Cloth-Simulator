@@ -333,7 +333,7 @@ void keyPress(unsigned char key, int x, int y) {
         case 't':
             timestep += STEP;
 
-            cloth->addExternalForce(gravity);
+            cloth->addExternalAccel(gravity);
             cloth->update(timestep);     
 
             break;
