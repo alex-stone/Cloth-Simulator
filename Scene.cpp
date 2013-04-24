@@ -42,6 +42,32 @@ Cloth*      cloth;
 // OpenGL Drawing Variables
 bool wire;
 bool smooth;
+bool paused;
+bool light;
+
+// OpenGL Perspective Variables & Constants:
+GLdouble aspectRatio;
+const GLdouble FOV_Y = 45.0;
+const GLdouble Z_NEAR = 1.0;
+const GLdouble Z_FAR = 40.0;
+
+// OpenGL Transformation Variables:
+GLfloat theta;
+GLfloat phi;
+GLfloat xTranslate;
+GLfloat yTranslate;
+GLfloat zTranslate;
+
+// OpenGL Transformation Constants;
+const GLfloat TRANSLATE_INC = 0.05f;
+const GLfloat Z_TRANSLATE_INC = 0.2f;
+const GLfloat ROTATE_INC = 3.0f;
+
+// Animation Variables:
+int step;
+
+// Want a key to step through the Animation
+
 
 
 //****************************************************
@@ -50,7 +76,7 @@ bool smooth;
 
 void initScene() {
 
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH );
+    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH );
 
     // Initialize Viewport Size
     viewport.w = 400;
@@ -61,7 +87,24 @@ void initScene() {
     glutInitWindowPosition(0,0);
     glutCreateWindow("CS184 - Final Project");
 
+    // Initialize Camera Properties:
+    theta = 0.0f;
+    phi = 0.0f;
+    xTranslate = 0.0f;
+    yTranslate = 0.0f;
+    zTranslate = -10.0f;
 
+    // Initialize Drawing Variables:
+    wire = true;
+    smooth = false;
+    light = false;
+
+    glEnable(GL_DEPTH_TEST);
+    glClearDepth(1.0f);
+
+    glDepthFunc(GL_LEQUAL);
+
+    
 }
 
 void myReshape(int w, int h) {
@@ -74,7 +117,7 @@ void myReshape(int w, int h) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-    gluPerspective(45, aspectRatio, 1, 100);
+    gluPerspective(FOV_Y, aspectRatio, Z_NEAR, Z_FAR);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -84,9 +127,15 @@ void myReshape(int w, int h) {
 void myDisplay() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    // Zeroe's Out 
     glLoadIdentity();
 
     // Set Camera
+    glTranslatef(xTranslate, yTranslate, zTranslate);
+    
+    glRotatef(theta, 1.0f, 0.0f, 0.0f);
+    glRotatef(phi, 0.0f, 0.0f, 1.0f);
+
     
     glBegin(GL_QUAD_STRIP);
 
@@ -107,9 +156,71 @@ void myDisplay() {
     glutSwapBuffers();
 }
 
+//****************************************************
+// On keyPress:
+//   if key:
+//      's':  Toggle Flat & Smooth Shading
+//      'w':  Toggle Filled & Wire Framing
+//      '+':  Zoom In
+//      '-':  Zoom out
+//      ' ':  Close the window
+//****************************************************
 void keyPress(unsigned char key, int x, int y) {
+    
+    switch(key) {
+        case '+':
+            zTranslate += Z_TRANSLATE_INC;
+            break;
+        case '-':
+            zTranslate -= Z_TRANSLATE_INC;
+            break;
+    
+        case ' ':
+            std::exit(1);
+            break;
 
+    }
+
+    myDisplay();
 }
+
+//****************************************************
+// On Arrow Key Press:
+//   
+//****************************************************
+void arroyKeyPress(int key, int x, int y) {
+    bool shift = (glutGetModifiers() == GLUT_ACTIVE_SHIFT);
+
+    switch(key) {
+        case 100:   // Left Arrow
+            if(shift) {
+                xTranslate -= TRANSLATE_INC;
+            } else {
+                phi -= ROTATE_INC;
+            }
+        case 101:   // Up Arrow
+            if(shift) {
+                yTranslate += TRANSLATE_INC;
+            } else {
+                theta -= ROTATE_INC;
+            }
+        case 102:   // Right Arrow
+            if(shift) {
+                xTranslate += TRANSLATE_INC;
+            } else {
+                phi += ROTATE_INC;
+            }
+        case 103:   // Down Arrow
+            if(shift) {
+                yTranslate -= TRANSLATE_INC;
+            } else {
+                theta += ROTATE_INC;
+            }
+    }
+
+    myDisplay();
+}
+
 
 //****************************************************
 // LoadCloth  Function
@@ -156,7 +267,7 @@ int main(int argc, char *argv[]) {
     if(argc == 2) {
         loadCloth(argv[1]);
     } else {
-        char* inputFile = "test/cloth.test";
+        char* inputFile = "test/cloth.test"; 
         loadCloth(inputFile);
     }
 
