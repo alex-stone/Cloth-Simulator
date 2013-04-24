@@ -55,4 +55,9 @@ glm::vec3 Vertex::vectorTo(Vertex* a) {
 }
 
 
+void Vertex::printPosition() {
+    std::cout << "(" << position.x << ", " << position.y << ", " << position.z << ")" << std::endl;
+
+}
+
 
