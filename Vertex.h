@@ -40,11 +40,15 @@ class Vertex {
     Vertex(float a, float b, float c);
     Vertex(float a, float b, float c, bool isFixed);
 
-    // Getters
+    // Getters & Setters
     glm::vec3 getPos() { return position; };
     glm::vec3 getVelocity() { return velocity; };
     glm::vec3 getAccel() { return acceleration; };
-
+    glm::vec3 getNetForce()  {return netForce; };
+    glm::vec3 getNormal()  {return normal;};
+    float getDampingCoeff()  {return dampingFactor;};
+    bool getFixed()  {return fixed;};
+    
     // Connect Vertex a, to this Vertex, in direction n
     void connectStretch(Vertex a, int n);
     void connectShear(Vertex a , int n);
@@ -59,6 +63,11 @@ class Vertex {
     //      Internal Forces:
     //          - 12 Spring Connections
 
+
+     
+     void updateVertex(float t);
 };
+
+
 
 #endif
