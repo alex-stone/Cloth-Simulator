@@ -10,23 +10,18 @@
 
 class Cloth {
   private:
-    int width;   // cloth width
-    int height;  // cloth height
+    int width;   // Number of Vertices
+    int height;  // Number of Vertices 
     
-
-    // 2D Array of Vertices
-    //      Size = W*H
-    //      Indexed by: (i*w+j) equal to vertexMatrix[i][j]
+    // 2D Array of Vertices: vertexMatrix[i][j] == vertexMatrix(i*w + j)
     std::vector<Vertex*> vertexMatrix;
-
-           
-    // Private Functions:
 
     // TODO: Other Variables
     //      bool tearable
-    //      bool wireframe
-    //      - Color, Texture
     //      Spring Constants
+    //      Dampening Constants
+    float springConstant;
+    float dampeningConstant;
 
   public:
     // Constructors:
@@ -38,7 +33,17 @@ class Cloth {
     // Getters:
     int getWidth() { return width; };
     int getHeight() { return height; };    
-    Vertex* getVertex(int i, int j) { return vertexMatrix[i*width + j]; };
+
+    // Width oriented vector
+    Vertex* getVertex(int w, int h) { return vertexMatrix[h*width + w]; };
+
+    // Update Cloth:
+    void update(float timestep);
+
+    void addExternalAccel(glm::vec3 externalForce);
+
+    void setFixedCorners(bool c1, bool c2, bool c3, bool c4);
+    void connectSprings();
 
 };
 

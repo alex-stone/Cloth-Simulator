@@ -13,24 +13,26 @@ class Vertex {
     glm::vec3 position;
     glm::vec3 velocity;
     glm::vec3 acceleration;
-    glm::vec3 netForce;
-    glm::vec3 normal;
-    float dampingFactor;
-
 
     // TODO: Spring Connections:
     // 4 Stretch Spring: Left, Up, Right, Down
-    Vertex* stretch[4];
+    Vertex** stretch;
+    float stretchRestDist;
 
     // 4 Shear Springs: Up-Left, Up-Right, Down-Right, Down-Left
-    Vertex* shear[4];
+    Vertex** shear;
+    float shearRestDist;
     
     // 4 Bend Springs: Left, Up, Right, Down
-    Vertex* bend[4];
+    Vertex** bend;
+    float bendRestDist;
 
     // TODO: Variables
+    float lastTimeUpdated;
     bool fixed;
     float mass;
+
+    float springConstant;
 
   public:
     // Constructors:
@@ -44,22 +46,29 @@ class Vertex {
     Vertex(float a, float b, float c);
     Vertex(float a, float b, float c, bool isFixed);
 
-    // Getters & Setters
+    // Getters
     glm::vec3 getPos() { return position; };
     glm::vec3 getVelocity() { return velocity; };
     glm::vec3 getAccel() { return acceleration; };
-    glm::vec3 getNetForce()  {return netForce; };
-    glm::vec3 getNormal()  {return normal;};
-    float getDampingFactor()  {return dampingFactor;};
-    bool getFixed()  {return fixed;};
-    
+
+    void setSpringRestLengths(float stretch, float bend, float shear);
+    void setFixedVertex(bool isFixed);
+
     // Connect Vertex a, to this Vertex, in direction n
-    void connectStretch(Vertex a, int n);
-    void connectShear(Vertex a , int n);
-    void connectBend(Vertex a, int n);
+    void connectStretch(Vertex* a, int n);
+    void connectShear(Vertex* a , int n);
+    void connectBend(Vertex* a, int n);
+
+    // Force Calculation Functions:
+    void update(float timestep);
+    void updateAccel(glm::vec3 externalForces);
+    glm::vec3 getSpringAccel();
+    glm::vec3 getDampAccel();
+    glm::vec3 getAccelFromSpring(float restLength, glm::vec3 springVec);
 
     // Direction To Vertex:
     glm::vec3 vectorTo(Vertex* a);
+
 
     // Force Calculation Functions
     //      External Forces:
@@ -67,11 +76,8 @@ class Vertex {
     //      Internal Forces:
     //          - 12 Spring Connections
 
+    void printPosition();
 
-     
-     void updateVertex(float t);
 };
-
-
 
 #endif
