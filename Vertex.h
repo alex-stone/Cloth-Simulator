@@ -13,6 +13,10 @@ class Vertex {
     glm::vec3 position;
     glm::vec3 velocity;
     glm::vec3 acceleration;
+    glm::vec3 netForce;
+    glm::vec3 normal;
+    float dampingFactor;
+
 
     // TODO: Spring Connections:
     // 4 Stretch Spring: Left, Up, Right, Down
@@ -46,7 +50,7 @@ class Vertex {
     glm::vec3 getAccel() { return acceleration; };
     glm::vec3 getNetForce()  {return netForce; };
     glm::vec3 getNormal()  {return normal;};
-    float getDampingCoeff()  {return dampingFactor;};
+    float getDampingFactor()  {return dampingFactor;};
     bool getFixed()  {return fixed;};
     
     // Connect Vertex a, to this Vertex, in direction n

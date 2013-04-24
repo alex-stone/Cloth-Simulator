@@ -11,8 +11,8 @@ else
         LDFLAGS = -lglut -lGLU
 endif
 
-SOURCES = Scene.cpp Vertex.cpp Spring.cpp Cloth.cpp
-OBJECTS = Scene.o Vertex.o Spring.o Cloth.o
+SOURCES = Scene.cpp Vertex.cpp Cloth.cpp
+OBJECTS = Scene.o Vertex.o Cloth.o
 
 RM = /bin/rm -f
 all: main

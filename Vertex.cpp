@@ -64,7 +64,7 @@ void Vertex::updateVertex(float t)
 {
     if(t>0 && fixed == false){
         position += velocity * t;
-        velocity += ((netForce/mass)*t)
+        velocity += ((netForce/mass)*t);
         netForce = glm::vec3(0.0f);
         velocity *= pow(dampingFactor,t);
     }
