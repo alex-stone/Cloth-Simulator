@@ -55,3 +55,13 @@ Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, V
 
 }
 
+void Cloth::update(float timestep) {
+    // Iterate through vertexMatrix, and update each individual particle
+
+    for(int i = 0; i < height*width; i++) {
+        vertexMatrix[i]->update(timestep);
+    }
+
+}
+
+
