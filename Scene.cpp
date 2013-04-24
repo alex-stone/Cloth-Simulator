@@ -68,10 +68,14 @@ const GLfloat ROTATE_INC = 3.0f;
 float timestep = 0;
 const float STEP = 0.01f;
 
-
 // Forces:
 bool gravity;
 glm::vec3 gravityForce(0.0f, -1.0f, 0.0f);
+
+
+// Debug Variables:
+bool debugFunc = false;
+
 
 // Want a key to step through the Animation
 
@@ -172,6 +176,11 @@ void glut2DSetup() {
 //     - reshape viewport if the window is resized
 //****************************************************
 void myReshape(int w, int h) {
+    
+    if(debugFunc) {
+        std::cout << "myReshape Called" << std::endl;
+    }
+
     viewport.w = w;
     viewport.h = h;
 
@@ -271,8 +280,10 @@ void renderCloth() {
 // MyDisplay 
 //     - reshape viewport if the window is resized
 //****************************************************
-void myDisplay() {
-
+void myDisplay() { 
+    if(debugFunc) {
+        std::cout << "myDisplay Called" << std::endl;
+    }
 
     glut3DSetup();
     
@@ -342,18 +353,28 @@ void keyPress(unsigned char key, int x, int y) {
     switch(key) {
         case 'r':
             running = !running;
+            // TODO: Pause Time that is being kept track of
+            // 
+            
             break;
         case 'g':
             gravity = !gravity;
+            std::cout << "Gravity is now ";
+            if(gravity) {
+                std::cout << "ON" << std::endl;
+            } else {
+                std::cout << "OFF" << std::endl;
+            }
             // Redo Forces?
             break;
         case 't':
-            if(!running) {
+      //      if(!running) {
                 timestep += STEP;
-                if(gravity)
+                if(gravity) {
                     cloth->addExternalAccel(gravityForce);
-                cloth->update(timestep);     
-            }
+                }
+                cloth->update(timestep);    
+        //    }
             break;
         case 'w':
             wire = !wire;

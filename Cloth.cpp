@@ -73,12 +73,7 @@ void Cloth::update(float timestep) {
 
 void Cloth::addExternalAccel(glm::vec3 externalForce) {
     
-    
     for(int i = 0; i < height*width; i++) {
-        std::cout << "AddExternalAccel Count = " << i << std::endl;
-        if(vertexMatrix[i] == NULL) {
-            std::cout << "VertexMatrix == NULL" << std::endl;
-        }
         vertexMatrix[i]->updateAccel(externalForce);
     }
 

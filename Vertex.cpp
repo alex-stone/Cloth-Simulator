@@ -160,7 +160,6 @@ glm::vec3 Vertex::getSpringAccel() {
 
     for(int i = 0; i < 4; i++) {
         if(stretch[i] != NULL) {
-            stretch[i]->printPosition();
             returnVec += getAccelFromSpring(stretchRestDist, this->vectorTo(stretch[i]));
         }
 /*
