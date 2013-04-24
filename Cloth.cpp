@@ -41,16 +41,11 @@ Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, V
 
     glm::vec3 vertStep = vertVec / (float)(h-1);
     glm::vec3 horizStep = horizVec / (float)(w-1);
-
-    std::cout << "Cloth: Width = " << w << std::endl;  
-    std::cout << "Cloth: Height = " << h << std::endl;  
-
-
     
     // Iterate through and create each Vertex
     for(int i = 0; i < w; i++) {
         for(int j = 0; j < h; j++) {
-            glm::vec3 temp = upLeft->getPos() + ((float)i * horizVec) + ((float)j * vertVec);
+            glm::vec3 temp = upLeft->getPos() + ((float)i * horizStep) + ((float)j * vertStep);
             
             //I*W + j indexes vertexMatrix like a 2D array vertexMatrix[i][j]; 
             vertexMatrix[i*w + j] = new Vertex(temp.x, temp.y, temp.z);
@@ -58,28 +53,5 @@ Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, V
         }
     }
 
-    std::cout << "Cloth After Constructor: Width = " << w << std::endl;
-        
-
 }
-
-/*
-void Cloth::initializeTestCloth(int w, int h) {
-    vertices = new Vertex[w][h];
-    
-    for(int i = 0; i < this->width; i++) {
-        for(int j = 0; j < this->height; j++) {
-            if(i == 0 || j == 0 || i == this->width || j == this->height) {
-
-                vertices[i][j] = new Vertex((float)i, 0, (float) j, true);
-            } else {
-                vertices[i][j] = new Vertex((float)i, 0, (float) j, false);
-            }
-        }
-    }
-
-    // Connect all the Springs
-
-}
-*/
 
