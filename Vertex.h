@@ -16,15 +16,12 @@ class Vertex {
 
     // TODO: Spring Connections:
     // 4 Stretch Spring: Left, Up, Right, Down
-//    Vertex* stretch1, stretch2, stretch3, stretch4;
     Vertex* stretch[4];
 
     // 4 Shear Springs: Up-Left, Up-Right, Down-Right, Down-Left
-  //  Vertex* shear1, shear2, shear3, shear4;
     Vertex* shear[4];
     
     // 4 Bend Springs: Left, Up, Right, Down
-    //Vertex* bend1, bend2, bend3, bend4;
     Vertex* bend[4];
 
     // TODO: Variables
@@ -52,6 +49,9 @@ class Vertex {
     void connectStretch(Vertex a, int n);
     void connectShear(Vertex a , int n);
     void connectBend(Vertex a, int n);
+
+    // Direction To Vertex:
+    glm::vec3 vectorTo(Vertex* a);
 
     // Force Calculation Functions
     //      External Forces:
