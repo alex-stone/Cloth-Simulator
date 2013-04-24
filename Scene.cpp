@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include "glm/glm.hpp"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -92,11 +93,11 @@ void myDisplay() {
     // Iterate through each vertex in the cloth;
     for(int i = 0; i < cloth->getWidth(); i++) {
         for(int j = 0; j < cloth->getHeight()-1; j++) {
-            Vertex temp = cloth->getVertex(i, j); 
-            glVertex3f(temp.getX(), temp.getY(), temp.getZ());
+            Vertex* temp = cloth->getVertex(i, j); 
+            glVertex3f(temp->getPos().x, temp->getPos().y, temp->getPos().z);
             
             temp = cloth->getVertex(i, j+1);
-            glVertex3f(temp.getX(), temp.getY(), temp.getZ());
+            glVertex3f(temp->getPos().x, temp->getPos().y, temp->getPos().z);
         }
     }
     
@@ -110,17 +111,59 @@ void keyPress(unsigned char key, int x, int y) {
 
 }
 
+//****************************************************
+// LoadCloth  Function
+//      - Reads in Cloth Information from file
+//      - First line Width Height
+//      - Next 4 lines four corners of cloth
+//****************************************************
 void loadCloth(char* input) {
+    std::ifstream inpfile(input, ifstream::in);
+    
+    int width, height;
 
+    Vertex* corners[4];
+
+    if(inpfile.good()) {
+        inpfile >> width;
+        inpfile >> height; 
+
+        
+        for(int i = 0; i < 4; i++) {
+            float x,y,z;
+            inpfile >> x;
+            inpfile >> y;
+            inpfile >> z;
+
+            corners[i] = new Vertex(x,y,z);
+
+        }
+
+    }
+    
+    inpfile.close();
+
+    cloth = new Cloth(width, height, corners[0], corners[1], corners[2], corners[3]);
+
+   
 }
 
 int main(int argc, char *argv[]) {
+   
+    // Process Inputs
     
+    // Load Cloth
+    if(argc == 2) {
+        loadCloth(argv[1]);
+    } else {
+        char* inputFile = "test/cloth.test";
+        loadCloth(inputFile);
+    }
+
     // Initialize GLUT
     glutInit(&argc, argv);
 
     initScene();
-
 
     // GLUT Loop    
     glutDisplayFunc(myDisplay);
