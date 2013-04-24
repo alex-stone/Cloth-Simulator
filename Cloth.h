@@ -1,6 +1,7 @@
 #ifndef CLOTH_H
 #define CLOTH_H
 
+#include <vector>
 #include "Vertex.h"
 
 //****************************************************
@@ -12,12 +13,13 @@ class Cloth {
     int width;   // Number of Vertices
     int height;  // Number of Vertices 
 
-    // 2D Arrray of Vertices:
-    Vertex** vertices;
+    // 2D Array of Vertices
+    //      Size = W*H
+    //      Indexed by: (i*w+j) equal to vertexMatrix[i][j]
+    std::vector<Vertex*> vertexMatrix;
+
            
     // Private Functions:
-//    initializeDefaultVertices();
-    void initializeTestCloth(int w, int h);
 
     // TODO: Other Variables
     //      bool tearable
@@ -35,7 +37,7 @@ class Cloth {
     // Getters:
     int getWidth() { return width; };
     int getHeight() { return height; };    
-    Vertex getVertex(int i, int j) { return vertices[width][height]; };
+    Vertex* getVertex(int i, int j) { return vertexMatrix[i*width + j]; };
 
 };
 
