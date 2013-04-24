@@ -15,7 +15,6 @@ Vertex::Vertex() {
 
     fixed = false;
     mass = 0.001f;  // Arbitrary Value
-
 }
 
 Vertex::Vertex(float a, float b, float c) {
@@ -25,7 +24,6 @@ Vertex::Vertex(float a, float b, float c) {
 
     fixed = false;
     mass = 0.001f;
-
 }
 
 Vertex::Vertex(float a, float b, float c, bool isFixed) {
@@ -35,7 +33,6 @@ Vertex::Vertex(float a, float b, float c, bool isFixed) {
 
     fixed = isFixed;
     mass = 0.001f;
-
 }
 
 //****************************************************
@@ -45,6 +42,44 @@ Vertex::Vertex(float a, float b, float c, bool isFixed) {
 void connectStretch(Vertex a, int n) {
 
 }
+
+//****************************************************
+// Force Calculation Functions
+//****************************************************
+void Vertex::update(float timestep) {
+
+}
+
+
+//****************************************************
+// Update Acceleration:
+//      - Given External Forces, Spring Forces, and
+//        Dampening Forces, calculate new acceleration
+//****************************************************
+void Vertex::updateAccel(glm::vec3 externalForces) {
+    glm::vec3 spring = this->getSpringAccel();
+    glm::vec3 damp = this->getDampAccel();
+
+
+    // Net Acceleration = Sum of 3 vectors
+    acceleration = spring + damp + externalForces;
+
+}
+
+//****************************************************
+// GetSpringAccel
+//      - Calculates the net Acceleration from all
+//        12 of the springs.
+//****************************************************
+glm::vec3 Vertex::getSpringAccel() {
+
+
+}
+
+glm::vec3 Vertex::getDampAccel() {
+
+}
+
 
 // Returns the vector that goes from this Vertex to Vertex a.
 glm::vec3 Vertex::vectorTo(Vertex* a) {
