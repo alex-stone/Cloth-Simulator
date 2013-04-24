@@ -50,6 +50,12 @@ class Vertex {
     void connectShear(Vertex a , int n);
     void connectBend(Vertex a, int n);
 
+    // Force Calculation Functions:
+    void update(float timestep);
+    void updateAccel(glm::vec3 externalForces);
+    glm::vec3 getSpringAccel();
+    glm::vec3 getDampAccel();
+
     // Direction To Vertex:
     glm::vec3 vectorTo(Vertex* a);
 
@@ -58,6 +64,8 @@ class Vertex {
     //          - Gravity, Wind, etc...
     //      Internal Forces:
     //          - 12 Spring Connections
+
+    void printPosition();
 
 };
 
