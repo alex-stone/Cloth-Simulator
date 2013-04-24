@@ -71,6 +71,13 @@ void Cloth::update(float timestep) {
 
 }
 
+void Cloth::addExternalForce(glm::vec3 externalForce) {
+    for(int i = 0; i < height*width; i++) {
+        vertexMatrix[i]->updateAccel(externalForce);
+    }
+
+}
+
 void Cloth::connectSprings() {
     for(int i = 0; i < width; i++) {
         for(int j = 0; j < height; j++) {

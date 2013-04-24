@@ -64,10 +64,14 @@ const GLfloat Z_TRANSLATE_INC = 0.2f;
 const GLfloat ROTATE_INC = 3.0f;
 
 // Animation Variables:
-int step;
+float timestep = 0;
+const float STEP = 0.01f;
+
+
+// Forces:
+glm::vec3 gravity(0.0f, -1.0f, 0.0f);
 
 // Want a key to step through the Animation
-
 
 
 //****************************************************
@@ -247,10 +251,25 @@ void renderCloth() {
 }
 
 //****************************************************
+// TODO: Render Stretch Springs
+//****************************************************
+
+//****************************************************
+// TODO: Render Shear Springs
+//****************************************************
+
+//****************************************************
+// TODO: Render Bend Springs
+//****************************************************
+
+//****************************************************
 // MyDisplay 
 //     - reshape viewport if the window is resized
 //****************************************************
 void myDisplay() {
+
+
+    
 
     glut3DSetup();
 
@@ -270,14 +289,14 @@ void myDisplay() {
     // Renders 3D Objects 
     renderCloth(); 
     
-    glut2DSetup();
+   /* glut2DSetup();
 
     // Renders 2D Objects
     const char* output = "Theta = ";
     printHUD(-2, -2, 1.0f, 1.0f, 1.0f, output);
 
     glDepthMask(GL_TRUE);
-    
+    */
     // Setup For 2D:
 
 /*
@@ -313,6 +332,13 @@ void myDisplay() {
 void keyPress(unsigned char key, int x, int y) {
     
     switch(key) {
+        case 't':
+            timestep += STEP;
+
+            cloth->addExternalForce(gravity);
+            cloth->update(timestep);     
+
+            break;
         case 'w':
             wire = !wire;
             if(wire) {

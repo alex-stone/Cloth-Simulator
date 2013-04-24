@@ -40,6 +40,8 @@ class Cloth {
     // Update Cloth:
     void update(float timestep);
 
+    void addExternalForce(glm::vec3 externalForce);
+
     void connectSprings();
 
 };
