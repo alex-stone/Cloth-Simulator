@@ -67,6 +67,7 @@ const GLfloat ROTATE_INC = 3.0f;
 
 // Animation Variables:
 float timestep = 0;
+int numTimeSteps = 20;
 const float STEP = 0.01f;
 
 // Position Update Method Variables: Command Lines
@@ -340,6 +341,24 @@ void myDisplay() {
 }
 
 //****************************************************
+// Step Frame - steps through one Frame
+//          - Performs numTimeSteps Calculations
+//          - Graph it
+//****************************************************
+void stepFrame() {
+    for(int i = 0; i < numTimeSteps; i++) {
+        if(gravity) {
+            cloth->addExternalForce(gravityForce);
+        }
+
+        timestep += STEP;
+        cloth->update(timestep); 
+
+    }
+}
+
+
+//****************************************************
 // On keyPress:
 //   if key:
 //      'r':  Toggle Run Simulation / Pause Simulation 
@@ -372,13 +391,9 @@ void keyPress(unsigned char key, int x, int y) {
             // Redo Forces?
             break;
         case 't':
-      //      if(!running) {
-                timestep += STEP;
-                if(gravity) {
-                    cloth->addExternalForce(gravityForce);
-                }
-                cloth->update(timestep);    
-        //    }
+            if(!running) {
+                stepFrame();
+            }
             break;
         case 'w':
             wire = !wire;
