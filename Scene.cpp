@@ -371,7 +371,7 @@ void keyPress(unsigned char key, int x, int y) {
       //      if(!running) {
                 timestep += STEP;
                 if(gravity) {
-                    cloth->addExternalAccel(gravityForce);
+                    cloth->addExternalForce(gravityForce);
                 }
                 cloth->update(timestep);    
         //    }
@@ -467,7 +467,6 @@ void loadCloth(const char* input) {
 
             corners[i] = new Vertex(x,y,z);
 
-            corners[i]->printPosition();
         }
 
         std::string temp;

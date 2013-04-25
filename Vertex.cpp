@@ -135,12 +135,12 @@ void Vertex::update(float timestep) {
 //        Dampening Forces, calculate new acceleration
 //****************************************************
 void Vertex::updateAccel(glm::vec3 externalForces) {
-    glm::vec3 spring = this->getSpringAccel();
-    glm::vec3 damp = this->getDampAccel();
+    glm::vec3 spring = this->getSpringForce();
+    glm::vec3 damp = this->getDampForce();
 
 
     // Net Acceleration = Sum of 3 vectors
-    acceleration = spring + damp + (externalForces);
+    acceleration = (spring + damp + externalForces) / mass;
 }
 
 
@@ -150,7 +150,7 @@ void Vertex::updateAccel(glm::vec3 externalForces) {
 //              Direction of Force
 //              Length;
 //****************************************************
-glm::vec3 Vertex::getAccelFromSpring(float restLength, glm::vec3 springVec) {
+glm::vec3 Vertex::getForceFromSpring(float restLength, float springConstant, glm::vec3 springVec) {
 
     // Displacement
     float diff = glm::length(springVec) - restLength;
@@ -159,7 +159,7 @@ glm::vec3 Vertex::getAccelFromSpring(float restLength, glm::vec3 springVec) {
     glm::vec3 returnVec = glm::normalize(springVec);
     
     // ReturnVec = (k * x) * direction
-    returnVec = returnVec * (springConstant * diff) / mass;
+    returnVec = returnVec * springConstant * diff;
 
     return returnVec;
 }
@@ -169,31 +169,30 @@ glm::vec3 Vertex::getAccelFromSpring(float restLength, glm::vec3 springVec) {
 //      - Calculates the net Acceleration from all
 //        12 of the springs.
 //****************************************************
-glm::vec3 Vertex::getSpringAccel() {
+glm::vec3 Vertex::getSpringForce() {
     // Iterate through each spring connection and calculate force 
     glm::vec3 returnVec;
 
 
     for(int i = 0; i < 4; i++) {
         if(stretch[i] != NULL) {
-            returnVec += getAccelFromSpring(stretchRestDist, this->vectorTo(stretch[i]));
+            returnVec += getForceFromSpring(stretchRestDist, stretchConstant, this->vectorTo(stretch[i]));
         }
-/*
+
         if(shear[i] != NULL) {
-            returnVec += getAccelFromSpring(shearRestDist, this->vectorTo(shear[i]));
+            returnVec += getForceFromSpring(shearRestDist, shearConstant, this->vectorTo(shear[i]));
         }
 
         if(bend[i] != NULL) {
-            returnVec += getAccelFromSpring(bendRestDist, this->vectorTo(bend[i]));
+            returnVec += getForceFromSpring(bendRestDist, bendConstant, this->vectorTo(bend[i]));
         }
-  */
+  
     }
-
 
     return returnVec;
 }
 
-glm::vec3 Vertex::getDampAccel() {
+glm::vec3 Vertex::getDampForce() {
     glm::vec3 temp(0, 0, 0);
 
     return temp;

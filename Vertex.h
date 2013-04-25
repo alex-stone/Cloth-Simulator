@@ -66,9 +66,9 @@ class Vertex {
     // Force Calculation Functions:
     void update(float timestep);
     void updateAccel(glm::vec3 externalForces);
-    glm::vec3 getSpringAccel();
-    glm::vec3 getDampAccel();
-    glm::vec3 getAccelFromSpring(float restLength, glm::vec3 springVec);
+    glm::vec3 getSpringForce();
+    glm::vec3 getDampForce();
+    glm::vec3 getForceFromSpring(float restLength, float stretchConstant, glm::vec3 springVec);
 
     // Direction To Vertex:
     glm::vec3 vectorTo(Vertex* a);
