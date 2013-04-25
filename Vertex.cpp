@@ -4,57 +4,64 @@
 
 #include "Vertex.h"
 
+const float DEF_STRETCH = 100.0f;
+const float DEF_SHEAR = 100.0f;
+const float DEF_BEND = 100.0f;
 
 //****************************************************
 // Vertex Class - Constructors
 //****************************************************
 Vertex::Vertex() {
-    this->position = glm::vec3(0.0f);
-    this->velocity = glm::vec3(0.0f);
-    this->acceleration = glm::vec3(0.0f);
+    initPhysicalProps(0.0f, 0.0f, 0.0f); 
+    initSpringToNull(); 
+    initSpringConstants(DEF_STRETCH, DEF_SHEAR, DEF_BEND);
     
-    stretch = new Vertex*[4];
-    shear = new Vertex*[4];
-    bend = new Vertex*[4];
-
-    for(int i = 0; i < 4; i++) {
-        stretch[i] = NULL;
-        shear[i] = NULL;
-        bend[i] = NULL;
-    }
-
     fixed = false;
-    mass = 1.0f;  // Arbitrary Value
-    springConstant = 40.0f;
     lastTimeUpdated = 0.0f;
 }
 
 Vertex::Vertex(float a, float b, float c) {
-    this->position = glm::vec3(a, b, c);
-    this->velocity = glm::vec3(0.0f);
-    this->acceleration = glm::vec3(0.0f);
-
-    stretch = new Vertex*[4];
-    shear = new Vertex*[4];
-    bend = new Vertex*[4];
-
-    for(int i = 0; i < 4; i++) {
-        stretch[i] = NULL;
-        shear[i] = NULL;
-        bend[i] = NULL;
-    }
+    initPhysicalProps(a, b, c);
+    initSpringToNull(); 
+    initSpringConstants(DEF_STRETCH, DEF_SHEAR, DEF_BEND);
 
     fixed = false;
-    mass = 1.0f;
-    springConstant = 40.0f;
     lastTimeUpdated = 0.0f;
 }
 
 Vertex::Vertex(float a, float b, float c, bool isFixed) {
-    this->position = glm::vec3(a, b, c);
-    this->velocity = glm::vec3(0.0f);
-    this->acceleration = glm::vec3(0.0f);
+    initPhysicalProps(a, b, c);
+    initSpringToNull();
+    initSpringConstants(DEF_STRETCH, DEF_SHEAR, DEF_BEND);
+    
+    fixed = isFixed;
+    lastTimeUpdated = 0.0f;
+}
 
+Vertex::Vertex(float a, float b, float c, float stretchConst, float shearConst, float bendConst) {
+    initPhysicalProps(a, b, c);
+    initSpringToNull();
+    initSpringConstants(stretchConst, shearConst, bendConst);
+
+    fixed = false;
+    lastTimeUpdated = 0.0f;
+}
+
+Vertex::Vertex(float a, float b, float c, float stretchConst, float shearConst, float bendConst, bool isFixed) {
+    initPhysicalProps(a, b, c);
+    initSpringToNull();
+    initSpringConstants(stretchConst, shearConst, bendConst);
+
+    fixed = isFixed;
+    lastTimeUpdated = 0.0f;
+
+}
+
+
+//****************************************************
+// Vertex Class - Private Functions
+//****************************************************
+void Vertex::initSpringToNull() {
     stretch = new Vertex*[4];
     shear = new Vertex*[4];
     bend = new Vertex*[4];
@@ -64,11 +71,20 @@ Vertex::Vertex(float a, float b, float c, bool isFixed) {
         shear[i] = NULL;
         bend[i] = NULL;
     }
-    
-    fixed = isFixed;
+}
+
+void Vertex::initPhysicalProps(float a, float b, float c) {
+    this->position = glm::vec3(a, b, c);
+    this->velocity = glm::vec3(0.0f);
+    this->acceleration = glm::vec3(0.0f);
+
     mass = 1.0f;
-    springConstant = 40.0f;
-    lastTimeUpdated = 0.0f;
+}
+
+void Vertex::initSpringConstants(float stretchConst, float shearConst, float bendConst) {
+    stretchConstant = stretchConst;
+    shearConstant = shearConst;
+    bendConstant = bendConst;
 }
 
 //****************************************************

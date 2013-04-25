@@ -32,19 +32,23 @@ class Vertex {
     bool fixed;
     float mass;
 
-    float springConstant;
+    // Spring Constants - Stretch, Shear, Bend
+    float stretchConstant;
+    float shearConstant;
+    float bendConstant;
+
+    // Function Initializations:
+    void initSpringToNull();
+    void initPhysicalProps(float a, float b, float c); 
+    void initSpringConstants(float stretchConst, float shearConst, float bendConst);
 
   public:
     // Constructors:
     Vertex();
-    // Constructor Options:
-    // Point in Space
-    // Cloth Vertex Coordinate
-    // Connections 
-    // Fixed Or Not
-
     Vertex(float a, float b, float c);
     Vertex(float a, float b, float c, bool isFixed);
+    Vertex(float a, float b, float c, float stretchConst, float shearConst, float bendConst);
+    Vertex(float a, float b, float c, float stretchConst, float shearConst, float bendConst, bool isFixed);
 
     // Getters
     glm::vec3 getPos() { return position; };
