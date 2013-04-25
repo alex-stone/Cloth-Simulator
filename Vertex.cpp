@@ -7,6 +7,7 @@
 const float DEF_STRETCH = 100.0f;
 const float DEF_SHEAR = 100.0f;
 const float DEF_BEND = 100.0f;
+const float DEF_DAMP = 5.0f;
 
 //****************************************************
 // Vertex Class - Constructors
@@ -14,7 +15,7 @@ const float DEF_BEND = 100.0f;
 Vertex::Vertex() {
     initPhysicalProps(0.0f, 0.0f, 0.0f); 
     initSpringToNull(); 
-    initSpringConstants(DEF_STRETCH, DEF_SHEAR, DEF_BEND);
+    initSpringConstants(DEF_STRETCH, DEF_SHEAR, DEF_BEND, DEF_DAMP);
     
     fixed = false;
     lastTimeUpdated = 0.0f;
@@ -23,7 +24,7 @@ Vertex::Vertex() {
 Vertex::Vertex(float a, float b, float c) {
     initPhysicalProps(a, b, c);
     initSpringToNull(); 
-    initSpringConstants(DEF_STRETCH, DEF_SHEAR, DEF_BEND);
+    initSpringConstants(DEF_STRETCH, DEF_SHEAR, DEF_BEND, DEF_DAMP);
 
     fixed = false;
     lastTimeUpdated = 0.0f;
@@ -32,7 +33,7 @@ Vertex::Vertex(float a, float b, float c) {
 Vertex::Vertex(float a, float b, float c, bool isFixed) {
     initPhysicalProps(a, b, c);
     initSpringToNull();
-    initSpringConstants(DEF_STRETCH, DEF_SHEAR, DEF_BEND);
+    initSpringConstants(DEF_STRETCH, DEF_SHEAR, DEF_BEND, DEF_DAMP);
     
     fixed = isFixed;
     lastTimeUpdated = 0.0f;
@@ -41,7 +42,7 @@ Vertex::Vertex(float a, float b, float c, bool isFixed) {
 Vertex::Vertex(float a, float b, float c, float stretchConst, float shearConst, float bendConst) {
     initPhysicalProps(a, b, c);
     initSpringToNull();
-    initSpringConstants(stretchConst, shearConst, bendConst);
+    initSpringConstants(stretchConst, shearConst, bendConst, DEF_DAMP);
 
     fixed = false;
     lastTimeUpdated = 0.0f;
@@ -50,7 +51,7 @@ Vertex::Vertex(float a, float b, float c, float stretchConst, float shearConst, 
 Vertex::Vertex(float a, float b, float c, float stretchConst, float shearConst, float bendConst, bool isFixed) {
     initPhysicalProps(a, b, c);
     initSpringToNull();
-    initSpringConstants(stretchConst, shearConst, bendConst);
+    initSpringConstants(stretchConst, shearConst, bendConst, DEF_DAMP);
 
     fixed = isFixed;
     lastTimeUpdated = 0.0f;
@@ -81,10 +82,12 @@ void Vertex::initPhysicalProps(float a, float b, float c) {
     mass = 1.0f;
 }
 
-void Vertex::initSpringConstants(float stretchConst, float shearConst, float bendConst) {
+void Vertex::initSpringConstants(float stretchConst, float shearConst, float bendConst, float dampConst) {
     stretchConstant = stretchConst;
     shearConstant = shearConst;
     bendConstant = bendConst;
+
+    dampConstant = dampConst;
 }
 
 //****************************************************
@@ -193,10 +196,9 @@ glm::vec3 Vertex::getSpringForce() {
 }
 
 glm::vec3 Vertex::getDampForce() {
-    glm::vec3 temp(0, 0, 0);
+    glm::vec3 returnVec = -velocity * dampConstant;
 
-    return temp;
-
+    return returnVec;
 }
 
 

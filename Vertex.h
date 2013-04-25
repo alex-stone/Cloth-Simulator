@@ -37,10 +37,12 @@ class Vertex {
     float shearConstant;
     float bendConstant;
 
+    float dampConstant;
+
     // Function Initializations:
     void initSpringToNull();
     void initPhysicalProps(float a, float b, float c); 
-    void initSpringConstants(float stretchConst, float shearConst, float bendConst);
+    void initSpringConstants(float stretchConst, float shearConst, float bendConst, float dampConstant);
 
   public:
     // Constructors:
