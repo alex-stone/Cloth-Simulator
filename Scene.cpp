@@ -67,6 +67,7 @@ const GLfloat ROTATE_INC = 3.0f;
 
 // Animation Variables:
 float timestep = 0;
+int numTimeSteps = 20;
 const float STEP = 0.01f;
 
 // Position Update Method Variables: Command Lines
@@ -79,7 +80,6 @@ glm::vec3 gravityForce(0.0f, -1.0f, 0.0f);
 
 // Debug Variables:
 bool debugFunc = false;
-
 
 // Want a key to step through the Animation
 
@@ -115,6 +115,20 @@ void initScene() {
     running = false;
     
     gravity = true;
+
+    // Set up Lights:
+    GLfloat Specular[] = {0.0f, 0.2f, 0.8f};
+    GLfloat Ambient[] = {0.0f, 0.2f, 0.7f};
+    GLfloat Diffuse[] = {0.2f, 0.3f, 0.6f};
+    GLfloat LightOnePos[] = {-2.0f, 2.0f, 2.0f};
+
+    glLightfv(GL_LIGHT1, GL_SPECULAR, Specular);
+    glLightfv(GL_LIGHT1, GL_AMBIENT, Ambient);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, Diffuse);
+    glLightfv(GL_LIGHT1, GL_POSITION, LightOnePos);
+
+    glEnable(GL_LIGHT1);
+    glEnable(GL_LIGHTING);
 
     // Initializes Wireframe to be ON 
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -340,6 +354,25 @@ void myDisplay() {
 }
 
 //****************************************************
+// Steps through by One Frame
+//      - Performs timesteps calculations
+//      - Then graph it
+//****************************************************
+void stepFrame() {
+    for(int i = 0; i < numTimeSteps; i++) {
+        if(gravity) {
+            cloth->addExternalForce(gravityForce);
+        } 
+        timestep += STEP;
+        cloth->update(timestep);
+    }
+
+    
+}
+
+
+
+//****************************************************
 // On keyPress:
 //   if key:
 //      'r':  Toggle Run Simulation / Pause Simulation 
@@ -371,8 +404,18 @@ void keyPress(unsigned char key, int x, int y) {
             }
             // Redo Forces?
             break;
+        case 'l':
+            light = !light;
+            if(light) {
+                glEnable(GL_LIGHTING);
+            } else {
+                glDisable(GL_LIGHTING);
+            }
+            break;
         case 't':
       //      if(!running) {
+                stepFrame();
+
                 timestep += STEP;
                 if(gravity) {
                     cloth->addExternalForce(gravityForce);
