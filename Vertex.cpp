@@ -116,19 +116,44 @@ void Vertex::connectBend(Vertex* a, int n) {
 }
 
 //****************************************************
+// Verlet Integration - Update Position      
+//****************************************************
+void Vertex::updateVerlet(float timestep) {
+    float time = timestep - lastTimeUpdated;
+    
+    glm::vec3 newPos = (float)2 *position - oldPos + acceleration * (timestep * timestep);
+    oldPos = position;
+    position = newPos;
+
+    lastTimeUpdated = timestep;
+}
+
+//****************************************************
+// Euler Integration - Update Position
+//****************************************************
+void Vertex::updateEuler(float timestep) {
+    float time = timestep - lastTimeUpdated;
+
+    position = position + (velocity * time);
+    velocity = velocity + (acceleration * time);
+
+    lastTimeUpdated = timestep;
+
+}
+
+//****************************************************
 // Force Calculation Functions
 //      - Use Euler's Methods to update Position & 
 //        Velocity
 //****************************************************
-void Vertex::update(float timestep) {
+void Vertex::update(float timestep, bool euler) {
     // x(i+1) = x(i) + v(i) * dT
     if(!fixed) {
-        float time = timestep - lastTimeUpdated;
-
-        position = position + velocity*time;
-        velocity = velocity + acceleration * time;
-
-        lastTimeUpdated = timestep;
+        if(euler) {
+            updateEuler(timestep);
+        } else {
+            updateVerlet(timestep);
+        }
     }
 }
 

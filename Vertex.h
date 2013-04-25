@@ -14,6 +14,9 @@ class Vertex {
     glm::vec3 velocity;
     glm::vec3 acceleration;
 
+    // Verlet Integration Properties:
+    glm::vec3 oldPos;
+
     // TODO: Spring Connections:
     // 4 Stretch Spring: Left, Up, Right, Down
     Vertex** stretch;
@@ -31,6 +34,8 @@ class Vertex {
     float lastTimeUpdated;
     bool fixed;
     float mass;
+
+    bool euler;
 
     // Spring Constants - Stretch, Shear, Bend
     float stretchConstant;
@@ -66,7 +71,10 @@ class Vertex {
     void connectBend(Vertex* a, int n);
 
     // Force Calculation Functions:
-    void update(float timestep);
+    void updateVerlet(float timestep);
+    void updateEuler(float timestep);
+    void update(float timestep, bool euler);
+
     void updateAccel(glm::vec3 externalForces);
     glm::vec3 getSpringForce();
     glm::vec3 getDampForce();

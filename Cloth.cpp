@@ -13,11 +13,15 @@
 Cloth::Cloth() {
     this->width = 4;
     this->height = 4;
+
+    euler = true;
 }
 
 Cloth::Cloth(int w, int h) {
     this->width = w;
     this->height = h;
+
+    euler = true;
 }
 
 //****************************************************
@@ -26,13 +30,15 @@ Cloth::Cloth(int w, int h) {
 //            Into W x H vertices
 //
 //****************************************************
-Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, Vertex* downLeft) {
+Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, Vertex* downLeft, bool isEuler) {
     // Sets the size of the vector to W*H 
     vertexMatrix.resize(w * h); 
 
     // Set Dimensions of Cloth
     this->width = w;
     this->height = h;
+
+    euler = isEuler;
 
     glm::vec3 vertVec = upLeft->vectorTo(downLeft);
     glm::vec3 horizVec = upLeft->vectorTo(upRight);
@@ -65,7 +71,7 @@ void Cloth::update(float timestep) {
     // Iterate through vertexMatrix, and update each individual particle
 
     for(int i = 0; i < height*width; i++) {
-        vertexMatrix[i]->update(timestep);
+        vertexMatrix[i]->update(timestep, euler);
     }
 
 }

@@ -21,13 +21,21 @@ class Cloth {
     //      Spring Constants
     //      Dampening Constants
     float springConstant;
+
+    float stretchConstant;
+    float shearConstant;
+    float bendConstant;
+    
     float dampeningConstant;
+
+    // Integration Type
+    bool euler;
 
   public:
     // Constructors:
     Cloth();
     Cloth(int w, int h);
-    Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, Vertex* downLeft);
+    Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, Vertex* downLeft, bool isEuler);
     // Other Constructors: Include Spring Constants
 
     // Getters:

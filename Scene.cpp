@@ -38,6 +38,7 @@ class Viewport {
 //****************************************************
 Viewport    viewport;
 Cloth*      cloth;
+const char* inputFile;
 
 // OpenGL Drawing Variables
 bool wire;
@@ -67,6 +68,9 @@ const GLfloat ROTATE_INC = 3.0f;
 // Animation Variables:
 float timestep = 0;
 const float STEP = 0.01f;
+
+// Position Update Method Variables: Command Lines
+bool euler;
 
 // Forces:
 bool gravity;
@@ -452,6 +456,7 @@ void loadCloth(const char* input) {
     
     int width, height;
     bool c1, c2, c3, c4;
+    bool euler;
 
     Vertex* corners[4];
 
@@ -484,7 +489,7 @@ void loadCloth(const char* input) {
     
     inpfile.close();
     
-    cloth = new Cloth(width, height, corners[0], corners[1], corners[2], corners[3]);
+    cloth = new Cloth(width, height, corners[0], corners[1], corners[2], corners[3], euler);
     cloth->setFixedCorners(c1, c2, c3, c4);
 
 }
@@ -492,15 +497,62 @@ void loadCloth(const char* input) {
 int main(int argc, char *argv[]) {
    
     // Process Inputs
+
+    if(argc > 3) {
+        std::cerr << "Too many arguments included" << std::endl;
+        std::exit(1);
+    } else {
+        if(argc >= 2) {
+            inputFile = argv[1];
+            
+            if(argc == 3) {
+                if(string(argv[2])== "-v") {
+                    euler = false;
+                } else {
+                    std::cerr << "Incorrect Flag Parameter" << std::endl;
+                    std::exit(1);
+                }
+            } else {
+                euler = true;
+            }
+
+
+        } else {
+            euler = true;
+            inputFile = "test/cloth.test";
+        }
+    }
+
+    loadCloth(inputFile);
+
+    std::cout << "Euler? = " << euler << std::endl;
+    std::cout << "File Name = " << inputFile << std::endl;
+
+
+    /*
     
     // Load Cloth
-    if(argc == 2) {
+    if(argc >= 2) {
         loadCloth(argv[1]);
+        if(argc == 3) {
+            if(argv[2] == "-euler") {
+                euler = true;
+            } else {
+                if(argv[2] == "-verlet") {
+                    euler = false;
+                } else {
+                    std::cerr << "Incorrect Flag: use either '-euler' or '-verlet'" << std::endl;
+                    std::exit(1); 
+                }
+            }
+        } else {
+            euler = true;
+        }
     } else {
         const char* inputFile = "test/cloth.test"; 
         loadCloth(inputFile);
     }
-
+*/
     // Initialize GLUT
     glutInit(&argc, argv);
 
