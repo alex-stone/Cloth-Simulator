@@ -4,10 +4,10 @@
 
 #include "Vertex.h"
 
-const float DEF_STRETCH = 500.0f;
-const float DEF_SHEAR = 500.0f;
-const float DEF_BEND = 500.0f;
-const float DEF_DAMP = 0.5f;
+const float DEF_STRETCH = 50.0f;
+const float DEF_SHEAR = 50.0f;
+const float DEF_BEND = 50.0f;
+const float DEF_DAMP = 15.0f;
 
 //****************************************************
 // Vertex Class - Constructors
@@ -130,21 +130,17 @@ void Vertex::connectBend(Vertex* a, int n) {
 //****************************************************
 void Vertex::updateVerlet(float timeChange) {
 
-    if(xPos == 10 && yPos == 10) { 
-        printPosition();
-        printVelocity();
-        printAccel();
-    }
+    glm::vec3 newPos = position + velocity + acceleration * (timeChange * timeChange);
 
-    glm::vec3 newPos = (2.0f * position) - oldPos + acceleration * (timeChange * timeChange);
+
+//    glm::vec3 newPos = (2.0f * position) - oldPos + acceleration * (timeChange * timeChange);
 
 
 //    glm::vec3 newPos = (float)2 *position - oldPos + acceleration * (timeChange * timeChange);
+
     oldPos = position;
     position = newPos;
-    
-    
-
+    velocity = position - oldPos;
 }
 
 //****************************************************
@@ -237,7 +233,7 @@ glm::vec3 Vertex::getSpringForce() {
 }
 
 glm::vec3 Vertex::getDampForce() {
-    glm::vec3 returnVec = velocity * dampConstant;
+    glm::vec3 returnVec = - velocity * dampConstant;
 
     return returnVec;
 }

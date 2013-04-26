@@ -358,10 +358,6 @@ void stepFrame() {
 
         oldTime += STEP;
 
-        // Update with Change in Time:
-//        timestep += STEP;
-  //      cloth->update(timestep); 
-
     }
 }
 
