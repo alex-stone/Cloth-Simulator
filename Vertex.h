@@ -14,6 +14,10 @@ class Vertex {
     glm::vec3 velocity;
     glm::vec3 acceleration;
 
+    // Cloth Coordinate Position;
+    int xPos;
+    int yPos;
+
     // Verlet Integration Properties:
     glm::vec3 oldPos;
 
@@ -62,6 +66,7 @@ class Vertex {
     glm::vec3 getVelocity() { return velocity; };
     glm::vec3 getAccel() { return acceleration; };
 
+    void setPosition(int x, int y);
     void setSpringRestLengths(float stretch, float bend, float shear);
     void setFixedVertex(bool isFixed);
 
@@ -71,9 +76,9 @@ class Vertex {
     void connectBend(Vertex* a, int n);
 
     // Force Calculation Functions:
-    void updateVerlet(float timestep);
-    void updateEuler(float timestep);
-    void update(float timestep, bool euler);
+    void updateVerlet(float timeChange);
+    void updateEuler(float timeChange);
+    void update(float timeChange, bool euler);
 
     void updateAccel(glm::vec3 externalForces);
     glm::vec3 getSpringForce();
@@ -91,6 +96,8 @@ class Vertex {
     //          - 12 Spring Connections
 
     void printPosition();
+    void printVelocity();
+    void printAccel();
 
 };
 

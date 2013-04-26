@@ -4,10 +4,10 @@
 
 #include "Vertex.h"
 
-const float DEF_STRETCH = 100.0f;
-const float DEF_SHEAR = 100.0f;
-const float DEF_BEND = 100.0f;
-const float DEF_DAMP = 5.0f;
+const float DEF_STRETCH = 500.0f;
+const float DEF_SHEAR = 500.0f;
+const float DEF_BEND = 500.0f;
+const float DEF_DAMP = 0.5f;
 
 //****************************************************
 // Vertex Class - Constructors
@@ -79,6 +79,8 @@ void Vertex::initPhysicalProps(float a, float b, float c) {
     this->velocity = glm::vec3(0.0f);
     this->acceleration = glm::vec3(0.0f);
 
+    this->oldPos = glm::vec3(a, b, c);
+
     mass = 1.0f;
 }
 
@@ -91,8 +93,13 @@ void Vertex::initSpringConstants(float stretchConst, float shearConst, float ben
 }
 
 //****************************************************
-// Vertex Class - Functions
+// Vertex Class - Setter Functions
 //****************************************************
+void Vertex::setPosition(int x, int y) {
+    xPos = x;   // X is width
+    yPos = y;   // Y is Height
+}
+
 void Vertex::setSpringRestLengths(float stretch, float bend, float shear) {
     stretchRestDist = stretch;
     shearRestDist = shear;
@@ -103,6 +110,9 @@ void Vertex::setFixedVertex(bool isFixed) {
     fixed = isFixed;
 }
 
+//****************************************************
+// Vertex Class - Functions
+//****************************************************
 void Vertex::connectStretch(Vertex* a, int n) {
     stretch[n] = a;
 }
@@ -118,26 +128,32 @@ void Vertex::connectBend(Vertex* a, int n) {
 //****************************************************
 // Verlet Integration - Update Position      
 //****************************************************
-void Vertex::updateVerlet(float timestep) {
-    float time = timestep - lastTimeUpdated;
-    
-    glm::vec3 newPos = (float)2 *position - oldPos + acceleration * (timestep * timestep);
+void Vertex::updateVerlet(float timeChange) {
+
+    if(xPos == 10 && yPos == 10) { 
+        printPosition();
+        printVelocity();
+        printAccel();
+    }
+
+    glm::vec3 newPos = (2.0f * position) - oldPos + acceleration * (timeChange * timeChange);
+
+
+//    glm::vec3 newPos = (float)2 *position - oldPos + acceleration * (timeChange * timeChange);
     oldPos = position;
     position = newPos;
+    
+    
 
-    lastTimeUpdated = timestep;
 }
 
 //****************************************************
 // Euler Integration - Update Position
 //****************************************************
-void Vertex::updateEuler(float timestep) {
-    float time = timestep - lastTimeUpdated;
+void Vertex::updateEuler(float timeChange) {
 
-    position = position + (velocity * time);
-    velocity = velocity + (acceleration * time);
-
-    lastTimeUpdated = timestep;
+    position = position + (velocity * timeChange);
+    velocity = velocity + (acceleration * timeChange);
 
 }
 
@@ -146,13 +162,13 @@ void Vertex::updateEuler(float timestep) {
 //      - Use Euler's Methods to update Position & 
 //        Velocity
 //****************************************************
-void Vertex::update(float timestep, bool euler) {
-    // x(i+1) = x(i) + v(i) * dT
+void Vertex::update(float timeChange, bool euler) {
+   
     if(!fixed) {
         if(euler) {
-            updateEuler(timestep);
+            updateEuler(timeChange);
         } else {
-            updateVerlet(timestep);
+            updateVerlet(timeChange);
         }
     }
 }
@@ -221,7 +237,7 @@ glm::vec3 Vertex::getSpringForce() {
 }
 
 glm::vec3 Vertex::getDampForce() {
-    glm::vec3 returnVec = -velocity * dampConstant;
+    glm::vec3 returnVec = velocity * dampConstant;
 
     return returnVec;
 }
@@ -239,5 +255,14 @@ glm::vec3 Vertex::vectorTo(Vertex* a) {
 void Vertex::printPosition() {
     std::cout << "(" << position.x << ", " << position.y << ", " << position.z << ")" << std::endl;
 }
+
+void Vertex::printVelocity() {
+    std::cout << "(" << velocity.x << ", " << velocity.y << ", " << velocity.z << ")" << std::endl;
+}
+
+void Vertex::printAccel() {
+    std::cout << "(" << acceleration.x << ", " << acceleration.y << ", " << acceleration.z << ")" << std::endl;
+}
+
 
 

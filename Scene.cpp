@@ -67,7 +67,9 @@ const GLfloat ROTATE_INC = 3.0f;
 
 // Animation Variables:
 float timestep = 0;
-int numTimeSteps = 20;
+float oldTime = 0;
+
+int numTimeSteps = 30;
 const float STEP = 0.01f;
 
 // Position Update Method Variables: Command Lines
@@ -347,12 +349,18 @@ void myDisplay() {
 //****************************************************
 void stepFrame() {
     for(int i = 0; i < numTimeSteps; i++) {
+        
         if(gravity) {
             cloth->addExternalForce(gravityForce);
         }
 
-        timestep += STEP;
-        cloth->update(timestep); 
+        cloth->update(STEP);
+
+        oldTime += STEP;
+
+        // Update with Change in Time:
+//        timestep += STEP;
+  //      cloth->update(timestep); 
 
     }
 }
@@ -393,6 +401,13 @@ void keyPress(unsigned char key, int x, int y) {
         case 't':
             if(!running) {
                 stepFrame();
+            }
+            break;
+        case 'l':
+            if(light) {
+                // glEnable(GL_LIGHTING);
+            } else {
+                // glDisable(GL_LIGHTING);
             }
             break;
         case 'w':
@@ -511,6 +526,9 @@ void loadCloth(const char* input) {
 
 int main(int argc, char *argv[]) {
    
+    // Initialize GLUT
+    glutInit(&argc, argv);
+    
     // Process Inputs
 
     if(argc > 3) {
@@ -539,37 +557,8 @@ int main(int argc, char *argv[]) {
     }
 
     loadCloth(inputFile);
-
-    std::cout << "Euler? = " << euler << std::endl;
-    std::cout << "File Name = " << inputFile << std::endl;
-
-
-    /*
-    
-    // Load Cloth
-    if(argc >= 2) {
-        loadCloth(argv[1]);
-        if(argc == 3) {
-            if(argv[2] == "-euler") {
-                euler = true;
-            } else {
-                if(argv[2] == "-verlet") {
-                    euler = false;
-                } else {
-                    std::cerr << "Incorrect Flag: use either '-euler' or '-verlet'" << std::endl;
-                    std::exit(1); 
-                }
-            }
-        } else {
-            euler = true;
-        }
-    } else {
-        const char* inputFile = "test/cloth.test"; 
-        loadCloth(inputFile);
-    }
-*/
-    // Initialize GLUT
-    glutInit(&argc, argv);
+   
+    std::cout << "Euler = " << euler << std::endl; 
 
     initScene();
 

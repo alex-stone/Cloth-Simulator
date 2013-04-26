@@ -60,6 +60,8 @@ Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, V
             vertexMatrix[i*w + j] = new Vertex(temp.x, temp.y, temp.z);
             vertexMatrix[i*w + j]->setSpringRestLengths(stretchLength, bendLength, shearLength); 
             //vertexMatrix[i*w + j]->setSpringConstants(stretchConst, shearConst, bendConst);
+
+            vertexMatrix[i*w + j]->setPosition(j, i);
         }
     }
 
