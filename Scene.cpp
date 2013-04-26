@@ -83,7 +83,6 @@ glm::vec3 gravityForce(0.0f, -1.0f, 0.0f);
 // Debug Variables:
 bool debugFunc = false;
 
-
 // Want a key to step through the Animation
 
 
@@ -118,6 +117,20 @@ void initScene() {
     running = false;
     
     gravity = true;
+
+    // Set up Lights:
+    GLfloat Specular[] = {0.0f, 0.2f, 0.8f};
+    GLfloat Ambient[] = {0.0f, 0.2f, 0.7f};
+    GLfloat Diffuse[] = {0.2f, 0.3f, 0.6f};
+    GLfloat LightOnePos[] = {-2.0f, 2.0f, 2.0f};
+
+    glLightfv(GL_LIGHT1, GL_SPECULAR, Specular);
+    glLightfv(GL_LIGHT1, GL_AMBIENT, Ambient);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, Diffuse);
+    glLightfv(GL_LIGHT1, GL_POSITION, LightOnePos);
+
+    glEnable(GL_LIGHT1);
+    glEnable(GL_LIGHTING);
 
     // Initializes Wireframe to be ON 
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -553,8 +566,6 @@ int main(int argc, char *argv[]) {
     }
 
     loadCloth(inputFile);
-   
-    std::cout << "Euler = " << euler << std::endl; 
 
     initScene();
 
