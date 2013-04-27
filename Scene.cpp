@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <sstream>
 #include "glm/glm.hpp"
 
 #ifdef _WIN32
@@ -83,6 +84,10 @@ glm::vec3 gravityForce(0.0f, -1.0f, 0.0f);
 // Debug Variables:
 bool debugFunc = false;
 
+// HUD Variables;
+const int LINE_SIZE = 15;
+
+
 // Want a key to step through the Animation
 
 
@@ -129,8 +134,8 @@ void initScene() {
     glLightfv(GL_LIGHT1, GL_DIFFUSE, Diffuse);
     glLightfv(GL_LIGHT1, GL_POSITION, LightOnePos);
 
-    glEnable(GL_LIGHT1);
-    glEnable(GL_LIGHTING);
+    //glEnable(GL_LIGHT1);
+  //  glEnable(GL_LIGHTING);
 
     // Initializes Wireframe to be ON 
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -156,7 +161,7 @@ void glut3DSetup() {
     glClearDepth(1.0f);
     
     if(light) {
-        glEnable(GL_LIGHTING);
+        //glEnable(GL_LIGHTING);
     }
 
     glMatrixMode(GL_PROJECTION);
@@ -165,7 +170,7 @@ void glut3DSetup() {
     // Perspective Camera
     gluPerspective(FOV_Y, aspectRatio, Z_NEAR, Z_FAR);
     glMatrixMode(GL_MODELVIEW);
-    
+    glLoadIdentity(); 
 }
 
 //****************************************************
@@ -219,18 +224,56 @@ void myReshape(int w, int h) {
 
 
 //****************************************************
+// Print Text:
+//      - Prints Text @ (x, y) w/ color (r,g,b)
+//****************************************************
+void printText(float x, float y, float r, float g, float b, std::string text) {
+    glColor3f(r,g,b);
+    glRasterPos2f(x,y);
+
+    for(int i = 0; i < text.length(); i++) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, text[i]);
+    }
+
+}
+
+//****************************************************
 // Print HUD
 //      - Prints the Heads Up Display:
 //      Variables To be Printed:
 //          - Timestep
 //****************************************************
-void printHUD(float x, float y, float r, float g, float b, const char* text) {
-    glColor3f(r,g,b);
-    glRasterPos2f(x,y);
-    while(*text) {
-        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_10, *text);
-        text++;
-    }
+void printHUD() {
+    float r = 1.0f;
+    float g = 1.0f;
+    float b = 1.0f;
+
+    // Print Theta:
+    int thetaAngle = theta;
+    thetaAngle = thetaAngle%360;
+    std::stringstream thetaStream;
+    thetaStream << "Theta: " << thetaAngle;
+    std::string thetaOut = thetaStream.str();
+    
+    printText(5, LINE_SIZE, r, g, b, thetaOut); 
+
+    // Print Phi 
+    int phiAngle = phi;
+    phiAngle = phiAngle%360;
+    std::stringstream phiStream;
+    phiStream << "Phi: " << phiAngle;
+    std::string phiOut = phiStream.str();
+    
+    printText(5, 2*LINE_SIZE, r, g, b, phiOut);
+
+    // Print Time:
+    int t = timestep;
+    std::stringstream timeStream;
+    timeStream << "Time Step: " << t;
+    std::string timeOut = timeStream.str();
+    
+    printText(5, 3*LINE_SIZE, r, g, b, timeOut);
+    
 
 }
 
@@ -314,8 +357,8 @@ void myDisplay() {
     // Set Camera
     glTranslatef(xTranslate, yTranslate, zTranslate);
    
-    glRotatef(theta, 1.0f, 0.0f, 0.0f);
-    glRotatef(phi, 0.0f, 1.0f, 0.0f);
+    glRotatef(phi, 1.0f, 0.0f, 0.0f);
+    glRotatef(theta, 0.0f, 1.0f, 0.0f);
 
     // Iterate through each vertex in the cloth;
    
@@ -324,14 +367,20 @@ void myDisplay() {
     // Renders 3D Objects 
     renderCloth(); 
     
-   /* glut2DSetup();
+    //glut2DSetup();
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, viewport.w, viewport.h, 0, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+
+    printHUD();
 
     // Renders 2D Objects
-    const char* output = "Theta = ";
-    printHUD(-2, -2, 1.0f, 1.0f, 1.0f, output);
-
-    glDepthMask(GL_TRUE);
-    */
+    //const char* output = "Theta = ";
+    //printHUD(5,5 , 1.0f, 1.0f, 1.0f, output);
     // Setup For 2D:
 
 /*
@@ -454,28 +503,28 @@ void arrowKeyPress(int key, int x, int y) {
             if(shift) {
                 xTranslate -= TRANSLATE_INC;
             } else {
-                phi -= ROTATE_INC;
+                theta -= ROTATE_INC;
             }
             break;
         case 101:   // Up Arrow
             if(shift) {
                 yTranslate += TRANSLATE_INC;
             } else {
-                theta -= ROTATE_INC;
+                phi -= ROTATE_INC;
             }
             break;
         case 102:   // Right Arrow
             if(shift) {
                 xTranslate += TRANSLATE_INC;
             } else {
-                phi += ROTATE_INC;
+                theta += ROTATE_INC;
             }
             break;
         case 103:   // Down Arrow
             if(shift) {
                 yTranslate -= TRANSLATE_INC;
             } else {
-                theta += ROTATE_INC;
+                phi += ROTATE_INC;
             }
             break;
     }
