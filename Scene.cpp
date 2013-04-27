@@ -23,7 +23,6 @@
 #include <math.h>
 #include "Cloth.h"
 #include "Vertex.h"
-#include "Spring.h"
 
 #define PI 3.14159265
 
@@ -425,6 +424,57 @@ void stepFrame() {
 
 
 //****************************************************
+// LoadCloth  Function
+//      - Reads in Cloth Information from file
+//      - First line Width Height
+//      - Next 4 lines four corners of cloth
+//****************************************************
+void loadCloth(const char* input) {
+    std::ifstream inpfile(input, ifstream::in);
+    
+    int width, height;
+    bool c1, c2, c3, c4;
+    bool euler;
+
+    Vertex* corners[4];
+
+    if(inpfile.good()) {
+        inpfile >> width;
+        inpfile >> height; 
+        
+        for(int i = 0; i < 4; i++) {
+            float x,y,z;
+            inpfile >> x;
+            inpfile >> y;
+            inpfile >> z;
+
+            corners[i] = new Vertex(x,y,z);
+
+        }
+
+        std::string temp;
+    
+        inpfile >> temp;
+        c1 = (temp == "true");
+        inpfile >> temp;
+        c2 = (temp == "true");
+        inpfile >> temp;
+        c3 = (temp == "true");
+        inpfile >> temp;
+        c4 = (temp == "true");
+
+    }
+    
+    inpfile.close();
+    
+    cloth = new Cloth(width, height, corners[0], corners[1], corners[2], corners[3], euler);
+    cloth->setFixedCorners(c1, c2, c3, c4);
+
+}
+
+
+
+//****************************************************
 // On keyPress:
 //   if key:
 //      'r':  Toggle Run Simulation / Pause Simulation 
@@ -440,6 +490,13 @@ void stepFrame() {
 void keyPress(unsigned char key, int x, int y) {
     
     switch(key) {
+        case 'y':
+            // Reset:
+            cloth = NULL;
+            loadCloth(inputFile);
+            oldTime = 0;
+
+            break;
         case 'r':
             running = !running;
             // TODO: Pause Time that is being kept track of
@@ -532,55 +589,6 @@ void arrowKeyPress(int key, int x, int y) {
     myDisplay();
 }
 
-
-//****************************************************
-// LoadCloth  Function
-//      - Reads in Cloth Information from file
-//      - First line Width Height
-//      - Next 4 lines four corners of cloth
-//****************************************************
-void loadCloth(const char* input) {
-    std::ifstream inpfile(input, ifstream::in);
-    
-    int width, height;
-    bool c1, c2, c3, c4;
-    bool euler;
-
-    Vertex* corners[4];
-
-    if(inpfile.good()) {
-        inpfile >> width;
-        inpfile >> height; 
-        
-        for(int i = 0; i < 4; i++) {
-            float x,y,z;
-            inpfile >> x;
-            inpfile >> y;
-            inpfile >> z;
-
-            corners[i] = new Vertex(x,y,z);
-
-        }
-
-        std::string temp;
-    
-        inpfile >> temp;
-        c1 = (temp == "true");
-        inpfile >> temp;
-        c2 = (temp == "true");
-        inpfile >> temp;
-        c3 = (temp == "true");
-        inpfile >> temp;
-        c4 = (temp == "true");
-
-    }
-    
-    inpfile.close();
-    
-    cloth = new Cloth(width, height, corners[0], corners[1], corners[2], corners[3], euler);
-    cloth->setFixedCorners(c1, c2, c3, c4);
-
-}
 
 int main(int argc, char *argv[]) {
    
