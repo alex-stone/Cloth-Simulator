@@ -14,6 +14,13 @@ class Vertex {
     glm::vec3 velocity;
     glm::vec3 acceleration;
 
+    // Cloth Coordinate Position;
+    int xPos;
+    int yPos;
+
+    // Verlet Integration Properties:
+    glm::vec3 oldPos;
+
     // TODO: Spring Connections:
     // 4 Stretch Spring: Left, Up, Right, Down
     Vertex** stretch;
@@ -32,25 +39,34 @@ class Vertex {
     bool fixed;
     float mass;
 
-    float springConstant;
+    bool euler;
+
+    // Spring Constants - Stretch, Shear, Bend
+    float stretchConstant;
+    float shearConstant;
+    float bendConstant;
+
+    float dampConstant;
+
+    // Function Initializations:
+    void initSpringToNull();
+    void initPhysicalProps(float a, float b, float c); 
+    void initSpringConstants(float stretchConst, float shearConst, float bendConst, float dampConstant);
 
   public:
     // Constructors:
     Vertex();
-    // Constructor Options:
-    // Point in Space
-    // Cloth Vertex Coordinate
-    // Connections 
-    // Fixed Or Not
-
     Vertex(float a, float b, float c);
     Vertex(float a, float b, float c, bool isFixed);
+    Vertex(float a, float b, float c, float stretchConst, float shearConst, float bendConst);
+    Vertex(float a, float b, float c, float stretchConst, float shearConst, float bendConst, bool isFixed);
 
     // Getters
     glm::vec3 getPos() { return position; };
     glm::vec3 getVelocity() { return velocity; };
     glm::vec3 getAccel() { return acceleration; };
 
+    void setPosition(int x, int y);
     void setSpringRestLengths(float stretch, float bend, float shear);
     void setFixedVertex(bool isFixed);
 
@@ -60,11 +76,16 @@ class Vertex {
     void connectBend(Vertex* a, int n);
 
     // Force Calculation Functions:
-    void update(float timestep);
+    void updateVerlet(float timeChange);
+    void updateEuler(float timeChange);
+    void update(float timeChange, bool euler);
+
     void updateAccel(glm::vec3 externalForces);
-    glm::vec3 getSpringAccel();
-    glm::vec3 getDampAccel();
-    glm::vec3 getAccelFromSpring(float restLength, glm::vec3 springVec);
+    
+     void updateCollisions(glm::vec3 &c, float radius);
+    glm::vec3 getSpringForce();
+    glm::vec3 getDampForce();
+    glm::vec3 getForceFromSpring(float restLength, float stretchConstant, glm::vec3 springVec);
 
     // Direction To Vertex:
     glm::vec3 vectorTo(Vertex* a);
@@ -77,6 +98,8 @@ class Vertex {
     //          - 12 Spring Connections
 
     void printPosition();
+    void printVelocity();
+    void printAccel();
 
 };
 

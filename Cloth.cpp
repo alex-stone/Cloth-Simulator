@@ -14,12 +14,14 @@ Cloth::Cloth() {
     this->width = 4;
     this->height = 4;
 
+    euler = true;
 }
 
 Cloth::Cloth(int w, int h) {
     this->width = w;
     this->height = h;
 
+    euler = true;
 }
 
 //****************************************************
@@ -28,13 +30,15 @@ Cloth::Cloth(int w, int h) {
 //            Into W x H vertices
 //
 //****************************************************
-Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, Vertex* downLeft) {
+Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, Vertex* downLeft, bool isEuler) {
     // Sets the size of the vector to W*H 
     vertexMatrix.resize(w * h); 
 
     // Set Dimensions of Cloth
     this->width = w;
     this->height = h;
+
+    euler = isEuler;
 
     glm::vec3 vertVec = upLeft->vectorTo(downLeft);
     glm::vec3 horizVec = upLeft->vectorTo(upRight);
@@ -55,6 +59,9 @@ Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, V
             //I*W + j indexes vertexMatrix like a 2D array vertexMatrix[i][j]; 
             vertexMatrix[i*w + j] = new Vertex(temp.x, temp.y, temp.z);
             vertexMatrix[i*w + j]->setSpringRestLengths(stretchLength, bendLength, shearLength); 
+            //vertexMatrix[i*w + j]->setSpringConstants(stretchConst, shearConst, bendConst);
+
+            vertexMatrix[i*w + j]->setPosition(j, i);
         }
     }
 
@@ -62,16 +69,20 @@ Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, V
 
 }
 
-void Cloth::update(float timestep) {
+void Cloth::update(float timestep,glm::vec3 spherePos, float sphereRadius) {
     // Iterate through vertexMatrix, and update each individual particle
 
     for(int i = 0; i < height*width; i++) {
-        vertexMatrix[i]->update(timestep);
+        vertexMatrix[i]->update(timestep,euler);
+        vertexMatrix[i]->updateCollisions(spherePos,sphereRadius);
     }
 
 }
 
-void Cloth::addExternalAccel(glm::vec3 externalForce) {
+
+
+
+void Cloth::addExternalForce(glm::vec3 externalForce) {
     
     for(int i = 0; i < height*width; i++) {
         vertexMatrix[i]->updateAccel(externalForce);
@@ -124,21 +135,21 @@ void Cloth::connectSprings() {
             }
 
             // Connections to the Right
-            if(i <= width - 2) {
+            if(i <= width - 3) {
                 vert->connectBend(this->getVertex(i+2, j), 2);
                 vert->connectStretch(this->getVertex(i+1, j), 2);
             } else {
-                if(i == width - 1) {
+                if(i == width - 2) {
                     vert->connectStretch(this->getVertex(i+1, j), 2);
                 }
             }
 
             // Connections Downwards:
-            if(j <= height - 2) {
+            if(j <= height - 3) {
                 vert->connectBend(this->getVertex(i, j+2), 3);
                 vert->connectStretch(this->getVertex(i, j+1), 3);   
             } else {
-                if(j == height - 1) {
+                if(j == height - 2) {
                     vert->connectStretch(this->getVertex(i, j+1), 3);
                 }
             }
@@ -151,17 +162,17 @@ void Cloth::connectSprings() {
             }
 
             // Conection Up-Right
-            if(i <= (width - 1) && j >= 1) {
+            if(i <= (width - 2) && j >= 1) {
                 vert->connectShear(this->getVertex(i+1, j-1), 1);
             }
 
             // Connection Down-Right:
-            if(i <= (width - 1) && j <= (height - 1)) {
+            if(i <= (width - 2) && j <= (height - 2)) {
                 vert->connectShear(this->getVertex(i+1, j+1), 2);
             }
 
             // Connection Down-Left:
-            if(i >= 1 && j <= (height - 1)) {
+            if(i >= 1 && j <= (height - 2)) {
                 vert->connectShear(this->getVertex(i-1, j+1), 3);
             }
 
