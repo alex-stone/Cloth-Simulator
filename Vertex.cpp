@@ -4,10 +4,10 @@
 
 #include "Vertex.h"
 
-const float DEF_STRETCH = 50.0f;
-const float DEF_SHEAR = 50.0f;
-const float DEF_BEND = 50.0f;
-const float DEF_DAMP = 15.0f;
+const float DEF_STRETCH = 1000.0f;
+const float DEF_SHEAR = 1000.0f;
+const float DEF_BEND = 1000.0f;
+const float DEF_DAMP = 115.0f;
 
 //****************************************************
 // Vertex Class - Constructors
