@@ -69,6 +69,7 @@ const GLfloat ROTATE_INC = 3.0f;
 float timestep = 0;
 float oldTime = 0;
 
+
 int numTimeSteps = 30;
 const float STEP = 0.01f;
 
@@ -117,14 +118,14 @@ void initScene() {
     // Initialize Drawing Variables:
     wire = true;
     smooth = false;
-    light = false;
+    light = true;
     running = false;
     
     gravity = true;
 
     // Set up Lights:
     GLfloat Specular[] = {0.0f, 0.2f, 0.8f};
-    GLfloat Ambient[] = {0.0f, 0.2f, 0.7f};
+    GLfloat Ambient[] = {0.5f, 0.2f, 0.7f};
     GLfloat Diffuse[] = {0.2f, 0.3f, 0.6f};
     GLfloat LightOnePos[] = {-2.0f, 2.0f, 2.0f};
 
@@ -133,8 +134,8 @@ void initScene() {
     glLightfv(GL_LIGHT1, GL_DIFFUSE, Diffuse);
     glLightfv(GL_LIGHT1, GL_POSITION, LightOnePos);
 
-    //glEnable(GL_LIGHT1);
-  //  glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT1);
+    glEnable(GL_LIGHTING);
 
     // Initializes Wireframe to be ON 
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -160,7 +161,9 @@ void glut3DSetup() {
     glClearDepth(1.0f);
     
     if(light) {
-        //glEnable(GL_LIGHTING);
+        glEnable(GL_LIGHTING);
+    } else {
+        glDisable(GL_LIGHTING);
     }
 
     glMatrixMode(GL_PROJECTION);
@@ -179,7 +182,7 @@ void glut3DSetup() {
 //      - Uses an Orthographic Camera
 //****************************************************
 void glut2DSetup() {
-    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glDisable(GL_LIGHTING);
     glDisable(GL_DEPTH_TEST);
@@ -227,6 +230,7 @@ void myReshape(int w, int h) {
 //      - Prints Text @ (x, y) w/ color (r,g,b)
 //****************************************************
 void printText(float x, float y, float r, float g, float b, std::string text) {
+    
     glColor3f(r,g,b);
     glRasterPos2f(x,y);
 
@@ -308,12 +312,12 @@ void drawTestLine() {
 void renderCloth() {
 
     for(int h = 0; h < cloth->getHeight()-1; h++) {
-        glBegin(GL_QUAD_STRIP);
-
+//        glBegin(GL_QUAD_STRIP);
+        glBegin(GL_TRIANGLE_STRIP);
         for(int w = 0; w < cloth->getWidth(); w++) {
 
             glColor3f(1.0f, 1.0f, 1.0f);
-            
+
             Vertex* temp = cloth->getVertex(w, h+1 );
             glVertex3f(temp->getPos().x, temp->getPos().y, temp->getPos().z);
 
@@ -418,8 +422,11 @@ void stepFrame() {
         cloth->update(STEP);
 
         oldTime += STEP;
-
     }
+    timestep++;
+
+    // Only update normals when they'll be needed to be drawn. TODO: Change with wind.
+    //cloth->updateNormals();
 }
 
 
@@ -495,6 +502,7 @@ void keyPress(unsigned char key, int x, int y) {
             cloth = NULL;
             loadCloth(inputFile);
             oldTime = 0;
+            timestep = 0;
 
             break;
         case 'r':
@@ -519,10 +527,11 @@ void keyPress(unsigned char key, int x, int y) {
             }
             break;
         case 'l':
+            light = !light;
             if(light) {
-                // glEnable(GL_LIGHTING);
+                 glEnable(GL_LIGHTING);
             } else {
-                // glDisable(GL_LIGHTING);
+                 glDisable(GL_LIGHTING);
             }
             break;
         case 'w':

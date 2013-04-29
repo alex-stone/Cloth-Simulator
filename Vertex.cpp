@@ -134,8 +134,6 @@ void Vertex::updateVerlet(float timeChange) {
 
 
 //    glm::vec3 newPos = (2.0f * position) - oldPos + acceleration * (timeChange * timeChange);
-
-
 //    glm::vec3 newPos = (float)2 *position - oldPos + acceleration * (timeChange * timeChange);
 
     oldPos = position;
@@ -181,6 +179,13 @@ void Vertex::updateAccel(glm::vec3 externalForces) {
 
     // Net Acceleration = Sum of 3 vectors
     acceleration = (spring + damp + externalForces) / mass;
+}
+
+// Use the cross product of other triangles to calculate. Sum of all the normals of every Triangle
+void Vertex::setNormal() {
+    
+
+
 }
 
 
