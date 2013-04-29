@@ -80,6 +80,7 @@ void Vertex::initPhysicalProps(float a, float b, float c) {
     this->acceleration = glm::vec3(0.0f);
 
     this->oldPos = glm::vec3(a, b, c);
+<<<<<<< HEAD
 
     mass = 1.0f;
 }
@@ -106,6 +107,34 @@ void Vertex::setSpringRestLengths(float stretch, float bend, float shear) {
     bendRestDist = bend;
 }
 
+=======
+
+    mass = 1.0f;
+}
+
+void Vertex::initSpringConstants(float stretchConst, float shearConst, float bendConst, float dampConst) {
+    stretchConstant = stretchConst;
+    shearConstant = shearConst;
+    bendConstant = bendConst;
+
+    dampConstant = dampConst;
+}
+
+//****************************************************
+// Vertex Class - Setter Functions
+//****************************************************
+void Vertex::setPosition(int x, int y) {
+    xPos = x;   // X is width
+    yPos = y;   // Y is Height
+}
+
+void Vertex::setSpringRestLengths(float stretch, float bend, float shear) {
+    stretchRestDist = stretch;
+    shearRestDist = shear;
+    bendRestDist = bend;
+}
+
+>>>>>>> Collisions updated
 void Vertex::setFixedVertex(bool isFixed) {
     fixed = isFixed;
 }
@@ -116,6 +145,124 @@ void Vertex::setFixedVertex(bool isFixed) {
 void Vertex::connectStretch(Vertex* a, int n) {
     stretch[n] = a;
 }
+<<<<<<< HEAD
+
+void Vertex::connectShear(Vertex* a, int n) {
+    shear[n] = a;
+}
+
+void Vertex::connectBend(Vertex* a, int n) {
+    bend[n] = a;
+}
+
+//****************************************************
+// Verlet Integration - Update Position      
+//****************************************************
+void Vertex::updateVerlet(float timeChange) {
+
+    glm::vec3 newPos = position + velocity + acceleration * (timeChange * timeChange);
+
+
+//    glm::vec3 newPos = (2.0f * position) - oldPos + acceleration * (timeChange * timeChange);
+
+
+//    glm::vec3 newPos = (float)2 *position - oldPos + acceleration * (timeChange * timeChange);
+
+    oldPos = position;
+    position = newPos;
+    velocity = position - oldPos;
+}
+
+//****************************************************
+// Euler Integration - Update Position
+//****************************************************
+void Vertex::updateEuler(float timeChange) {
+
+    position = position + (velocity * timeChange);
+    velocity = velocity + (acceleration * timeChange);
+
+}
+
+//****************************************************
+// Force Calculation Functions
+//      - Use Euler's Methods to update Position & 
+//        Velocity
+//****************************************************
+void Vertex::update(float timeChange, bool euler) {
+   
+    if(!fixed) {
+        if(euler) {
+            updateEuler(timeChange);
+        } else {
+            updateVerlet(timeChange);
+        }
+    }
+}
+
+//****************************************************
+// Update Acceleration:
+//      - Given External Forces, Spring Forces, and
+//        Dampening Forces, calculate new acceleration
+//****************************************************
+void Vertex::updateAccel(glm::vec3 externalForces) {
+    glm::vec3 spring = this->getSpringForce();
+    glm::vec3 damp = this->getDampForce();
+
+
+    // Net Acceleration = Sum of 3 vectors
+    acceleration = (spring + damp + externalForces) / mass;
+}
+
+
+//****************************************************
+// GetAccelFromSpring       From a Single Spring 
+//      - springVec
+//              Direction of Force
+//              Length;
+//****************************************************
+glm::vec3 Vertex::getForceFromSpring(float restLength, float springConstant, glm::vec3 springVec) {
+
+    // Displacement
+    float diff = glm::length(springVec) - restLength;
+
+    // Direction of Force
+    glm::vec3 returnVec = glm::normalize(springVec);
+    
+    // ReturnVec = (k * x) * direction
+    returnVec = returnVec * springConstant * diff;
+
+    return returnVec;
+}
+
+//****************************************************
+// GetSpringAccel
+//      - Calculates the net Acceleration from all
+//        12 of the springs.
+//****************************************************
+glm::vec3 Vertex::getSpringForce() {
+    // Iterate through each spring connection and calculate force 
+    glm::vec3 returnVec;
+
+
+    for(int i = 0; i < 4; i++) {
+        if(stretch[i] != NULL) {
+            returnVec += getForceFromSpring(stretchRestDist, stretchConstant, this->vectorTo(stretch[i]));
+        }
+
+        if(shear[i] != NULL) {
+            returnVec += getForceFromSpring(shearRestDist, shearConstant, this->vectorTo(shear[i]));
+        }
+
+        if(bend[i] != NULL) {
+            returnVec += getForceFromSpring(bendRestDist, bendConstant, this->vectorTo(bend[i]));
+        }
+  
+    }
+
+    return returnVec;
+}
+
+=======
 
 void Vertex::connectShear(Vertex* a, int n) {
     shear[n] = a;
@@ -189,6 +336,23 @@ void Vertex::setNormal() {
 }
 
 
+void Vertex::updateCollisions(glm::vec3 &center, float r){
+
+        glm::vec3 temp = this->position - center;
+        //check if position of vertex - center of ball is less than radius
+        float n = glm::length(temp);
+        if (n < r)
+        {
+            
+            this->position = glm::normalize(temp)* r + center;
+            this->velocity.x *= .4;
+            this->velocity.y *= .4;
+            this->velocity.z *= .4;
+        }
+    }
+
+
+
 //****************************************************
 // GetAccelFromSpring       From a Single Spring 
 //      - springVec
@@ -237,6 +401,7 @@ glm::vec3 Vertex::getSpringForce() {
     return returnVec;
 }
 
+>>>>>>> Collisions updated
 glm::vec3 Vertex::getDampForce() {
     glm::vec3 returnVec = - velocity * dampConstant;
 
@@ -265,5 +430,8 @@ void Vertex::printAccel() {
     std::cout << "(" << acceleration.x << ", " << acceleration.y << ", " << acceleration.z << ")" << std::endl;
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> Collisions updated
 

@@ -66,6 +66,7 @@ Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, V
     }
 
     this->connectSprings();
+<<<<<<< HEAD
 
 }
 
@@ -77,12 +78,31 @@ void Cloth::update(float timestep) {
     }
 
 }
+=======
+
+}
+
+void Cloth::update(float timestep,glm::vec3 spherePos, float sphereRadius) {
+    // Iterate through vertexMatrix, and update each individual particle
+
+    for(int i = 0; i < height*width; i++) {
+        vertexMatrix[i]->updateCollisions(spherePos,sphereRadius);
+        vertexMatrix[i]->update(timestep,euler);
+        
+    }
+
+}
+
+
+
+>>>>>>> Collisions updated
 
 void Cloth::addExternalForce(glm::vec3 externalForce) {
     
     for(int i = 0; i < height*width; i++) {
         vertexMatrix[i]->updateAccel(externalForce);
     }
+<<<<<<< HEAD
 
 }
 
@@ -173,6 +193,97 @@ void Cloth::connectSprings() {
             }
 
         }
+=======
+
+}
+
+void Cloth::setFixedCorners(bool c1, bool c2, bool c3, bool c4) {
+    
+    if(c1) {
+        this->getVertex(0, 0)->setFixedVertex(true);
+    }
+
+    if(c2) {
+        this->getVertex(width-1, 0)->setFixedVertex(true);
+    } 
+
+    if(c3) {
+        this->getVertex(width-1, height-1)->setFixedVertex(true);
+    }
+
+    if(c4) {
+        this->getVertex(0, height-1)->setFixedVertex(true);
+>>>>>>> Collisions updated
     }
 }
 
+void Cloth::connectSprings() {
+    for(int i = 0; i < width; i++) {
+        for(int j = 0; j < height; j++) {
+            Vertex* vert = this->getVertex(i, j);
+            
+            // Connections to the Left:
+            if(i >= 2) {
+                vert->connectBend(this->getVertex(i-2, j), 0);
+                vert->connectStretch(this->getVertex(i-1, j), 0);
+            } else {
+                if(i == 1) {
+                    vert->connectStretch(this->getVertex(i-1, j), 0);
+                }
+            }   
+
+            // Connections Upwards:
+            if(j >= 2) {
+                vert->connectBend(this->getVertex(i, j-2), 1);
+                vert->connectStretch(this->getVertex(i, j-1), 1);
+            } else {
+                if(j == 1) {
+                    vert->connectStretch(this->getVertex(i, j-1), 1);
+                }
+            }
+
+            // Connections to the Right
+            if(i <= width - 3) {
+                vert->connectBend(this->getVertex(i+2, j), 2);
+                vert->connectStretch(this->getVertex(i+1, j), 2);
+            } else {
+                if(i == width - 2) {
+                    vert->connectStretch(this->getVertex(i+1, j), 2);
+                }
+            }
+
+            // Connections Downwards:
+            if(j <= height - 3) {
+                vert->connectBend(this->getVertex(i, j+2), 3);
+                vert->connectStretch(this->getVertex(i, j+1), 3);   
+            } else {
+                if(j == height - 2) {
+                    vert->connectStretch(this->getVertex(i, j+1), 3);
+                }
+            }
+
+            // Diagonal Conections:
+            
+            // Connection Up-Left
+            if(i >= 1 && j >= 1) {
+                vert->connectShear(this->getVertex(i-1, j-1), 0);
+            }
+
+            // Conection Up-Right
+            if(i <= (width - 2) && j >= 1) {
+                vert->connectShear(this->getVertex(i+1, j-1), 1);
+            }
+
+            // Connection Down-Right:
+            if(i <= (width - 2) && j <= (height - 2)) {
+                vert->connectShear(this->getVertex(i+1, j+1), 2);
+            }
+
+            // Connection Down-Left:
+            if(i >= 1 && j <= (height - 2)) {
+                vert->connectShear(this->getVertex(i-1, j+1), 3);
+            }
+
+        }
+    }
+}

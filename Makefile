@@ -33,6 +33,9 @@ clean:
 	$(RM) *.o Scene
 
 
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> Collisions updated
