@@ -39,18 +39,14 @@ class Viewport {
 Viewport    viewport;
 Cloth*      cloth;
 const char* inputFile;
-<<<<<<< HEAD
-=======
-glm::vec3 spherePos(0.0f,-4.0f,-2.0f);
-float sphereRadius = 2.0f;
->>>>>>> Collisions updated
+glm::vec3 spherePos(0.0f,-3.0f,0.0f);
+float sphereRadius = 0.5f;
 
 // OpenGL Drawing Variables
 bool wire;
 bool smooth;
 bool running;   // Is simulation running in real-time or paused for step through
 bool light;
-
 
 // OpenGL Perspective Variables & Constants:
 GLdouble aspectRatio;
@@ -152,7 +148,6 @@ void initScene() {
     glDepthFunc(GL_LEQUAL);
     
 }
-<<<<<<< HEAD
 
 //****************************************************
 // GLUT 3D Setup
@@ -181,48 +176,6 @@ void glut3DSetup() {
     glLoadIdentity(); 
 }
 
-//****************************************************
-// GLUT 2D Setup
-//     - Sets all the openGL/GLUT Modes and views for
-//      Rendering 2D Objects
-//      - Uses an Orthographic Camera
-//****************************************************
-void glut2DSetup() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glDisable(GL_LIGHTING);
-    glDisable(GL_DEPTH_TEST);
-    glDepthMask(GL_FALSE);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    
-=======
-
-//****************************************************
-// GLUT 3D Setup
-//     - Sets all the openGL/GLUT Modes and views for
-//      Rendering 3D Objects
-//****************************************************
-void glut3DSetup() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    glEnable(GL_DEPTH_TEST);
-    glDepthMask(GL_TRUE);
-    glClearDepth(1.0f);
-    
-    if(light) {
-        glEnable(GL_LIGHTING);
-    }
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    
-    // Perspective Camera
-    gluPerspective(FOV_Y, aspectRatio, Z_NEAR, Z_FAR);
-    glMatrixMode(GL_MODELVIEW);
-    
-}
 
 //****************************************************
 // GLUT 2D Setup
@@ -240,7 +193,6 @@ void glut2DSetup() {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     
->>>>>>> Collisions updated
     // Orthographic Camera
     glOrtho(0.0, viewport.w, viewport.h, 0, -1, 1);
     glMatrixMode(GL_MODELVIEW);
@@ -379,21 +331,12 @@ void renderCloth() {
         glEnd();
     }
 }
-<<<<<<< HEAD
 
 //****************************************************
 // TODO: Render Stretch Springs
 //****************************************************
 
 //****************************************************
-=======
-
-//****************************************************
-// TODO: Render Stretch Springs
-//****************************************************
-
-//****************************************************
->>>>>>> Collisions updated
 // TODO: Render Shear Springs
 //****************************************************
 
@@ -428,8 +371,6 @@ void myDisplay() {
    
     // Renders 3D Objects 
     renderCloth(); 
-<<<<<<< HEAD
-=======
 
     glPushMatrix();
     glTranslatef(spherePos.x,spherePos.y,spherePos.z);
@@ -438,8 +379,6 @@ void myDisplay() {
 
     // Clear the transforms and rotations applied earlier
     glPopMatrix();
-    
->>>>>>> Collisions updated
     
     //glut2DSetup();
 
@@ -490,11 +429,8 @@ void stepFrame() {
             cloth->addExternalForce(gravityForce);
         }
 
-<<<<<<< HEAD
-        cloth->update(STEP);
-=======
+//        cloth->update(STEP);
         cloth->update(STEP,spherePos,sphereRadius);
->>>>>>> Collisions updated
 
         oldTime += STEP;
     }
