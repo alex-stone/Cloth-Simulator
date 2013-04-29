@@ -40,15 +40,10 @@ Viewport    viewport;
 Cloth*      cloth;
 const char* inputFile;
 <<<<<<< HEAD
-<<<<<<< HEAD
 =======
 glm::vec3 spherePos(0.0f,-4.0f,-2.0f);
 float sphereRadius = 2.0f;
 >>>>>>> Collisions updated
-=======
-glm::vec3 spherePos(0.0f,-4.0f,-2.0f);
-float sphereRadius = 2.0f;
->>>>>>> Adding-math
 
 // OpenGL Drawing Variables
 bool wire;
@@ -78,7 +73,6 @@ const GLfloat ROTATE_INC = 3.0f;
 // Animation Variables:
 float timestep = 0;
 float oldTime = 0;
-<<<<<<< HEAD
 
 int numTimeSteps = 30;
 const float STEP = 0.01f;
@@ -94,23 +88,6 @@ glm::vec3 gravityForce(0.0f, -1.0f, 0.0f);
 // Debug Variables:
 bool debugFunc = false;
 
-=======
-
-int numTimeSteps = 30;
-const float STEP = 0.01f;
-
-// Position Update Method Variables: Command Lines
-bool euler;
-
-// Forces:
-bool gravity;
-glm::vec3 gravityForce(0.0f, -1.0f, 0.0f);
-
-
-// Debug Variables:
-bool debugFunc = false;
-
->>>>>>> Adding-math
 // Want a key to step through the Animation
 
 
@@ -171,9 +148,6 @@ void initScene() {
     
 }
 <<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> Adding-math
 
 //****************************************************
 // GLUT 3D Setup
@@ -212,7 +186,6 @@ void glut2DSetup() {
     glDisable(GL_LIGHTING);
     glDisable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
-<<<<<<< HEAD
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -261,12 +234,6 @@ void glut2DSetup() {
     glLoadIdentity();
     
 >>>>>>> Collisions updated
-=======
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    
->>>>>>> Adding-math
     // Orthographic Camera
     glOrtho(0.0, viewport.w, viewport.h, 0, -1, 1);
     glMatrixMode(GL_MODELVIEW);
@@ -367,14 +334,10 @@ void renderCloth() {
     }
 }
 <<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> Adding-math
 
 //****************************************************
 // TODO: Render Stretch Springs
 //****************************************************
-<<<<<<< HEAD
 
 //****************************************************
 =======
@@ -453,75 +416,6 @@ void myDisplay() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-=======
-
-//****************************************************
-// TODO: Render Shear Springs
-//****************************************************
-
-//****************************************************
-// TODO: Render Bend Springs
-//****************************************************
-
-//****************************************************
-// MyDisplay 
-//     - reshape viewport if the window is resized
-//****************************************************
-void myDisplay() { 
-    if(debugFunc) {
-        std::cout << "myDisplay Called" << std::endl;
-    }
-
-    glut3DSetup();
-    
-
-    // Zeroe's Out 
-    glLoadIdentity();
-
-    // Set Camera
-    glTranslatef(xTranslate, yTranslate, zTranslate);
-   
-    glRotatef(theta, 1.0f, 0.0f, 0.0f);
-    glRotatef(phi, 0.0f, 1.0f, 0.0f);
-
-    // Iterate through each vertex in the cloth;
-   
-    //drawTestLine();
-   
-    // Renders 3D Objects 
-    renderCloth(); 
-
-    glPushMatrix();
-    glTranslatef(spherePos.x,spherePos.y,spherePos.z);
-    glColor3f(0.1f,0.3f,0.1f);
-    glutSolidSphere(sphereRadius-0.1,50,50);
-
-    // Clear the transforms and rotations applied earlier
-    glPopMatrix();
-    
-    
-   /* glut2DSetup();
-
-    // Renders 2D Objects
-    const char* output = "Theta = ";
-    printHUD(-2, -2, 1.0f, 1.0f, 1.0f, output);
-
-    glDepthMask(GL_TRUE);
-    */
-    // Setup For 2D:
-
-/*
-    glDisable(GL_DEPTH_TEST);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity;
-
-    glOrtho(0, viewport.w, 0, viewport.h, -1, 1);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
->>>>>>> Adding-math
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
@@ -545,14 +439,10 @@ void stepFrame() {
         }
 
 <<<<<<< HEAD
-<<<<<<< HEAD
         cloth->update(STEP);
 =======
         cloth->update(STEP,spherePos,sphereRadius);
 >>>>>>> Collisions updated
-=======
-        cloth->update(STEP,spherePos,sphereRadius);
->>>>>>> Adding-math
 
         oldTime += STEP;
 

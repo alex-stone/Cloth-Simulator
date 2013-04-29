@@ -47,14 +47,10 @@ class Cloth {
 
     // Update Cloth:
 <<<<<<< HEAD
-<<<<<<< HEAD
     void update(float timestep);
 =======
     void update(float timestep,glm::vec3 spherePosition, float sphereRadius);
 >>>>>>> Collisions updated
-=======
-    void update(float timestep,glm::vec3 spherePosition, float sphereRadius);
->>>>>>> Adding-math
 
     void addExternalForce(glm::vec3 externalForce);
 

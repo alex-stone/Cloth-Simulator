@@ -1,9 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-<<<<<<< HEAD
 // OpenGL Mathematics Copyright (c) 2005 - 2013 G-Truc Creation (www.g-truc.net)
-=======
-// OpenGL Mathematics Copyright (c) 2005 - 2012 G-Truc Creation (www.g-truc.net)
->>>>>>> Adding-math
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Created : 2005-12-21
 // Updated : 2008-11-27
@@ -44,11 +40,7 @@ namespace glm
 		detail::tquat<T> const & s2, 
 		T const & h)
 	{
-<<<<<<< HEAD
 		return mix(mix(q1, q2, h), mix(s1, s2, h), T(2) * (T(1) - h) * h);
-=======
-		return mix(mix(q1, q2, h), mix(s1, s2, h), T(2) * h (T(1) - h));
->>>>>>> Adding-math
 	}
 
 	template <typename T> 
@@ -60,17 +52,12 @@ namespace glm
 	)
 	{
 		detail::tquat<T> invQuat = inverse(curr);
-<<<<<<< HEAD
 		return exp((log(next + invQuat) + log(prev + invQuat)) / T(-4)) * curr;
-=======
-		return ext((log(next + invQuat) + log(prev + invQuat)) / T(-4)) * curr;
->>>>>>> Adding-math
 	}
 
 	template <typename T> 
 	GLM_FUNC_QUALIFIER detail::tquat<T> exp
 	(
-<<<<<<< HEAD
 		detail::tquat<T> const & q
 	)
 	{
@@ -78,16 +65,6 @@ namespace glm
 		float Angle = glm::length(u);
 		detail::tvec3<T> v(u / Angle);
 		return detail::tquat<T>(cos(Angle), sin(Angle) * v);
-=======
-		detail::tquat<T> const & q, 
-		T const & exponent
-	)
-	{
-		detail::tvec3<T> u(q.x, q.y, q.z);
-		float a = glm::length(u);
-		detail::tvec3<T> v(u / a);
-		return detail::tquat<T>(cos(a), sin(a) * v);
->>>>>>> Adding-math
 	}
 
 	template <typename T> 

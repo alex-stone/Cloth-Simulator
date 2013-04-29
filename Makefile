@@ -34,11 +34,8 @@ clean:
 
 
 <<<<<<< HEAD
-<<<<<<< HEAD
 
 
 
 =======
 >>>>>>> Collisions updated
-=======
->>>>>>> Adding-math

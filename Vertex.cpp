@@ -81,7 +81,6 @@ void Vertex::initPhysicalProps(float a, float b, float c) {
 
     this->oldPos = glm::vec3(a, b, c);
 <<<<<<< HEAD
-<<<<<<< HEAD
 
     mass = 1.0f;
 }
@@ -110,9 +109,6 @@ void Vertex::setSpringRestLengths(float stretch, float bend, float shear) {
 
 =======
 
-=======
-
->>>>>>> Adding-math
     mass = 1.0f;
 }
 
@@ -138,10 +134,7 @@ void Vertex::setSpringRestLengths(float stretch, float bend, float shear) {
     bendRestDist = bend;
 }
 
-<<<<<<< HEAD
 >>>>>>> Collisions updated
-=======
->>>>>>> Adding-math
 void Vertex::setFixedVertex(bool isFixed) {
     fixed = isFixed;
 }
@@ -152,7 +145,6 @@ void Vertex::setFixedVertex(bool isFixed) {
 void Vertex::connectStretch(Vertex* a, int n) {
     stretch[n] = a;
 }
-<<<<<<< HEAD
 <<<<<<< HEAD
 
 void Vertex::connectShear(Vertex* a, int n) {
@@ -299,36 +291,6 @@ void Vertex::updateVerlet(float timeChange) {
 }
 
 //****************************************************
-=======
-
-void Vertex::connectShear(Vertex* a, int n) {
-    shear[n] = a;
-}
-
-void Vertex::connectBend(Vertex* a, int n) {
-    bend[n] = a;
-}
-
-//****************************************************
-// Verlet Integration - Update Position      
-//****************************************************
-void Vertex::updateVerlet(float timeChange) {
-
-    glm::vec3 newPos = position + velocity + acceleration * (timeChange * timeChange);
-
-
-//    glm::vec3 newPos = (2.0f * position) - oldPos + acceleration * (timeChange * timeChange);
-
-
-//    glm::vec3 newPos = (float)2 *position - oldPos + acceleration * (timeChange * timeChange);
-
-    oldPos = position;
-    position = newPos;
-    velocity = position - oldPos;
-}
-
-//****************************************************
->>>>>>> Adding-math
 // Euler Integration - Update Position
 //****************************************************
 void Vertex::updateEuler(float timeChange) {
@@ -434,10 +396,7 @@ glm::vec3 Vertex::getSpringForce() {
     return returnVec;
 }
 
-<<<<<<< HEAD
 >>>>>>> Collisions updated
-=======
->>>>>>> Adding-math
 glm::vec3 Vertex::getDampForce() {
     glm::vec3 returnVec = - velocity * dampConstant;
 
@@ -467,10 +426,7 @@ void Vertex::printAccel() {
 }
 
 <<<<<<< HEAD
-<<<<<<< HEAD
 
 =======
 >>>>>>> Collisions updated
-=======
->>>>>>> Adding-math
 
