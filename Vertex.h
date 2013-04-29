@@ -82,10 +82,15 @@ class Vertex {
 
     void updateAccel(glm::vec3 externalForces);
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     
      void updateCollisions(glm::vec3 &c, float radius);
 >>>>>>> Collisions updated
+=======
+    
+     void updateCollisions(glm::vec3 &c, float radius);
+>>>>>>> Adding-math
     glm::vec3 getSpringForce();
     glm::vec3 getDampForce();
     glm::vec3 getForceFromSpring(float restLength, float stretchConstant, glm::vec3 springVec);

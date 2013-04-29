@@ -67,6 +67,7 @@ Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, V
 
     this->connectSprings();
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 }
 
@@ -79,6 +80,8 @@ void Cloth::update(float timestep) {
 
 }
 =======
+=======
+>>>>>>> Adding-math
 
 }
 
@@ -95,7 +98,10 @@ void Cloth::update(float timestep,glm::vec3 spherePos, float sphereRadius) {
 
 
 
+<<<<<<< HEAD
 >>>>>>> Collisions updated
+=======
+>>>>>>> Adding-math
 
 void Cloth::addExternalForce(glm::vec3 externalForce) {
     
@@ -103,6 +109,9 @@ void Cloth::addExternalForce(glm::vec3 externalForce) {
         vertexMatrix[i]->updateAccel(externalForce);
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Adding-math
 
 }
 
@@ -110,6 +119,7 @@ void Cloth::setFixedCorners(bool c1, bool c2, bool c3, bool c4) {
     
     if(c1) {
         this->getVertex(0, 0)->setFixedVertex(true);
+<<<<<<< HEAD
     }
 
     if(c2) {
@@ -201,6 +211,8 @@ void Cloth::setFixedCorners(bool c1, bool c2, bool c3, bool c4) {
     
     if(c1) {
         this->getVertex(0, 0)->setFixedVertex(true);
+=======
+>>>>>>> Adding-math
     }
 
     if(c2) {
@@ -213,7 +225,10 @@ void Cloth::setFixedCorners(bool c1, bool c2, bool c3, bool c4) {
 
     if(c4) {
         this->getVertex(0, height-1)->setFixedVertex(true);
+<<<<<<< HEAD
 >>>>>>> Collisions updated
+=======
+>>>>>>> Adding-math
     }
 }
 

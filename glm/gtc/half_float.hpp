@@ -1,7 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////////
 /// OpenGL Mathematics (glm.g-truc.net)
 ///
+<<<<<<< HEAD
 /// Copyright (c) 2005 - 2013 G-Truc Creation (www.g-truc.net)
+=======
+/// Copyright (c) 2005 - 2012 G-Truc Creation (www.g-truc.net)
+>>>>>>> Adding-math
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
 /// in the Software without restriction, including without limitation the rights
@@ -432,6 +436,7 @@ namespace detail
 	/// @see gtc_half_float
 	hvec4 abs(hvec4 const & x);
 
+<<<<<<< HEAD
 	/// Selects which vector each returned component comes
 	/// from. For a component of <a> that is false, the
 	/// corresponding component of x is returned. For a
@@ -446,6 +451,8 @@ namespace detail
 	/// @see gtc_half_float
 	half mix(half const & x, half const & y, bool const & a);
 
+=======
+>>>>>>> Adding-math
 	/// @}
 }// namespace glm
 

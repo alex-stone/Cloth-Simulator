@@ -1,5 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+<<<<<<< HEAD
 // OpenGL Mathematics Copyright (c) 2005 - 2013 G-Truc Creation (www.g-truc.net)
+=======
+// OpenGL Mathematics Copyright (c) 2005 - 2012 G-Truc Creation (www.g-truc.net)
+>>>>>>> Adding-math
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Created : 2007-03-06
 // Updated : 2009-05-01
@@ -35,7 +39,11 @@ namespace glm
 	template <typename T> 
 	GLM_FUNC_QUALIFIER detail::tvec3<T> euclidean
 	(
+<<<<<<< HEAD
 		detail::tvec2<T> const & polar
+=======
+		detail::tvec3<T> const & polar
+>>>>>>> Adding-math
 	)
 	{
 #ifdef GLM_FORCE_RADIANS

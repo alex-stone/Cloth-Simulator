@@ -1,7 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////////
 /// OpenGL Mathematics (glm.g-truc.net)
 ///
+<<<<<<< HEAD
 /// Copyright (c) 2005 - 2013 G-Truc Creation (www.g-truc.net)
+=======
+/// Copyright (c) 2005 - 2012 G-Truc Creation (www.g-truc.net)
+>>>>>>> Adding-math
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
 /// in the Software without restriction, including without limitation the rights
@@ -420,6 +424,7 @@ namespace detail
 	}
 
 	// mix
+<<<<<<< HEAD
 	template <typename genType>
 	GLM_FUNC_QUALIFIER genType mix
 	(
@@ -501,6 +506,95 @@ namespace detail
 	)
 	{
 		return x + a * (y - x);
+=======
+	template <typename genTypeT, typename genTypeU>
+	GLM_FUNC_QUALIFIER genTypeT mix
+	(
+		genTypeT const & x, 
+		genTypeT const & y, 
+		genTypeU const & a
+	)
+	{
+		// It could be a vector too
+		//GLM_STATIC_ASSERT(
+		//	detail::type<genTypeT>::is_float && 
+		//	detail::type<genTypeU>::is_float);
+
+		//return x + a * (y - x);
+		return genTypeT(genTypeU(x) + a * genTypeU(y - x));
+	}
+
+	template <typename valTypeA, typename valTypeB>
+	GLM_FUNC_QUALIFIER detail::tvec2<valTypeA> mix
+	(
+		detail::tvec2<valTypeA> const & x, 
+		detail::tvec2<valTypeA> const & y, 
+		valTypeB const & a
+	)
+	{
+		return detail::tvec2<valTypeA>(
+			detail::tvec2<valTypeB>(x) + a * detail::tvec2<valTypeB>(y - x));
+	}
+
+	template <typename valTypeA, typename valTypeB>
+	GLM_FUNC_QUALIFIER detail::tvec3<valTypeA> mix
+	(
+		detail::tvec3<valTypeA> const & x, 
+		detail::tvec3<valTypeA> const & y, 
+		valTypeB const & a
+	)
+	{
+		return detail::tvec3<valTypeA>(
+			detail::tvec3<valTypeB>(x) + a * detail::tvec3<valTypeB>(y - x));
+	}
+
+	template <typename valTypeA, typename valTypeB>
+	GLM_FUNC_QUALIFIER detail::tvec4<valTypeA> mix
+	(
+		detail::tvec4<valTypeA> const & x, 
+		detail::tvec4<valTypeA> const & y, 
+		valTypeB const & a
+	)
+	{
+		return detail::tvec4<valTypeA>(
+			detail::tvec4<valTypeB>(x) + a * detail::tvec4<valTypeB>(y - x));
+	}
+
+	template <typename valTypeA, typename valTypeB>
+	GLM_FUNC_QUALIFIER detail::tvec2<valTypeA> mix
+	(
+		detail::tvec2<valTypeA> const & x, 
+		detail::tvec2<valTypeA> const & y, 
+		detail::tvec2<valTypeB> const & a
+	)
+	{
+		return detail::tvec2<valTypeA>(
+			detail::tvec2<valTypeB>(x) + a * detail::tvec2<valTypeB>(y - x));
+	}
+
+	template <typename valTypeA, typename valTypeB>
+	GLM_FUNC_QUALIFIER detail::tvec3<valTypeA> mix
+	(
+		detail::tvec3<valTypeA> const & x, 
+		detail::tvec3<valTypeA> const & y, 
+		detail::tvec3<valTypeB> const & a
+	)
+	{
+		return detail::tvec3<valTypeA>(
+			detail::tvec3<valTypeB>(x) + a * detail::tvec3<valTypeB>(y - x));
+	}
+
+	template <typename valTypeA, typename valTypeB>
+	GLM_FUNC_QUALIFIER detail::tvec4<valTypeA> mix
+	(
+		detail::tvec4<valTypeA> const & x, 
+		detail::tvec4<valTypeA> const & y, 
+		detail::tvec4<valTypeB> const & a
+	)
+	{
+		return detail::tvec4<valTypeA>(
+			detail::tvec4<valTypeB>(x) + a * detail::tvec4<valTypeB>(y - x));
+>>>>>>> Adding-math
 	}
 
 	//template <typename genTypeT>
@@ -519,6 +613,7 @@ namespace detail
 	//	return x + a * (y - x);
 	//}
 
+<<<<<<< HEAD
 	template <>
 	GLM_FUNC_QUALIFIER float mix
 	(
@@ -576,6 +671,17 @@ namespace detail
 	)
 	{
 		GLM_STATIC_ASSERT(detail::type<T>::is_float, "'mix' only accept floating-point inputs");
+=======
+	template <typename genType>
+	GLM_FUNC_QUALIFIER genType mix
+	(
+		genType const & x, 
+		genType const & y, 
+		bool const & a
+	)
+	{
+		GLM_STATIC_ASSERT(detail::type<genType>::is_float, "'mix' only accept floating-point inputs");
+>>>>>>> Adding-math
 
 		return a ? y : x;
 	}
@@ -594,7 +700,12 @@ namespace detail
 		for
 		(
 			typename detail::tvec2<T>::size_type i = 0; 
+<<<<<<< HEAD
 			i < x.length(); ++i
+=======
+			i < detail::tvec2<T>::value_size(); 
+			++i
+>>>>>>> Adding-math
 		)
 		{
 			result[i] = a[i] ? y[i] : x[i];
@@ -616,7 +727,12 @@ namespace detail
 		for
 		(
 			typename detail::tvec3<T>::size_type i = 0; 
+<<<<<<< HEAD
 			i < x.length(); ++i
+=======
+			i < detail::tvec3<T>::value_size(); 
+			++i
+>>>>>>> Adding-math
 		)
 		{
 			result[i] = a[i] ? y[i] : x[i];
@@ -638,7 +754,12 @@ namespace detail
 		for
 		(
 			typename detail::tvec4<T>::size_type i = 0; 
+<<<<<<< HEAD
 			i < x.length(); ++i
+=======
+			i < detail::tvec4<T>::value_size(); 
+			++i
+>>>>>>> Adding-math
 		)
 		{
 			result[i] = a[i] ? y[i] : x[i];
@@ -842,19 +963,32 @@ namespace detail
 	{
 		GLM_STATIC_ASSERT(detail::type<genType>::is_float, "'isnan' only accept floating-point inputs");
 
+<<<<<<< HEAD
 #		if(GLM_COMPILER & (GLM_COMPILER_VC | GLM_COMPILER_INTEL))
 			return _isnan(x) != 0;
 #		elif(GLM_COMPILER & (GLM_COMPILER_GCC | GLM_COMPILER_CLANG))
+=======
+#       if(GLM_COMPILER & (GLM_COMPILER_VC | GLM_COMPILER_INTEL))
+			return _isnan(x) != 0;
+#		elif(GLM_COMPILER & GLM_COMPILER_GCC)
+>>>>>>> Adding-math
 #			if(GLM_PLATFORM & GLM_PLATFORM_ANDROID)
 				return _isnan(x) != 0;
 #			else
 				return std::isnan(x);
 #			endif
 #		elif(GLM_COMPILER & GLM_COMPILER_CUDA)
+<<<<<<< HEAD
 			return isnan(x) != 0;
 #		else
 			return std::isnan(x);
 #		endif
+=======
+            return isnan(x) != 0;
+#       else
+			return std::isnan(x);
+#       endif
+>>>>>>> Adding-math
 	}
 
 	template <typename T>
@@ -899,20 +1033,49 @@ namespace detail
 	{
 		GLM_STATIC_ASSERT(detail::type<genType>::is_float, "'isinf' only accept floating-point inputs");
 
+<<<<<<< HEAD
 #		if(GLM_COMPILER & (GLM_COMPILER_INTEL | GLM_COMPILER_VC))
 			return _fpclass(x) == _FPCLASS_NINF || _fpclass(x) == _FPCLASS_PINF;
 #		elif(GLM_COMPILER & (GLM_COMPILER_GCC | GLM_COMPILER_CLANG))
+=======
+#       if(GLM_COMPILER & (GLM_COMPILER_INTEL | GLM_COMPILER_VC))
+			return _fpclass(x) == _FPCLASS_NINF || _fpclass(x) == _FPCLASS_PINF;
+#		elif(GLM_COMPILER & GLM_COMPILER_GCC)
+>>>>>>> Adding-math
 #			if(GLM_PLATFORM & GLM_PLATFORM_ANDROID)
 				return _isinf(x) != 0;
 #			else
 				return std::isinf(x);
 #			endif
 #		elif(GLM_COMPILER & GLM_COMPILER_CUDA)
+<<<<<<< HEAD
 			// http://developer.download.nvidia.com/compute/cuda/4_2/rel/toolkit/docs/online/group__CUDA__MATH__DOUBLE_g13431dd2b40b51f9139cbb7f50c18fab.html#g13431dd2b40b51f9139cbb7f50c18fab
 			return isinf(double(x)) != 0;
 #		else
 			return std::isinf(x);
 #		endif
+=======
+            // http://developer.download.nvidia.com/compute/cuda/4_2/rel/toolkit/docs/online/group__CUDA__MATH__DOUBLE_g13431dd2b40b51f9139cbb7f50c18fab.html#g13431dd2b40b51f9139cbb7f50c18fab
+            return isinf(double(x)) != 0;
+#       else
+			return std::isinf(x);
+#       endif
+/*
+#       if(GLM_COMPILER & GLM_COMPILER_VC)
+			return _fpclass(x) == _FPCLASS_NINF || _fpclass(x) == _FPCLASS_PINF;
+#       elif(GLM_COMPILER & GLM_COMPILER_GCC)
+#           if(GLM_PLATFORM & GLM_PLATFORM_ANDROID)
+				return _isinf(x) != 0;
+#           else
+				return std::isinf(x);
+#           endif
+#       elif(GLM_COMPILER & GLM_COMPILER_INTEL)
+			return isinf(x) != 0;			
+#       else
+			return std::isinf(x);
+#       endif
+*/
+>>>>>>> Adding-math
 	}
 
 	template <typename T>
