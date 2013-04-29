@@ -73,8 +73,9 @@ void Cloth::update(float timestep,glm::vec3 spherePos, float sphereRadius) {
     // Iterate through vertexMatrix, and update each individual particle
 
     for(int i = 0; i < height*width; i++) {
-        vertexMatrix[i]->update(timestep,euler);
         vertexMatrix[i]->updateCollisions(spherePos,sphereRadius);
+        vertexMatrix[i]->update(timestep,euler);
+        
     }
 
 }
