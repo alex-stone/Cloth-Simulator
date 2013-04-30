@@ -13,6 +13,7 @@ class Vertex {
     glm::vec3 position;
     glm::vec3 velocity;
     glm::vec3 acceleration;
+    glm::vec3 normal;
 
     // Cloth Coordinate Position;
     int xPos;
@@ -65,6 +66,9 @@ class Vertex {
     glm::vec3 getPos() { return position; };
     glm::vec3 getVelocity() { return velocity; };
     glm::vec3 getAccel() { return acceleration; };
+    glm::vec3 getNormal() { return normal; };
+
+   
 
     void setPosition(int x, int y);
     void setSpringRestLengths(float stretch, float bend, float shear);
@@ -72,7 +76,7 @@ class Vertex {
 
     // Connect Vertex a, to this Vertex, in direction n
     void connectStretch(Vertex* a, int n);
-    void connectShear(Vertex* a , int n);
+    void connectShear(Vertex* a , int n);;
     void connectBend(Vertex* a, int n);
 
     // Force Calculation Functions:
@@ -81,8 +85,15 @@ class Vertex {
     void update(float timeChange, bool euler);
 
     void updateAccel(glm::vec3 externalForces);
+    void updateNormal(glm::vec3 triangleNormal);
+    float getNormalX();
+    float getNormalY();
+    float getNormalZ();
+    glm::vec3 findNormal(Vertex *v2, Vertex *v3);
+
     
      void updateCollisions(glm::vec3 &c, float radius);
+
     glm::vec3 getSpringForce();
     glm::vec3 getDampForce();
     glm::vec3 getForceFromSpring(float restLength, float stretchConstant, glm::vec3 springVec);

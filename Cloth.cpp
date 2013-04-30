@@ -3,6 +3,8 @@
 #include <vector>
 #include "glm/glm.hpp"
 
+
+
 #include "Cloth.h"
 #include "Vertex.h"
 
@@ -69,6 +71,31 @@ Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, V
 
 }
 
+void Cloth::updateNormals(){
+    for(int i = 0; i< this->height -1; i++){
+        for(int z= 0; z < this->width; z++){
+            glm::vec3 triNormal =vertexMatrix[z * this->width + (i+1)]->findNormal(vertexMatrix[z * this->width + i], vertexMatrix[(z+1) * this->width + i]);
+            vertexMatrix[z * this->width + (i+1)]->updateNormal(triNormal);
+            vertexMatrix[z * this->width + i]->updateNormal(triNormal);
+            vertexMatrix[(z+1) * this->width + i]->updateNormal(triNormal);
+
+            glm::vec3 tempNormal = vertexMatrix[(z+1) * this->width + (i+1)]->findNormal(vertexMatrix[z * this->width + (i+1)], vertexMatrix[(z+1) * this->width + i]);
+            vertexMatrix[(z+1) * this->width + (i+1)]->updateNormal(tempNormal);
+            vertexMatrix[z * this->width + (i+1)]->updateNormal(tempNormal);
+            vertexMatrix[(z+1) * this->width + i]->updateNormal(tempNormal);
+        }
+    }
+    glBegin(GL_TRIANGLES);
+    for(int x = 0; x< this->height -1; x++){
+        for(int y= 0; y < this->width; y++){
+           
+            drawPatches(vertexMatrix[y * this->width + (x+1)] ,vertexMatrix[y * this->width + x], vertexMatrix[(y+1) * this->width + x]);
+            drawPatches(vertexMatrix[(y+1) * this->width + (x+1)], vertexMatrix[y * this->width + (x+1)], vertexMatrix[(y+1) * this->width + x]);
+        }
+    }
+    glEnd();
+}
+
 void Cloth::update(float timestep,glm::vec3 spherePos, float sphereRadius) {
     // Iterate through vertexMatrix, and update each individual particle
 
@@ -80,7 +107,19 @@ void Cloth::update(float timestep,glm::vec3 spherePos, float sphereRadius) {
 
 }
 
+void Cloth::drawPatches(Vertex *v1, Vertex *v2, Vertex *v3){
 
+        glColor3f(1.0f,1.0f,1.0f);
+        glNormal3f(v1->getNormalX(), v1->getNormalY(), v1->getNormalZ());
+        glVertex3f(v1->getPos().x,v1->getPos().y,v1->getPos().z);
+        
+        glNormal3f(v2->getNormalX(), v2->getNormalY(), v2->getNormalZ());
+        glVertex3f(v2->getPos().x,v2->getPos().y,v2->getPos().z);
+
+        glNormal3f(v3->getNormalX(), v3->getNormalY(), v3->getNormalZ());
+        glVertex3f(v3->getPos().x,v3->getPos().y,v3->getPos().z);
+
+}
 
 
 void Cloth::addExternalForce(glm::vec3 externalForce) {

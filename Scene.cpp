@@ -333,6 +333,10 @@ void myDisplay() {
 
     // Clear the transforms and rotations applied earlier
     glPopMatrix();
+
+    glEnable(GL_LIGHTING);
+    cloth->updateNormals();
+    
     
     
    /* glut2DSetup();
@@ -589,6 +593,3 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
-
-
-

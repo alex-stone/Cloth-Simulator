@@ -46,7 +46,13 @@ class Cloth {
     Vertex* getVertex(int w, int h) { return vertexMatrix[h*width + w]; };
 
     // Update Cloth:
+
+    void update(float timestep);
+
     void update(float timestep,glm::vec3 spherePosition, float sphereRadius);
+    void drawPatches(Vertex *v1, Vertex *v2, Vertex *v3);
+    void updateNormals();
+
 
     void addExternalForce(glm::vec3 externalForce);
 

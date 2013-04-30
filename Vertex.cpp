@@ -16,7 +16,6 @@ Vertex::Vertex() {
     initPhysicalProps(0.0f, 0.0f, 0.0f); 
     initSpringToNull(); 
     initSpringConstants(DEF_STRETCH, DEF_SHEAR, DEF_BEND, DEF_DAMP);
-    
     fixed = false;
     lastTimeUpdated = 0.0f;
 }
@@ -78,7 +77,7 @@ void Vertex::initPhysicalProps(float a, float b, float c) {
     this->position = glm::vec3(a, b, c);
     this->velocity = glm::vec3(0.0f);
     this->acceleration = glm::vec3(0.0f);
-
+    this->normal = glm::vec3(0.0f,0.0f,0.0f);
     this->oldPos = glm::vec3(a, b, c);
 
     mass = 1.0f;
@@ -183,6 +182,29 @@ void Vertex::updateAccel(glm::vec3 externalForces) {
     acceleration = (spring + damp + externalForces) / mass;
 }
 
+void Vertex::updateNormal(glm::vec3 triangleNormal){
+    this->normal += triangleNormal;
+}
+
+float Vertex::getNormalX(){
+    glm::vec3 temp = glm::normalize(this->normal);
+    return temp.x;
+}
+float Vertex::getNormalY(){
+    glm::vec3 temp = glm::normalize(this->normal);
+    return temp.y;
+}
+float Vertex::getNormalZ(){
+    glm::vec3 temp = glm::normalize(this->normal);
+    return temp.z;
+}
+
+glm::vec3 Vertex::findNormal(Vertex *v2, Vertex *v3){
+    glm::vec3 temp_v1 = v2->getPos() - this->getPos();
+    glm::vec3 temp_v2 = v3->getPos() - this->getPos();
+
+    return glm::cross(temp_v1,temp_v2);
+}
 
 void Vertex::updateCollisions(glm::vec3 &center, float r){
 
@@ -193,9 +215,9 @@ void Vertex::updateCollisions(glm::vec3 &center, float r){
         {
             
             this->position = glm::normalize(temp)* r + center;
-            this->velocity.x *= .4;
-            this->velocity.y *= .4;
-            this->velocity.z *= .4;
+            this->velocity.x *= .6;
+            this->velocity.y *= .6;
+            this->velocity.z *= .6;
         }
     }
 
@@ -276,5 +298,4 @@ void Vertex::printVelocity() {
 void Vertex::printAccel() {
     std::cout << "(" << acceleration.x << ", " << acceleration.y << ", " << acceleration.z << ")" << std::endl;
 }
-
 
