@@ -132,7 +132,7 @@ void initScene() {
     // Set up Lights:
     GLfloat Specular[] = {0.0f, 0.2f, 0.8f};
     GLfloat Ambient[] = {0.0f, 0.2f, 0.7f};
-    GLfloat Diffuse[] = {0.2f, 0.3f, 0.6f};
+    GLfloat Diffuse[] = {0.6f, 0.6f, 0.6f};
     GLfloat LightOnePos[] = {-2.0f, 2.0f, 2.0f};
 
     glLightfv(GL_LIGHT1, GL_SPECULAR, Specular);
@@ -317,6 +317,8 @@ void drawTestLine() {
 //      - Render's the Cloth
 //****************************************************
 void renderCloth() {
+    cloth->updateNormals();
+
 
     for(int h = 0; h < cloth->getHeight()-1; h++) {
 //        glBegin(GL_QUAD_STRIP);
@@ -603,6 +605,14 @@ void keyPress(unsigned char key, int x, int y) {
             // TODO: Pause Time that is being kept track of
             // 
             
+            break;
+        case 's':
+            smooth = !smooth;
+            if(smooth) {
+                glShadeModel(GL_SMOOTH);
+            } else {
+                glShadeModel(GL_FLAT);
+            }
             break;
         case 'g':
             gravity = !gravity;
