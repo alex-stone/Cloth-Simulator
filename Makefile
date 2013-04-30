@@ -1,4 +1,4 @@
-# Makefile - Bezier
+# Makefile - Cloth Simulation 
 
 CC = g++
 ifeq ($(shell sw_vers 2>/dev/null | grep Mac | awk '{ print $$2}'),Mac)
@@ -11,8 +11,8 @@ else
         LDFLAGS = -lglut -lGLU
 endif
 
-SOURCES = Scene.cpp Vertex.cpp Cloth.cpp
-OBJECTS = Scene.o Vertex.o Cloth.o
+SOURCES = Scene.cpp Vertex.cpp Cloth.cpp Sphere.cpp
+OBJECTS = Scene.o Vertex.o Cloth.o Sphere.o
 
 RM = /bin/rm -f
 all: main
@@ -32,10 +32,3 @@ Scene.o: Scene.cpp
 clean: 
 	$(RM) *.o Scene
 
-
-<<<<<<< HEAD
-
-
-
-=======
->>>>>>> Collisions updated
