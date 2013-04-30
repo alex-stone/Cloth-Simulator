@@ -51,13 +51,18 @@ bool Plane::isPointInPlane(glm::vec3 pointOnPlane) {
 
     glm::vec3 vecToPoint = pointOnPlane - topLeft;
 
-    float rightDist = glm::dot(vecToRight, vecToPoint);
-    float lowDist = glm::dot(vecToLow, vecToPoint);
 
-    float buffer = 0.09;
+    float rightDist = glm::length(vecToRight);
+    float rightPtDist = glm::dot(glm::normalize(vecToRight), vecToPoint);
+    
+    float lowDist = glm::length(vecToLow);
+    float lowPtDist = glm::dot(glm::normalize(vecToLow), vecToPoint);
 
-    bool rightRange = (rightDist <= glm::length(vecToRight)+buffer) && (rightDist >= - buffer);
-    bool lowRange = (lowDist <= glm::length(vecToLow)+buffer) && (lowDist >= - buffer);
+    //float buffer = 0.09;
+    float buffer = 0.15;
+
+    bool rightRange = (rightPtDist <= rightDist+buffer) && (rightPtDist >= - buffer);
+    bool lowRange = (lowPtDist <= lowDist + buffer) && (lowPtDist >= - buffer);
 
     if(rightRange && lowRange) {
         return true;
@@ -100,18 +105,20 @@ bool Plane::collide(Vertex* v) {
             if(isPointInPlane(pointOnPlane)) {
 
     
-                glm::vec3 parallel = glm::dot(normal, v->getVelocity()) * normal;
+                glm::vec3 parallel = glm::dot(glm::normalize(normal), v->getVelocity()) * normal;
                 glm::vec3 tangential = v->getVelocity() - parallel;
 
                 // V' = tangential - Kf * parallel
-                float kf = 0.0f;
+                float kf = 0.1f;
 
-                glm::vec3 newVel = - v->getVelocity() ;
+//                glm::vec3 newVel = - v->getVelocity() ;
 
-//            glm::vec3 newVel = tangential - kf * parallel;
+            glm::vec3 newVel = tangential - kf * parallel;
 //            glm::vec3 newPos = v->getPos() - v->getVelocity();
-
+                
                 glm::vec3 newPos = v->getPos() - v->getVelocity();
+
+//                glm::vec3 newPos = v->getPos() - v->getVelocity();
 
                 v->updateAfterCollide(newPos, newVel);
             

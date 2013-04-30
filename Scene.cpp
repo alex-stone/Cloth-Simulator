@@ -123,7 +123,7 @@ void initScene() {
 
     // Initialize Drawing Variables:
     wire = true;
-    smooth = false;
+    smooth = true;
     light = true;
     running = false;
     
@@ -154,7 +154,7 @@ void initScene() {
 
     // Initializes Wireframe to be ON 
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glShadeModel(GL_FLAT);
+    glShadeModel(GL_SMOOTH);
 
     glEnable(GL_DEPTH_TEST);
     glClearDepth(1.0f);
@@ -555,25 +555,33 @@ void loadShapes(const char* shapeInput) {
             }
 
             if(string(type) == "plane") {
-                float* pt = new float[12];
-                
-                for(int i = 0; i < 12; i++) {
-                    inpfile >> pt[i];
-                }
-                
                 float x1, y1, z1;
                 float x2, y2, z2;
                 float x3, y3, z3;
                 float x4, y4, z4;
 
+                inpfile >> x1;
+                inpfile >> y1;
+                inpfile >> z1;
 
-                glm::vec3 topLeft(pt[0], pt[1], pt[2]);
-                glm::vec3 topRight(pt[3], pt[4], pt[5]);
-                glm::vec3 lowRight(pt[6], pt[7], pt[8]);
-                glm::vec3 lowLeft(pt[9], pt[10], pt[11]);
+                inpfile >> x2;
+                inpfile >> y2;
+                inpfile >> z2;
+
+                inpfile >> x3;
+                inpfile >> y3;
+                inpfile >> z3;
+
+                inpfile >> x4;
+                inpfile >> y4;
+                inpfile >> z4;
+
+                glm::vec3 topLeft(x1, y1, z1);
+                glm::vec3 topRight(x2, y2, z2);
+                glm::vec3 lowRight(x3, y3, z3);
+                glm::vec3 lowLeft(x4, y4, z4);
             
-                //s = new Plane(topLeft, topRight, lowRight, lowLeft);    
-                s = new Plane();
+                s = new Plane(topLeft, topRight, lowRight, lowLeft);    
             }
             
 
@@ -794,7 +802,7 @@ int main(int argc, char *argv[]) {
     }
 
     //const char* shapeFile = "shapes/2spheres.test";
-    const char* shapeFile = "shapes/plane.test";
+    const char* shapeFile = "shapes/plane2.test";
 
     loadCloth(inputFile);
     loadShapes(shapeFile);
