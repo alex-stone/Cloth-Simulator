@@ -81,7 +81,7 @@ bool euler;
 bool gravity;
 bool force;
 glm::vec3 gravityForce(0.0f, -1.0f, 0.0f);
-glm::vec3 extForce(1.0f,-0.7f,1.0f);
+glm::vec3 extForce(1.0f,1.0f,1.0f);
 
 
 // Debug Variables:
@@ -415,7 +415,7 @@ void stepFrame() {
         }
 
         if(force){
-            cloth->addExtForce(extForce);
+            cloth->addDirectionalForce(extForce);
         }
 
         cloth->update(STEP,spherePos,sphereRadius);
