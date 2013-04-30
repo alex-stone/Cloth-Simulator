@@ -182,6 +182,8 @@ void Vertex::updateAccel(glm::vec3 externalForces) {
     acceleration = (spring + damp + externalForces) / mass;
 }
 
+
+
 void Vertex::updateNormal(glm::vec3 triangleNormal){
     this->normal += triangleNormal;
 }

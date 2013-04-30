@@ -48,6 +48,7 @@ class Cloth {
     // Update Cloth:
 
     void update(float timestep);
+    void addExtForce(glm::vec3 force);
 
     void update(float timestep,glm::vec3 spherePosition, float sphereRadius);
 

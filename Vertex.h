@@ -93,6 +93,7 @@ class Vertex {
 
     
      void updateCollisions(glm::vec3 &c, float radius);
+     void updateNetForce(glm::vec3 force);
 
     glm::vec3 getSpringForce();
     glm::vec3 getDampForce();

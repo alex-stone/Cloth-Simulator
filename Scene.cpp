@@ -79,7 +79,9 @@ bool euler;
 
 // Forces:
 bool gravity;
+bool force;
 glm::vec3 gravityForce(0.0f, -1.0f, 0.0f);
+glm::vec3 extForce(1.0f,-0.7f,1.0f);
 
 
 // Debug Variables:
@@ -119,6 +121,7 @@ void initScene() {
     running = false;
     
     gravity = true;
+    force = true;
 
     // Set up Lights:
     GLfloat Specular[] = {0.0f, 0.2f, 0.8f};
@@ -411,6 +414,10 @@ void stepFrame() {
             cloth->addExternalForce(gravityForce);
         }
 
+        if(force){
+            cloth->addExtForce(extForce);
+        }
+
         cloth->update(STEP,spherePos,sphereRadius);
 
         oldTime += STEP;
@@ -440,6 +447,18 @@ void keyPress(unsigned char key, int x, int y) {
             // TODO: Pause Time that is being kept track of
             // 
             
+            break;
+
+        case 'f':
+            force = !force;
+            std::cout << "External Force is now ";
+            if (force){
+                 std::cout << "ON" << std::endl;
+            } 
+             else {
+                std::cout << "OFF" << std::endl;
+            }
+
             break;
         case 'g':
             gravity = !gravity;
