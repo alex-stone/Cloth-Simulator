@@ -494,16 +494,11 @@ void loadShapes(const char* shapeInput) {
         inpfile >> numShapes;
         std::string type;
     
-        std::cout << "Num Shapes = " << numShapes << std::endl;
-        
         for(int i = 0; i < numShapes; i++) {
-
 
             inpfile >> type;
             Shape* s;
         
-            std::cout << "Type = " << type << std::endl;
-
             if(string(type) == "sphere") {
                 float x,y,z,r;
                 inpfile >> x;
