@@ -454,9 +454,11 @@ GLuint drawShape(Shape* s) {
     GLuint shapeList = glGenLists(1);
     glNewList(shapeList, GL_COMPILE);
 
+    
     if(s->getType() == "SPHERE") {
         glm::vec3 center = s->getCenter();
 
+        glPushMatrix();
         glTranslatef(center.x, center.y, center.z);
         glColor3f(0.1f, 0.3f, 0.1f);
         
@@ -486,6 +488,39 @@ void makeDrawLists() {
 //      - Creates the draw list for all the shapes
 //****************************************************
 void loadShapes(const char* shapeInput) {
+    std::ifstream inpfile(shapeInput, ifstream::in);
+
+    if(inpfile.good()){
+        inpfile >> numShapes;
+        std::string type;
+    
+        std::cout << "Num Shapes = " << numShapes << std::endl;
+        
+        for(int i = 0; i < numShapes; i++) {
+
+
+            inpfile >> type;
+            Shape* s;
+        
+            std::cout << "Type = " << type << std::endl;
+
+            if(string(type) == "sphere") {
+                float x,y,z,r;
+                inpfile >> x;
+                inpfile >> y;
+                inpfile >> z;
+                inpfile >> r;
+
+                glm::vec3 center(x,y,z);
+
+                s = new Sphere(center, r); 
+            }
+            
+
+            shapes.push_back(s);
+        }
+
+    }
 
 }
 
@@ -690,14 +725,17 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    const char* shapeFile = "shapes/2spheres.test";
+
     loadCloth(inputFile);
+    loadShapes(shapeFile);
+    
+   // Shape* testSphere = new Sphere(glm::vec3(0.0f, -2.0f, 0.0f), 1.0f);
 
-    Shape* testSphere = new Sphere(glm::vec3(0.0f, -2.0f, 0.0f), 1.0f);
 
+    //shapes.push_back(testSphere);
 
-    shapes.push_back(testSphere);
-
-    numShapes = 1;
+   // numShapes = 1;
 
     // Initialize Shapes Array
 
