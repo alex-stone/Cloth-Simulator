@@ -85,8 +85,9 @@ class Vertex {
 
     void updateAccel(glm::vec3 externalForces);
     void updateNormal();
-    
-    void updateCollisions(glm::vec3 &c, float radius);
+
+    void updateAfterCollide(glm::vec3 newPos, glm::vec3 newVel);
+   // void updateCollisions(glm::vec3 &c, float radius);
     
     glm::vec3 getSpringForce();
     glm::vec3 getDampForce();

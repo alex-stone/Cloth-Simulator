@@ -69,6 +69,12 @@ Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, V
 
 }
 
+void Cloth::updateCollision(Shape* s) {
+    for(int i = 0; i < height*width; i++) {
+        s->collide(vertexMatrix[i]);
+    }
+}
+
 void Cloth::update(float timestep) {
     // Iterate through vertexMatrix, and update each individual particle
 
@@ -78,7 +84,7 @@ void Cloth::update(float timestep) {
 
 }
 
-void Cloth::update(float timestep,glm::vec3 spherePos, float sphereRadius) {
+/*void Cloth::update(float timestep,glm::vec3 spherePos, float sphereRadius) {
     // Iterate through vertexMatrix, and update each individual particle
 
     for(int i = 0; i < height*width; i++) {
@@ -88,7 +94,7 @@ void Cloth::update(float timestep,glm::vec3 spherePos, float sphereRadius) {
     }
 
 }
-
+*/
 
 void Cloth::addExternalForce(glm::vec3 externalForce) {
     

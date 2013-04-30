@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "Vertex.h"
+#include "Shape.h"
 
 //****************************************************
 // Cloth Header Definition
@@ -47,7 +48,8 @@ class Cloth {
 
     // Update Cloth:
     void update(float timestep);
-    void update(float timestep,glm::vec3 spherePosition, float sphereRadius);
+    //void update(float timestep,glm::vec3 spherePosition, float sphereRadius);
+    void updateCollision(Shape* s);
 
     void addExternalForce(glm::vec3 externalForce);
 

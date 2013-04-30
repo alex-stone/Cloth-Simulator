@@ -2,6 +2,8 @@
 #define SPHERE_H
 
 #include "glm/glm.hpp"
+#include "Shape.h"
+#include "Vertex.h"
 
 //****************************************************
 // Sphere Header Definition
@@ -19,7 +21,10 @@ class Sphere : public Shape {
 
     // Shape - Abstract Functions
     bool collide(Vertex* v); 
+    glm::vec3 getNormal(Vertex* v);
+    std::string getType() { return "SPHERE"; };
+    float getRadius() { return radius; };
+    glm::vec3 getCenter() { return center; };
+};
 
-}
-
-
+#endif

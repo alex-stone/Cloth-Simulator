@@ -3,7 +3,6 @@
 #include <fstream>
 #include <cmath>
 #include <sstream>
-#include "glm/glm.hpp"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -21,8 +20,13 @@
              
 #include <time.h>
 #include <math.h>
+
+#include "glm/glm.hpp"
 #include "Cloth.h"
 #include "Vertex.h"
+#include "Shape.h"
+#include "Sphere.h"
+
 
 #define PI 3.14159265
 
@@ -36,11 +40,12 @@ class Viewport {
 //****************************************************
 // Global Variables 
 //****************************************************
-Viewport    viewport;
-Cloth*      cloth;
-const char* inputFile;
-glm::vec3 spherePos(0.0f,-3.0f,0.0f);
-float sphereRadius = 0.5f;
+Viewport                viewport;
+Cloth*                  cloth;
+const char*             inputFile;
+std::vector<Shape*>     shapes;
+GLuint*                 shapeDrawLists;
+int                     numShapes;
 
 // OpenGL Drawing Variables
 bool wire;
@@ -372,13 +377,10 @@ void myDisplay() {
     // Renders 3D Objects 
     renderCloth(); 
 
-    glPushMatrix();
-    glTranslatef(spherePos.x,spherePos.y,spherePos.z);
-    glColor3f(0.1f,0.3f,0.1f);
-    glutSolidSphere(sphereRadius-0.1,50,50);
-
-    // Clear the transforms and rotations applied earlier
-    glPopMatrix();
+    // Draw Shapes:
+    for(int i = 0; i < numShapes; i++) {
+        glCallList(shapeDrawLists[i]);
+    }
     
     //glut2DSetup();
 
@@ -417,6 +419,13 @@ void myDisplay() {
     glutSwapBuffers();
 }
 
+void updateCollisions() {
+    for(int i = 0; i < shapes.size(); i++) {
+        cloth->updateCollision(shapes[i]);
+    }
+}
+
+
 //****************************************************
 // Step Frame - steps through one Frame
 //          - Performs numTimeSteps Calculations
@@ -429,8 +438,8 @@ void stepFrame() {
             cloth->addExternalForce(gravityForce);
         }
 
-//        cloth->update(STEP);
-        cloth->update(STEP,spherePos,sphereRadius);
+        updateCollisions();
+        cloth->update(STEP);
 
         oldTime += STEP;
     }
@@ -440,6 +449,45 @@ void stepFrame() {
     //cloth->updateNormals();
 }
 
+GLuint drawShape(Shape* s) {
+  
+    GLuint shapeList = glGenLists(1);
+    glNewList(shapeList, GL_COMPILE);
+
+    if(s->getType() == "SPHERE") {
+        glm::vec3 center = s->getCenter();
+
+        glTranslatef(center.x, center.y, center.z);
+        glColor3f(0.1f, 0.3f, 0.1f);
+        
+        glutSolidSphere(s->getRadius()-0.1 ,50 ,50 );
+        glPopMatrix();
+    }
+
+
+    glEndList();
+
+    return shapeList;
+}
+
+
+//****************************************************
+// Make Draw Lists Function 
+//      - Creates the draw list for all the shapes
+//****************************************************
+void makeDrawLists() {
+    for(int i = 0; i < numShapes; i++) {
+        shapeDrawLists[i] = drawShape(shapes[i]);
+    }
+}
+
+//****************************************************
+// LoadShapes Function
+//      - Creates the draw list for all the shapes
+//****************************************************
+void loadShapes(const char* shapeInput) {
+
+}
 
 //****************************************************
 // LoadCloth  Function
@@ -644,7 +692,24 @@ int main(int argc, char *argv[]) {
 
     loadCloth(inputFile);
 
+    Shape* testSphere = new Sphere(glm::vec3(0.0f, -2.0f, 0.0f), 1.0f);
+
+
+    shapes.push_back(testSphere);
+
+    numShapes = 1;
+
+    // Initialize Shapes Array
+
+    // Initialize Shape Draw Lists
+    shapeDrawLists = new GLuint[numShapes]; 
+
+    // Make The Draw Lists for the shapes 
+
     initScene();
+
+
+    makeDrawLists();
 
     // GLUT Loop    
     glutDisplayFunc(myDisplay);

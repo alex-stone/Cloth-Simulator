@@ -240,6 +240,15 @@ void Vertex::setNormal() {
 }
 
 
+void Vertex::updateAfterCollide(glm::vec3 newPos, glm::vec3 newVel) {
+    this->position = newPos;
+    
+    this->velocity.x *= .4;
+    this->velocity.y *= .4;
+    this->velocity.z *= .4;
+
+}
+/*
 void Vertex::updateCollisions(glm::vec3 &center, float r){
 
         glm::vec3 temp = this->position - center;
@@ -254,7 +263,7 @@ void Vertex::updateCollisions(glm::vec3 &center, float r){
             this->velocity.z *= .4;
         }
     }
-
+*/
 
 glm::vec3 Vertex::getDampForce() {
     glm::vec3 returnVec = - velocity * dampConstant;
