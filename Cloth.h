@@ -50,7 +50,7 @@ class Cloth {
     void update(float timestep);
 
     void update(float timestep,glm::vec3 spherePosition, float sphereRadius);
-    void drawPatches(Vertex *v1, Vertex *v2, Vertex *v3);
+
     void updateNormals();
 
 

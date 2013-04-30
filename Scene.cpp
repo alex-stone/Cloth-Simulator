@@ -39,7 +39,7 @@ class Viewport {
 Viewport    viewport;
 Cloth*      cloth;
 const char* inputFile;
-glm::vec3 spherePos(0.0f,-4.0f,-2.0f);
+glm::vec3 spherePos(0.0f,-4.0f,0.0f);
 float sphereRadius = 2.0f;
 
 // OpenGL Drawing Variables
@@ -329,14 +329,43 @@ void myDisplay() {
     glPushMatrix();
     glTranslatef(spherePos.x,spherePos.y,spherePos.z);
     glColor3f(0.1f,0.3f,0.1f);
-    glutSolidSphere(sphereRadius-0.1,50,50);
+    glutSolidSphere(sphereRadius-0.1,30,30);
 
     // Clear the transforms and rotations applied earlier
     glPopMatrix();
 
     glEnable(GL_LIGHTING);
+
     cloth->updateNormals();
-    
+    glBegin(GL_TRIANGLES);
+    glColor3f(1.0f,1.0f,1.0f);
+    for(int x = 0; x< cloth->getWidth() -1; x++){
+        for(int y= 0; y < cloth->getHeight() -1 ; y++){
+           
+       
+        glNormal3f(cloth->getVertex(x+1,y)->getNormalX(), cloth->getVertex(x+1,y)->getNormalY(), cloth->getVertex(x+1,y)->getNormalZ());
+        glVertex3f(cloth->getVertex(x+1,y)->getPos().x,cloth->getVertex(x+1,y)->getPos().y,cloth->getVertex(x+1,y)->getPos().z);
+        
+        glNormal3f(cloth->getVertex(x,y)->getNormalX(), cloth->getVertex(x,y)->getNormalY(), cloth->getVertex(x,y)->getNormalZ());
+        glVertex3f(cloth->getVertex(x,y)->getPos().x,cloth->getVertex(x,y)->getPos().y,cloth->getVertex(x,y)->getPos().z);
+
+        glNormal3f(cloth->getVertex(x,y+1)->getNormalX(), cloth->getVertex(x,y+1)->getNormalY(), cloth->getVertex(x,y+1)->getNormalZ());
+        glVertex3f(cloth->getVertex(x,y+1)->getPos().x,cloth->getVertex(x,y+1)->getPos().y,cloth->getVertex(x,y+1)->getPos().z);
+
+        glNormal3f(cloth->getVertex(x+1,y+1)->getNormalX(), cloth->getVertex(x+1,y+1)->getNormalY(), cloth->getVertex(x+1,y+1)->getNormalZ());
+        glVertex3f(cloth->getVertex(x+1,y+1)->getPos().x,cloth->getVertex(x+1,y+1)->getPos().y,cloth->getVertex(x+1,y+1)->getPos().z);
+        
+        glNormal3f(cloth->getVertex(x+1,y)->getNormalX(), cloth->getVertex(x+1,y)->getNormalY(), cloth->getVertex(x+1,y)->getNormalZ());
+        glVertex3f(cloth->getVertex(x+1,y)->getPos().x,cloth->getVertex(x+1,y)->getPos().y,cloth->getVertex(x+1,y)->getPos().z);
+        
+
+        glNormal3f(cloth->getVertex(x,y+1)->getNormalX(), cloth->getVertex(x,y+1)->getNormalY(), cloth->getVertex(x,y+1)->getNormalZ());
+        glVertex3f(cloth->getVertex(x,y+1)->getPos().x,cloth->getVertex(x,y+1)->getPos().y,cloth->getVertex(x,y+1)->getPos().z);
+        
+        }
+    }
+    glEnd();
+
     
     
    /* glut2DSetup();
