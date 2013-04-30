@@ -26,7 +26,7 @@
 #include "Vertex.h"
 #include "Shape.h"
 #include "Sphere.h"
-
+#include "Plane.h"
 
 #define PI 3.14159265
 
@@ -106,8 +106,8 @@ void initScene() {
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH );
 
     // Initialize Viewport Size
-    viewport.w = 400;
-    viewport.h = 400;
+    viewport.w = 800;
+    viewport.h = 800;
 
     // The Size and Position of the Window
     glutInitWindowSize(viewport.w, viewport.h);
@@ -134,14 +134,23 @@ void initScene() {
     GLfloat Ambient[] = {0.0f, 0.2f, 0.7f};
     GLfloat Diffuse[] = {0.6f, 0.6f, 0.6f};
     GLfloat LightOnePos[] = {-2.0f, 2.0f, 2.0f};
+    GLfloat LightTwoPos[] = {0.0f, 4.0f, 0.0f};
 
     glLightfv(GL_LIGHT1, GL_SPECULAR, Specular);
     glLightfv(GL_LIGHT1, GL_AMBIENT, Ambient);
     glLightfv(GL_LIGHT1, GL_DIFFUSE, Diffuse);
     glLightfv(GL_LIGHT1, GL_POSITION, LightOnePos);
 
+    glLightfv(GL_LIGHT2, GL_SPECULAR, Specular);
+    glLightfv(GL_LIGHT2, GL_AMBIENT, Ambient);
+    glLightfv(GL_LIGHT2, GL_DIFFUSE, Diffuse);
+    glLightfv(GL_LIGHT2, GL_POSITION, LightTwoPos);
+
     glEnable(GL_LIGHT1);
+    glEnable(GL_LIGHT2);
     glEnable(GL_LIGHTING);
+
+    glEnable(GL_COLOR_MATERIAL);
 
     // Initializes Wireframe to be ON 
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -470,6 +479,34 @@ GLuint drawShape(Shape* s) {
         
         glutSolidSphere(s->getRadius()-0.1 ,50 ,50 );
         glPopMatrix();
+    } 
+
+    if(s->getType() == "PLANE") {
+
+        glm::vec3 norm = s->getNormal();
+        glm::vec3 point = s->getUL();
+
+
+        glPushMatrix();
+
+        glBegin(GL_QUADS);
+        glColor3f(0.0f, 1.0f, 0.0f);
+        glNormal3f(norm.x, norm.y, norm.z);
+
+        glVertex3f(point.x, point.y, point.z );
+        
+        point = s->getUR();
+        glVertex3f(point.x, point.y, point.z );
+
+        point = s->getLR();
+        glVertex3f(point.x, point.y, point.z );
+        
+        point = s->getLL();
+        glVertex3f(point.x, point.y, point.z );
+
+        glEnd();
+        glPopMatrix();
+  
     }
 
 
@@ -515,6 +552,28 @@ void loadShapes(const char* shapeInput) {
                 glm::vec3 center(x,y,z);
 
                 s = new Sphere(center, r); 
+            }
+
+            if(string(type) == "plane") {
+                float* pt = new float[12];
+                
+                for(int i = 0; i < 12; i++) {
+                    inpfile >> pt[i];
+                }
+                
+                float x1, y1, z1;
+                float x2, y2, z2;
+                float x3, y3, z3;
+                float x4, y4, z4;
+
+
+                glm::vec3 topLeft(pt[0], pt[1], pt[2]);
+                glm::vec3 topRight(pt[3], pt[4], pt[5]);
+                glm::vec3 lowRight(pt[6], pt[7], pt[8]);
+                glm::vec3 lowLeft(pt[9], pt[10], pt[11]);
+            
+                //s = new Plane(topLeft, topRight, lowRight, lowLeft);    
+                s = new Plane();
             }
             
 
@@ -734,7 +793,8 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    const char* shapeFile = "shapes/2spheres.test";
+    //const char* shapeFile = "shapes/2spheres.test";
+    const char* shapeFile = "shapes/plane.test";
 
     loadCloth(inputFile);
     loadShapes(shapeFile);

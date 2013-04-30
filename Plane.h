@@ -25,12 +25,19 @@ class Plane : public Shape {
 
     glm::vec3 calcNormal();
 
+    glm::vec3 getUL() { return topLeft; };
+    glm::vec3 getUR() { return topRight; };
+    glm::vec3 getLR() { return lowRight; };
+    glm::vec3 getLL() { return lowLeft; };
+
+    bool isPointInPlane(glm::vec3 pointOnPlane);
+
     // Shape - Abstract Functions
     bool collide(Vertex* v); 
-    glm::vec3 getNormal(Vertex* v) {return normal;};
     std::string getType() { return "PLANE"; };
-    float getRadius() { return NULL; };
-    glm::vec3 getCenter() { return NULL; };
+
+    glm::vec3 getNormal() {return normal;};
+    
 };
 
 #endif

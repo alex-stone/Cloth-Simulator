@@ -4,6 +4,7 @@
 #include "glm/glm.hpp"
 
 #include "Plane.h"
+#include "Vertex.h"
 
 //****************************************************
 // Plane Class Definition
@@ -16,7 +17,7 @@ Plane::Plane(){
     normal = calcNormal();
 }
 
-Plane::Plane(glm::vec3 ul, glm::vec3 ur, glm:vec3 lr, glm::vec3 ll) {
+Plane::Plane(glm::vec3 ul, glm::vec3 ur, glm::vec3 lr, glm::vec3 ll) {
     topLeft = ul;
     topRight = ur;
     lowRight = lr;
@@ -39,6 +40,33 @@ glm::vec3 Plane::calcNormal() {
     return glm::cross(v1, v2);
 }
 
+bool Plane::isPointInPlane(glm::vec3 pointOnPlane) {
+    // Take Vector from TopLeft to Top Right:
+    // Take Vector From TopLeft to Low Left:
+    // Take Vector from TopLeft to point:
+    //      Take the dot Products, and see if there greate
+
+    glm::vec3 vecToRight = topRight - topLeft;
+    glm::vec3 vecToLow = lowLeft - topLeft;
+
+    glm::vec3 vecToPoint = pointOnPlane - topLeft;
+
+    float rightDist = glm::dot(vecToRight, vecToPoint);
+    float lowDist = glm::dot(vecToLow, vecToPoint);
+
+    float buffer = 0.09;
+
+    bool rightRange = (rightDist <= glm::length(vecToRight)+buffer) && (rightDist >= - buffer);
+    bool lowRange = (lowDist <= glm::length(vecToLow)+buffer) && (lowDist >= - buffer);
+
+    if(rightRange && lowRange) {
+        return true;
+    } else {
+        return false;
+    }
+
+}
+
 //****************************************************
 // Test if the change in position vector newPos - oldPos, intersects the plane
 // Since velocity = currentPos - oldPos, check if vector (- velocity) going from current Position intersects the plane
@@ -55,32 +83,40 @@ bool Plane::collide(Vertex* v) {
     //      TODO: Perhaps change collision detection to be a part of update.
     //      Thus if a vector collides it doesn't call update as it normally would
 
-    glm::vec3 path = - v->getVel();
+    glm::vec3 path = - v->getVelocity();
       
     // (X - P) dot N < threshold
 
     // X to any point in the plane dot N, is the distance to the palne
 
-    float distToPlane = glm::dot((v->getPos() - topLeft), normal);
+    float distToPlane = - glm::dot((v->getPos() - topLeft), normal);
     // TODO: CHECK if negative values are appropriate
-    
+
+    glm::vec3 pointOnPlane = v->getPos() - (distToPlane * normal);    
 
     if(distToPlane < 0.01) {
-        if(glm::dot(normal, v->getVel()) < 0.0f) {
-            std::cout << "Collision with Plane" << std::endl;
+        if(glm::dot(normal, v->getVelocity()) > 0.0f) {
 
-            glm::vec3 parallel = glm::dot(normal, v->getVel()) * normal;
-            glm::vec3 tangential = v->getVel() - parallel;
+            if(isPointInPlane(pointOnPlane)) {
 
-            // V' = tangential - Kf * parallel
-            float kf = 0.1f;
+    
+                glm::vec3 parallel = glm::dot(normal, v->getVelocity()) * normal;
+                glm::vec3 tangential = v->getVelocity() - parallel;
 
-            glm::vec3 newVel = tangential - kf * parallel;
-            glm::vec3 newPos = v->getPos() - velocity;
+                // V' = tangential - Kf * parallel
+                float kf = 0.0f;
 
-            v->updateAfterCollide(newPos, newVel);
+                glm::vec3 newVel = - v->getVelocity() ;
+
+//            glm::vec3 newVel = tangential - kf * parallel;
+//            glm::vec3 newPos = v->getPos() - v->getVelocity();
+
+                glm::vec3 newPos = v->getPos() - v->getVelocity();
+
+                v->updateAfterCollide(newPos, newVel);
             
-            return true; 
+                return true; 
+            }
         }
 
     }
@@ -90,10 +126,5 @@ bool Plane::collide(Vertex* v) {
 }
 
 
-
-glm::vec3 Sphere::getNormal(Vertex* v) {
-    glm::vec3 returnVec = v->getPos() - center;
-    return glm::normalize(returnVec);
-}
 
 
