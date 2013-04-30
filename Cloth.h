@@ -48,6 +48,7 @@ class Cloth {
 
     // Update Cloth:
     void update(float timestep);
+    void updateNormals();
     //void update(float timestep,glm::vec3 spherePosition, float sphereRadius);
     void updateCollision(Shape* s);
 

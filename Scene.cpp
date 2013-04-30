@@ -131,7 +131,7 @@ void initScene() {
 
     // Set up Lights:
     GLfloat Specular[] = {0.0f, 0.2f, 0.8f};
-    GLfloat Ambient[] = {0.5f, 0.2f, 0.7f};
+    GLfloat Ambient[] = {0.0f, 0.2f, 0.7f};
     GLfloat Diffuse[] = {0.2f, 0.3f, 0.6f};
     GLfloat LightOnePos[] = {-2.0f, 2.0f, 2.0f};
 
@@ -326,9 +326,11 @@ void renderCloth() {
             glColor3f(1.0f, 1.0f, 1.0f);
 
             Vertex* temp = cloth->getVertex(w, h+1 );
+            glNormal3f(temp->getNorm().x, temp->getNorm().y, temp->getNorm().z);
             glVertex3f(temp->getPos().x, temp->getPos().y, temp->getPos().z);
 
             temp = cloth->getVertex(w, h);
+            glNormal3f(temp->getNorm().x, temp->getNorm().y, temp->getNorm().z);
             glVertex3f(temp->getPos().x, temp->getPos().y, temp->getPos().z);
 
         }
@@ -438,11 +440,13 @@ void stepFrame() {
             cloth->addExternalForce(gravityForce);
         }
 
+        //cloth->updateNormals();
         updateCollisions();
         cloth->update(STEP);
 
         oldTime += STEP;
     }
+    cloth->updateNormals();
     timestep++;
 
     // Only update normals when they'll be needed to be drawn. TODO: Change with wind.

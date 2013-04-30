@@ -182,6 +182,22 @@ void Vertex::updateAccel(glm::vec3 externalForces) {
     acceleration = (spring + damp + externalForces) / mass;
 }
 
+//****************************************************
+// Update Acceleration:
+//      - Given External Forces, Spring Forces, and
+//        Dampening Forces, calculate new acceleration
+//****************************************************
+void Vertex::updateNormal(glm::vec3 addNorm) {
+    this->normal += addNorm;
+}
+
+glm::vec3 Vertex::findNormal(Vertex *v2, Vertex *v3){
+    glm::vec3 temp_v1 = v2->getPos() - this->getPos();
+    glm::vec3 temp_v2 = v3->getPos() - this->getPos();
+
+    return glm::cross(temp_v1,temp_v2);
+}
+
 
 //****************************************************
 // GetAccelFromSpring       From a Single Spring 
@@ -231,6 +247,10 @@ glm::vec3 Vertex::getSpringForce() {
     return returnVec;
 }
 
+void Vertex::resetNorm() {
+    normal = glm::vec3(0.0f, 0.0f, 0.0f);
+}
+
 
 // Use the cross product of other triangles to calculate. Sum of all the normals of every Triangle
 void Vertex::setNormal() {
@@ -243,9 +263,9 @@ void Vertex::setNormal() {
 void Vertex::updateAfterCollide(glm::vec3 newPos, glm::vec3 newVel) {
     this->position = newPos;
     
-    this->velocity.x *= .4;
-    this->velocity.y *= .4;
-    this->velocity.z *= .4;
+    this->velocity.x *= .6;
+    this->velocity.y *= .6;
+    this->velocity.z *= .6;
 
 }
 /*
