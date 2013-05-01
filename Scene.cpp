@@ -124,7 +124,7 @@ void initScene() {
     phi = 0.0f;
     xTranslate = 0.0f;
     yTranslate = 0.0f;
-    zTranslate = -10.0f;
+    zTranslate = -5.0f;
 
     // Initialize Drawing Variables:
     wire = false;
@@ -137,10 +137,17 @@ void initScene() {
 
     // Set up Lights:
     GLfloat Specular[] = {0.0f, 0.2f, 0.8f};
-    GLfloat Ambient[] = {0.0f, 0.6f, 0.4f};
+    GLfloat Ambient[] = {0.3f, 0.3f, 0.4f};
     GLfloat Diffuse[] = {0.6f, 0.6f, 0.6f};
-    GLfloat LightOnePos[] = {-2.0f, 2.0f, 2.0f};
+    GLfloat LightOnePos[] = {-2.0f, 6.0f, 2.0f};
     GLfloat LightTwoPos[] = {0.0f, 4.0f, 0.0f};
+
+    GLfloat mat_spec[] = {1.0, 1.0, 1.0, 1.0 };
+    GLfloat mat_shine[] = { 50.0 };
+
+    glMaterialfv(GL_FRONT, GL_SPECULAR, mat_spec);
+    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shine);
+
 
     glLightfv(GL_LIGHT1, GL_SPECULAR, Specular);
     glLightfv(GL_LIGHT1, GL_AMBIENT, Ambient);
@@ -157,7 +164,7 @@ void initScene() {
     glEnable(GL_LIGHTING);
 
    
-    //glEnable(GL_COLOR_MATERIAL);
+    glEnable(GL_COLOR_MATERIAL);
 
     // Initializes Wireframe to be ON 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -372,7 +379,7 @@ void renderCloth() {
         glBegin(GL_TRIANGLE_STRIP);
         for(int w = 0; w < cloth->getWidth(); w++) {
 
-            glColor3f(1.0f, 1.0f, 1.0f);
+            glColor4f(0.65f, 0.64f, 0.65f, 1.0f);
 
             Vertex* temp = cloth->getVertex(w, h+1 );
             glNormal3f(temp->getNorm().x, temp->getNorm().y, temp->getNorm().z);
