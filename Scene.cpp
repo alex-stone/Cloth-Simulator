@@ -125,7 +125,7 @@ void initScene() {
     zTranslate = -10.0f;
 
     // Initialize Drawing Variables:
-    wire = true;
+    wire = false;
     smooth = true;
     light = true;
     running = false;
@@ -159,7 +159,7 @@ void initScene() {
     //glEnable(GL_COLOR_MATERIAL);
 
     // Initializes Wireframe to be ON 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glShadeModel(GL_SMOOTH);
 
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
@@ -294,6 +294,8 @@ void printHUD() {
     
     printText(5, 2*LINE_SIZE, r, g, b, phiOut);
 
+    // Print Frames Per Second
+
     // Print Time:
     int t = timestep;
     std::stringstream timeStream;
@@ -385,17 +387,43 @@ void renderCloth() {
     }
 }
 
-//****************************************************
-// TODO: Render Stretch Springs
-//****************************************************
+
+void updateCollisions() {
+    for(int i = 0; i < shapes.size(); i++) {
+        cloth->updateCollision(shapes[i]);
+    }
+}
+
+
 
 //****************************************************
-// TODO: Render Shear Springs
+// Step Frame - steps through one Frame
+//          - Performs numTimeSteps Calculations
+//          - Graph it
 //****************************************************
+void stepFrame() {
+    for(int i = 0; i < numTimeSteps; i++) {
+        
+        if(gravity) {
+            cloth->addExternalForce(gravityForce);
+        }
 
-//****************************************************
-// TODO: Render Bend Springs
-//****************************************************
+        if(wind) {
+            cloth->addExtForce(extForce);
+        }
+
+        //cloth->updateNormals();
+        updateCollisions();
+        cloth->update(STEP);
+
+        oldTime += STEP;
+    }
+    cloth->updateNormals();
+    timestep++;
+
+    // Only update normals when they'll be needed to be drawn. TODO: Change with wind.
+    //cloth->updateNormals();
+}
 
 //****************************************************
 // MyDisplay 
@@ -443,6 +471,11 @@ void myDisplay() {
     printHUD();
 
 
+    if(running) {
+        stepFrame();
+    }
+
+
     // Renders 2D Objects
     //const char* output = "Theta = ";
     //printHUD(5,5 , 1.0f, 1.0f, 1.0f, output);
@@ -467,42 +500,22 @@ void myDisplay() {
 */
     glFlush();
     glutSwapBuffers();
-}
-
-void updateCollisions() {
-    for(int i = 0; i < shapes.size(); i++) {
-        cloth->updateCollision(shapes[i]);
+    
+    if(running) {
+        glutPostRedisplay();
     }
 }
 
 
-//****************************************************
-// Step Frame - steps through one Frame
-//          - Performs numTimeSteps Calculations
-//          - Graph it
-//****************************************************
-void stepFrame() {
-    for(int i = 0; i < numTimeSteps; i++) {
+
+void runLoop() {
+    while(running) {
+        stepFrame();
+        myDisplay();
+
         
-        if(gravity) {
-            cloth->addExternalForce(gravityForce);
-        }
-
-        if(wind) {
-            cloth->addExtForce(extForce);
-        }
-
-        //cloth->updateNormals();
-        updateCollisions();
-        cloth->update(STEP);
-
-        oldTime += STEP;
     }
-    cloth->updateNormals();
-    timestep++;
 
-    // Only update normals when they'll be needed to be drawn. TODO: Change with wind.
-    //cloth->updateNormals();
 }
 
 GLuint drawShape(Shape* s) {
@@ -710,6 +723,8 @@ void keyPress(unsigned char key, int x, int y) {
             break;
         case 'r':
             running = !running;
+
+            
             // TODO: Pause Time that is being kept track of
             // 
             
