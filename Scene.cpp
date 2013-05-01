@@ -43,6 +43,7 @@ class Viewport {
 Viewport                viewport;
 Cloth*                  cloth;
 const char*             inputFile;
+const char*             shapeFile;
 std::vector<Shape*>     shapes;
 GLuint*                 shapeDrawLists;
 int                     numShapes;
@@ -76,8 +77,8 @@ float timestep = 0;
 float oldTime = 0;
 
 
-int numTimeSteps = 30;
-const float STEP = 0.01f;
+int numTimeSteps = 30;//30;
+const float STEP = 0.008f;
 
 // Position Update Method Variables: Command Lines
 bool euler;
@@ -132,7 +133,7 @@ void initScene() {
     running = false;
     
     gravity = true;
-    wind = true;
+    wind = false;
 
     // Set up Lights:
     GLfloat Specular[] = {0.0f, 0.2f, 0.8f};
@@ -156,7 +157,6 @@ void initScene() {
     glEnable(GL_LIGHTING);
 
    
-
     //glEnable(GL_COLOR_MATERIAL);
 
     // Initializes Wireframe to be ON 
@@ -164,6 +164,7 @@ void initScene() {
     glShadeModel(GL_SMOOTH);
 
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+    
 
     glEnable(GL_DEPTH_TEST);
     glClearDepth(1.0f);
@@ -540,7 +541,7 @@ GLuint drawShape(Shape* s) {
         glPushMatrix();
 
         glBegin(GL_QUADS);
-        glColor3f(0.0f, 1.0f, 0.0f);
+        glColor3f(1.0f, 0.0f, 0.0f);
         glNormal3f(norm.x, norm.y, norm.z);
 
         glVertex3f(point.x, point.y, point.z );
@@ -831,15 +832,16 @@ int main(int argc, char *argv[]) {
     
     // Process Inputs
 
-    if(argc > 3) {
+    if(argc > 4) {
         std::cerr << "Too many arguments included" << std::endl;
         std::exit(1);
     } else {
-        if(argc >= 2) {
+        if(argc >= 3) {
             inputFile = argv[1];
-            
-            if(argc == 3) {
-                if(string(argv[2])== "-v") {
+            shapeFile = argv[2];
+
+            if(argc == 4) {
+                if(string(argv[3])== "-v") {
                     euler = false;
                 } else {
                     std::cerr << "Incorrect Flag Parameter" << std::endl;
@@ -853,34 +855,20 @@ int main(int argc, char *argv[]) {
         } else {
             euler = true;
             inputFile = "test/cloth.test";
+            shapeFile = "shapes/4spheres.test";
         }
     }
 
-    //const char* shapeFile = "shapes/2spheres.test";
-    const char* shapeFile = "shapes/4spheres.test";
-
+    // Loads Cloth & Shapes Info
     loadCloth(inputFile);
     loadShapes(shapeFile);
-    
-   // Shape* testSphere = new Sphere(glm::vec3(0.0f, -2.0f, 0.0f), 1.0f);
-
-
-    //shapes.push_back(testSphere);
-
-   // numShapes = 1;
-
-    // Initialize Shapes Array
-
-    // Initialize Shape Draw Lists
-    shapeDrawLists = new GLuint[numShapes]; 
-
-    // Make The Draw Lists for the shapes 
 
     initScene();
 
-
+    // Initialize Shape Draw Lists
+    shapeDrawLists = new GLuint[numShapes]; 
     makeDrawLists();
-
+    
     // GLUT Loop    
     glutDisplayFunc(myDisplay);
     glutReshapeFunc(myReshape);

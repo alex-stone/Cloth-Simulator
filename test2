@@ -1,0 +1,5 @@
+#!/bin/bash
+echo "Wind Example: Flag 2 Corners pinned"
+echo "Executing: ./Scene test/flag.test shapes/empty.test -v"
+./Scene test/flag.test shapes/empty.test -v
+

@@ -1,0 +1,5 @@
+#!/bin/bash
+echo "Plane Collision: Cloth in Freefall Falls onto Plane"
+echo "Executing: ./Scene test/freefall.test shapes/plane.test -v"
+./Scene test/freefall.test shapes/plane.test -v
+

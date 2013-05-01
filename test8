@@ -1,0 +1,5 @@
+#!/bin/bash
+echo "Wind & Ball Collision Example: Top 2 Corners pinned with Ball Behind"
+echo "Executing: ./Scene test/cloth.test shapes/windBall.test -v"
+./Scene test/cloth.test shapes/windBall.test -v
+
