@@ -122,29 +122,46 @@ void initScene() {
     
     gravity = true;
     force = true;
+    
 
+    
     // Set up Lights:
+    
     GLfloat Specular[] = {0.0f, 0.2f, 0.8f};
     GLfloat Ambient[] = {0.0f, 0.2f, 0.7f};
     GLfloat Diffuse[] = {0.2f, 0.3f, 0.6f};
     GLfloat LightOnePos[] = {-2.0f, 2.0f, 2.0f};
+    GLfloat LightTwoPos[] = {-2.0f, -2.0f, 0.0f};
 
     glLightfv(GL_LIGHT1, GL_SPECULAR, Specular);
     glLightfv(GL_LIGHT1, GL_AMBIENT, Ambient);
     glLightfv(GL_LIGHT1, GL_DIFFUSE, Diffuse);
     glLightfv(GL_LIGHT1, GL_POSITION, LightOnePos);
+    glLightfv(GL_LIGHT2, GL_SPECULAR, Specular);
+    glLightfv(GL_LIGHT2, GL_AMBIENT, Ambient);
+    glLightfv(GL_LIGHT2, GL_DIFFUSE, Diffuse);
+    glLightfv(GL_LIGHT2, GL_POSITION, LightTwoPos);
 
     glEnable(GL_LIGHT1);
+    glEnable(GL_LIGHT2);
     glEnable(GL_LIGHTING);
+    
 
     // Initializes Wireframe to be ON 
+
+
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glShadeModel(GL_FLAT);
+    glShadeModel(GL_SMOOTH);
 
     glEnable(GL_DEPTH_TEST);
+  
+   
     glClearDepth(1.0f);
 
     glDepthFunc(GL_LEQUAL);
+
+    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_FALSE);
+  
     
 }
 
@@ -340,6 +357,7 @@ void myDisplay() {
     glEnable(GL_LIGHTING);
 
     cloth->updateNormals();
+    
     glBegin(GL_TRIANGLES);
     glColor3f(1.0f,1.0f,1.0f);
     for(int x = 0; x< cloth->getWidth() -1; x++){
@@ -369,7 +387,7 @@ void myDisplay() {
     }
     glEnd();
 
-    
+
     
    /* glut2DSetup();
 
@@ -400,6 +418,7 @@ void myDisplay() {
 */
     glFlush();
     glutSwapBuffers();
+    glutPostRedisplay();
 }
 
 //****************************************************
@@ -470,6 +489,14 @@ void keyPress(unsigned char key, int x, int y) {
             }
             // Redo Forces?
             break;
+
+        case 's':
+            smooth = !smooth;
+            if(smooth) {
+                glShadeModel(GL_SMOOTH);
+            } else {
+                glShadeModel(GL_FLAT);
+            }
         case 't':
             if(!running) {
                 stepFrame();
