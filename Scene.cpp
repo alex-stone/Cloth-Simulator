@@ -802,7 +802,7 @@ int main(int argc, char *argv[]) {
     }
 
     //const char* shapeFile = "shapes/2spheres.test";
-    const char* shapeFile = "shapes/plane2.test";
+    const char* shapeFile = "shapes/plane4.test";
 
     loadCloth(inputFile);
     loadShapes(shapeFile);

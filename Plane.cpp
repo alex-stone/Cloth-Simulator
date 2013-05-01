@@ -113,11 +113,13 @@ bool Plane::collide(Vertex* v) {
 
 //                glm::vec3 newVel = - v->getVelocity() ;
 
-            glm::vec3 newVel = tangential - kf * parallel;
+//            glm::vec3 newVel = tangential - kf * parallel;
 //            glm::vec3 newPos = v->getPos() - v->getVelocity();
                 
                 glm::vec3 newPos = v->getPos() - v->getVelocity();
-
+    
+                glm::vec3 testVel = v->getVelocity();
+                glm::vec3 newVel(testVel.x*0.9, testVel.y*0.9, testVel.z*0.9);
 //                glm::vec3 newPos = v->getPos() - v->getVelocity();
 
                 v->updateAfterCollide(newPos, newVel);
