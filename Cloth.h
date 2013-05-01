@@ -52,6 +52,8 @@ class Cloth {
     //void update(float timestep,glm::vec3 spherePosition, float sphereRadius);
     void updateCollision(Shape* s);
 
+    void addExtForce(glm::vec3 force);
+
     void addExternalForce(glm::vec3 externalForce);
 
     void setFixedCorners(bool c1, bool c2, bool c3, bool c4);

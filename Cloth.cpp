@@ -137,6 +137,28 @@ void Cloth::updateNormals(){
 }
 
 
+void Cloth::addExtForce(glm::vec3 force){
+    for(int i = 0; i< this->height -1; i++){
+        for(int z= 0; z < this->width -1 ; z++){
+            glm::vec3 triNormal =glm::normalize(vertexMatrix[z * this->width + (i+1)]->findNormal(vertexMatrix[z * this->width + i], vertexMatrix[(z+1) * this->width + i]));
+            glm::vec3 tempNormal = glm::normalize(vertexMatrix[(z+1) * this->width + (i+1)]->findNormal(vertexMatrix[z * this->width + (i+1)], vertexMatrix[(z+1) * this->width + i]));
+            triNormal *= glm::dot(triNormal, force);
+            tempNormal *= glm::dot(tempNormal, force);
+            vertexMatrix[z * this->width + (i+1)]->updateAccel(triNormal);
+            vertexMatrix[z * this->width + (i)]->updateAccel(triNormal);
+            vertexMatrix[(z+1) * this->width + (i)]->updateAccel(triNormal);
+            vertexMatrix[(z+1) * this->width + (i+1)]->updateAccel(tempNormal);
+            vertexMatrix[(z) * this->width + (i+1)]->updateAccel(tempNormal);
+            vertexMatrix[(z+1) * this->width + (i)]->updateAccel(tempNormal);
+
+            }
+     }
+}
+
+
+
+
+
 
 void Cloth::update(float timestep) {
     // Iterate through vertexMatrix, and update each individual particle
