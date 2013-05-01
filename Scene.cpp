@@ -86,6 +86,9 @@ bool euler;
 bool gravity;
 glm::vec3 gravityForce(0.0f, -1.0f, 0.0f);
 
+//TODO: WIND INFO
+bool wind;
+glm::vec3 extForce(1.0f, -0.7f, 1.0f);
 
 // Debug Variables:
 bool debugFunc = false;
@@ -128,10 +131,11 @@ void initScene() {
     running = false;
     
     gravity = true;
+    wind = true;
 
     // Set up Lights:
     GLfloat Specular[] = {0.0f, 0.2f, 0.8f};
-    GLfloat Ambient[] = {0.0f, 0.2f, 0.7f};
+    GLfloat Ambient[] = {0.0f, 0.6f, 0.4f};
     GLfloat Diffuse[] = {0.6f, 0.6f, 0.6f};
     GLfloat LightOnePos[] = {-2.0f, 2.0f, 2.0f};
     GLfloat LightTwoPos[] = {0.0f, 4.0f, 0.0f};
@@ -150,11 +154,15 @@ void initScene() {
     glEnable(GL_LIGHT2);
     glEnable(GL_LIGHTING);
 
-    glEnable(GL_COLOR_MATERIAL);
+   
+
+    //glEnable(GL_COLOR_MATERIAL);
 
     // Initializes Wireframe to be ON 
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glShadeModel(GL_SMOOTH);
+
+    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 
     glEnable(GL_DEPTH_TEST);
     glClearDepth(1.0f);
@@ -246,6 +254,7 @@ void myReshape(int w, int h) {
 //      - Prints Text @ (x, y) w/ color (r,g,b)
 //****************************************************
 void printText(float x, float y, float r, float g, float b, std::string text) {
+    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     glColor3f(r,g,b);
     glRasterPos2f(x,y);
@@ -293,7 +302,33 @@ void printHUD() {
     
     printText(5, 3*LINE_SIZE, r, g, b, timeOut);
     
+    // Print Gravity:
+    std::string gravBool;
+    if(gravity) {
+        gravBool = "ON";
+    } else {
+        gravBool = "OFF";
+    }
 
+    std::stringstream gravStream;
+    gravStream << "Gravity: " << gravBool;
+    std::string gravOut = gravStream.str(); 
+
+    printText(5, 4*LINE_SIZE, r, g, b, gravOut);
+
+    // Print Wind:
+    std::string windBool;
+    if(wind) {
+        windBool = "ON";
+    } else {
+        windBool = "OFF";
+    }
+
+    std::stringstream windStream;
+    windStream << "Wind: " << windBool;
+    std::string windOut = windStream.str();
+
+    printText(5, 5*LINE_SIZE, r, g, b, windOut);
 }
 
 //****************************************************
@@ -397,14 +432,16 @@ void myDisplay() {
     
     //glut2DSetup();
 
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_LIGHTING);
+
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0, viewport.w, viewport.h, 0, -1, 1);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-
-
     printHUD();
+
 
     // Renders 2D Objects
     //const char* output = "Theta = ";
@@ -449,6 +486,10 @@ void stepFrame() {
         
         if(gravity) {
             cloth->addExternalForce(gravityForce);
+        }
+
+        if(wind) {
+            cloth->addExtForce(extForce);
         }
 
         //cloth->updateNormals();
@@ -691,6 +732,9 @@ void keyPress(unsigned char key, int x, int y) {
             }
             // Redo Forces?
             break;
+        case 'f':
+            wind = !wind;
+            break;
         case 't':
             if(!running) {
                 stepFrame();
@@ -802,7 +846,7 @@ int main(int argc, char *argv[]) {
     }
 
     //const char* shapeFile = "shapes/2spheres.test";
-    const char* shapeFile = "shapes/plane4.test";
+    const char* shapeFile = "shapes/4spheres.test";
 
     loadCloth(inputFile);
     loadShapes(shapeFile);
