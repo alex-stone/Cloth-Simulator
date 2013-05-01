@@ -368,7 +368,6 @@ void renderCloth() {
 
 
     for(int h = 0; h < cloth->getHeight()-1; h++) {
-//        glBegin(GL_QUAD_STRIP);
         glBegin(GL_TRIANGLE_STRIP);
         for(int w = 0; w < cloth->getWidth(); w++) {
 
@@ -395,8 +394,6 @@ void updateCollisions() {
     }
 }
 
-
-
 //****************************************************
 // Step Frame - steps through one Frame
 //          - Performs numTimeSteps Calculations
@@ -413,17 +410,15 @@ void stepFrame() {
             cloth->addExtForce(extForce);
         }
 
-        //cloth->updateNormals();
+        cloth->updateNormals();
         updateCollisions();
         cloth->update(STEP);
 
         oldTime += STEP;
     }
-    cloth->updateNormals();
+    //cloth->updateNormals();
     timestep++;
 
-    // Only update normals when they'll be needed to be drawn. TODO: Change with wind.
-    //cloth->updateNormals();
 }
 
 //****************************************************
