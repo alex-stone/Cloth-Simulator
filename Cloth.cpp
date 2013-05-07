@@ -72,8 +72,8 @@ Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, V
 }
 
 void Cloth::updateNormals(){
-    for(int i = 0; i< this->width -1; i++){
-        for(int z= 0; z < this->height -1 ; z++){
+    for(int i = 0; i< this->height -1; i++){
+        for(int z= 0; z < this->width -1 ; z++){
             glm::vec3 triNormal =vertexMatrix[z * this->width + (i+1)]->findNormal(vertexMatrix[z * this->width + i], vertexMatrix[(z+1) * this->width + i]);
             vertexMatrix[z * this->width + (i+1)]->updateNormal(triNormal);
             vertexMatrix[z * this->width + i]->updateNormal(triNormal);
@@ -89,8 +89,8 @@ void Cloth::updateNormals(){
 }
 
 void Cloth::addDirectionalForce(glm::vec3 force){
-    for(int i = 0; i< this->width -1; i++){
-        for(int z= 0; z < this->height -1 ; z++){
+    for(int i = 0; i< this->height -1; i++){
+        for(int z= 0; z < this->width -1 ; z++){
             glm::vec3 triNormal =glm::normalize(vertexMatrix[z * this->width + (i+1)]->findNormal(vertexMatrix[z * this->width + i], vertexMatrix[(z+1) * this->width + i]));
             glm::vec3 tempNormal = glm::normalize(vertexMatrix[(z+1) * this->width + (i+1)]->findNormal(vertexMatrix[z * this->width + (i+1)], vertexMatrix[(z+1) * this->width + i]));
             triNormal *= glm::dot(triNormal, force);

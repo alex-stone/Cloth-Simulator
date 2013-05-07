@@ -116,7 +116,7 @@ void initScene() {
 
     // Initialize Drawing Variables:
     wire = true;
-    smooth = false;
+    smooth = true;
     light = false;
     running = false;
     
@@ -152,7 +152,7 @@ void initScene() {
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glShadeModel(GL_SMOOTH);
-
+    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);
     glEnable(GL_DEPTH_TEST);
   
    
@@ -160,7 +160,7 @@ void initScene() {
 
     glDepthFunc(GL_LEQUAL);
 
-    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_FALSE);
+   
   
     
 }
