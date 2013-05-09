@@ -996,8 +996,6 @@ int main(int argc, char *argv[]) {
     // Initializes Window & OpenGL Settings
     initScene();
 
-    std::cout << glutGet(GLUT_ELAPSED_TIME) << std::endl;
-
     // Initialize Shape Draw Lists
     shapeDrawLists = new GLuint[numShapes]; 
     makeDrawLists();
