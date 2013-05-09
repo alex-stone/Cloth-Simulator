@@ -121,11 +121,20 @@ void initScene() {
     glutInitWindowPosition(0,0);
     glutCreateWindow("CS184 - Final Project");
   
+    // Enables OpenGL to use Z-Buffer & Depth Testing
     glEnable(GL_DEPTH_TEST);
     glClearDepth(1.0f);
     glDepthFunc(GL_LEQUAL);
     //glEnable(GL_NORMALIZE);
+    
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST); // Provides Nicer Perspective Calculations   
+    
+    glEnable(GL_COLOR_MATERIAL);                // Enables Material Properties to be shown
+    
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);  // Initializes Wireframe to be ON 
+    glShadeModel(GL_SMOOTH);                    // Initializes Smooth Shading
 
+    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);    // Allows for 2-Sided Lighting Calculations
 
     // Initialize Camera Properties:
     theta = 0.0f;
@@ -140,38 +149,9 @@ void initScene() {
     light = true;
     running = false;
     
+    // Initialize External Force Variables
     gravity = true;
     wind = false;
-
-    // Set up Lights:
-
-    
-    
-    //glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
-   
-    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-
-    //glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);
-   
-
-   
-    glEnable(GL_COLOR_MATERIAL);
-
-
-    // Initializes Wireframe to be ON 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glShadeModel(GL_SMOOTH);
-
-
-    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-    
-  
-    glEnable(GL_DEPTH_TEST);
-    glClearDepth(1.0f);
-
-
-    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-    
 
 }
 
