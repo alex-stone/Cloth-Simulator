@@ -60,8 +60,6 @@ const GLdouble FOV_Y = 45.0;
 const GLdouble Z_NEAR = 1.0;
 const GLdouble Z_FAR = 40.0;
 
-    GLfloat LightPosition[]=    { -2.0f, 2.0f,0, 0.0f };
-    GLfloat LightPosition1[]=    { 2.0f, -2.0f,0, 0.0f };
 
 // OpenGL Transformation Variables:
 GLfloat theta;
@@ -81,7 +79,7 @@ float timestep = 0;
 float oldTime = 0;
 
 
-int numTimeSteps = 30;//30;
+int numTimeSteps = 30;
 const float STEP = 0.008f;
 
 // Position Update Method Variables: Command Lines
@@ -151,31 +149,8 @@ void initScene() {
     
     //glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
    
-    //glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-    GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0};
-     GLfloat mat_Ambient[] = { 0.4, 0.6, 0.7, 0.0};
-      GLfloat mat_diffuse[] = { 0.6, 0.6, 0.7, 1.0};
-    GLfloat mat_shininess[] = {40.0 };
-    GLfloat LightAmbient[]=  { 0.4f, 0.6f, 0.8f, 0.4f};
-    GLfloat LightDiffuse[]=  { 0.7f, 0.6f, 0.5f, 0.5f};
-    GLfloat light_specular[] = { 0.4, 0.3, 0.8, 0.6};
-    
-    
-     glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);        // Setup The Ambient Light
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, LightDiffuse);     // Setup The Diffuse Light
-    glLightfv(GL_LIGHT0, GL_POSITION,LightPosition);
-    glLightfv(GL_LIGHT0, GL_SPECULAR,light_specular);
-     glLightfv(GL_LIGHT1, GL_POSITION,LightPosition1);
-    //glEnable(GL_LIGHT1);
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
-    glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
-    glMaterialfv(GL_FRONT, GL_AMBIENT, mat_Ambient);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
-      
-    glEnable(GL_LIGHT0);
-
-    glEnable(GL_LIGHTING);
     //glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);
    
 
@@ -187,9 +162,6 @@ void initScene() {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glShadeModel(GL_SMOOTH);
 
-    // Initializes Wireframe to be OFF
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glShadeModel(GL_SMOOTH);
 
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
     
@@ -200,9 +172,6 @@ void initScene() {
 
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
     
-
-
-
 
 }
 
@@ -233,11 +202,6 @@ void glut3DSetup() {
     glLoadIdentity(); 
 }
 
-   
-
-
-
-
 //****************************************************
 // GLUT 2D Setup
 //     - Sets all the openGL/GLUT Modes and views for
@@ -260,6 +224,53 @@ void glut2DSetup() {
     glLoadIdentity(); 
 //       gluLookAt(cameraDirection[0],cameraDirection[1],cameraDirection[2],theta,phi,0,0,1,0);
 
+}
+
+//****************************************************
+// Light Setup:
+//      - Sets the Light Ambient, Diffuse, Specular
+//      - Sets the position, and is called after
+//          translations, so that it doesn't move 
+//          w.r.t. World Coordinates
+//****************************************************
+void lightSetup() {
+    // Light Specific Values
+    GLfloat light_ambient[]=  { 0.4f, 0.6f, 0.8f, 0.4f};
+    GLfloat light_diffuse[]=  { 0.7f, 0.6f, 0.5f, 0.5f};
+    GLfloat light_specular[] = { 0.4, 0.3, 0.8, 0.6};
+
+    GLfloat light_position1[]=    { -2.0f, 2.0f, 1.0f, 0.0f };
+    GLfloat light_position2[]=    { 2.0f, 5.0f, -3.0f, 0.0f };
+
+    glLightfv(GL_LIGHT1, GL_AMBIENT, light_ambient);        
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, light_diffuse);     
+    glLightfv(GL_LIGHT1, GL_SPECULAR,light_specular);
+    glLightfv(GL_LIGHT1, GL_POSITION, light_position1);
+    glEnable(GL_LIGHT1);
+
+    glLightfv(GL_LIGHT2, GL_AMBIENT, light_ambient);        
+    glLightfv(GL_LIGHT2, GL_DIFFUSE, light_diffuse);     
+    glLightfv(GL_LIGHT2, GL_SPECULAR,light_specular);
+    glLightfv(GL_LIGHT2, GL_POSITION, light_position2);
+    glEnable(GL_LIGHT2);
+
+    glEnable(GL_LIGHTING);
+}
+
+//****************************************************
+// Material Setup:
+//      - Sets the Material Properties
+//****************************************************
+void materialSetup() {
+    GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0};
+    GLfloat mat_Ambient[] = { 0.4, 0.6, 0.7, 0.0};
+    GLfloat mat_diffuse[] = { 0.6, 0.6, 0.7, 1.0};
+    GLfloat mat_shininess[] = {40.0 };
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, mat_shininess);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, mat_Ambient);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_diffuse);
 }
 
 //****************************************************
@@ -443,7 +454,6 @@ void renderCloth() {
         glEnd();
 
     }
-    //glDisable(GL_LIGHTING);
 }
 
 
@@ -498,16 +508,15 @@ void myDisplay() {
     // Zeroe's Out 
     glLoadIdentity();
 
-    // Set Camera
-    glTranslatef(xTranslate, yTranslate, zTranslate);
-
-  
-   
+    // Transformation from World to Camera Coordinates
+    glTranslatef(xTranslate, yTranslate, zTranslate); 
     glRotatef(phi, 1.0f, 0.0f, 0.0f);
     glRotatef(theta, 0.0f, 1.0f, 0.0f);
-    glLightfv(GL_LIGHT0, GL_POSITION,LightPosition);
-   
-     glLightfv(GL_LIGHT1, GL_POSITION,LightPosition1);
+
+    // Set Lights:
+    lightSetup();
+    materialSetup();
+
 
     // Iterate through each vertex in the cloth;
    
