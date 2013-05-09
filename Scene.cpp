@@ -61,14 +61,13 @@ const GLdouble Z_NEAR = 1.0;
 const GLdouble Z_FAR = 40.0;
 
 
-// OpenGL Transformation Variables:
+// OpenGL World To Camera - Transformation Variables:
 GLfloat theta;
 GLfloat phi;
 GLfloat xTranslate;
 GLfloat yTranslate;
 GLfloat zTranslate;
 
-GLfloat cameraDirection[] = {xTranslate,yTranslate,zTranslate};
 // OpenGL Transformation Constants;
 const GLfloat TRANSLATE_INC = 0.05f;
 const GLfloat Z_TRANSLATE_INC = 0.2f;
@@ -101,13 +100,80 @@ bool debugFunc = false;
 const int LINE_SIZE = 15;
 
 
-// Want a key to step through the Animation
+//****************************************************
+// Light & Material Property Functions
+//****************************************************
 
+//****************************************************
+// Light Reposition
+//      - Sets the position, and is called after
+//          translations, so that it doesn't move 
+//          w.r.t. World Coordinates
+//****************************************************
+void lightReposition() {
+    GLfloat light_position0[] = { -2.0f, 2.0f, 1.0f, 1.0f };
+    GLfloat light_position1[] = { 2.0f, 5.0f, -3.0f, 1.0f };
+
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position0);
+    glLightfv(GL_LIGHT1, GL_POSITION, light_position1);
+}
+
+//****************************************************
+// Light Setup:
+//      - Sets the Light Ambient, Diffuse, Specular
+//****************************************************
+void lightSetup() {
+    // Light Specific Values
+//    GLfloat light_ambient[]=  { 0.4f, 0.6f, 0.8f, 1.0f};
+//    GLfloat light_diffuse[]=  { 0.7f, 0.6f, 0.5f, 1.0f};
+    
+    GLfloat light_specular[] = { 0.3, 0.3, 0.3, 1.0f};
+    GLfloat light_ambient[]=  { 0.0f, 0.0f, 0.0f, 1.0f};
+    GLfloat light_diffuse[]=  { 1.0f, 1.0f, 1.0f, 1.0f};
+//    GLfloat light_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f};
+
+    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);        
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);     
+    glLightfv(GL_LIGHT0, GL_SPECULAR,light_specular);
+    
+    glLightfv(GL_LIGHT1, GL_AMBIENT, light_ambient);        
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, light_diffuse);     
+    glLightfv(GL_LIGHT1, GL_SPECULAR,light_specular);
+   
+    lightReposition();
+
+    glEnable(GL_LIGHT0);
+    glEnable(GL_LIGHT1);
+    glEnable(GL_LIGHTING);
+}
+
+//****************************************************
+// Material Setup:
+//      - Sets the Material Properties
+//      - Uses GL_COLOR_MATERIAL, allowing for each
+//          Object drawn to set its own Ambient & 
+//          Diffuse values using glColor
+//****************************************************
+void materialSetup() {
+//    GLfloat mat_specular[] = { 0.5, 0.5, 0.5, 1.0};
+//    GLfloat mat_ambient[] = { 0.4, 0.2, 0.7, 1.0};
+//   GLfloat mat_diffuse[] = { 0.6, 0.6, 0.7, 1.0};
+//    GLfloat mat_shininess[] = { 60.0 };
+
+    GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0};
+    GLfloat mat_shininess[] = { 20.0 };
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, mat_shininess);
+
+    glEnable(GL_COLOR_MATERIAL);                // Enables Material Properties to be shown
+    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+
+}
 
 //****************************************************
 // Glut Functions
 //****************************************************
-
 void initScene() {
 
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH );
@@ -129,7 +195,9 @@ void initScene() {
     
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST); // Provides Nicer Perspective Calculations   
     
-    glEnable(GL_COLOR_MATERIAL);                // Enables Material Properties to be shown
+    // Initializes Light & Material Property Values
+    lightSetup();
+    materialSetup();
     
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);  // Initializes Wireframe to be ON 
     glShadeModel(GL_SMOOTH);                    // Initializes Smooth Shading
@@ -152,7 +220,6 @@ void initScene() {
     // Initialize External Force Variables
     gravity = true;
     wind = false;
-
 }
 
 //****************************************************
@@ -189,68 +256,14 @@ void glut3DSetup() {
 //      - Uses an Orthographic Camera
 //****************************************************
 void glut2DSetup() {
-    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glDisable(GL_LIGHTING);
     glDisable(GL_DEPTH_TEST);
-    glDepthMask(GL_FALSE);
+    glDisable(GL_LIGHTING);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    
-    // Orthographic Camera
-    glOrtho(0.0, viewport.w, viewport.h, 0, -1, 1);
+    glOrtho(0, viewport.w, viewport.h, 0, -1, 1);
     glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity(); 
-//       gluLookAt(cameraDirection[0],cameraDirection[1],cameraDirection[2],theta,phi,0,0,1,0);
-
-}
-
-//****************************************************
-// Light Setup:
-//      - Sets the Light Ambient, Diffuse, Specular
-//      - Sets the position, and is called after
-//          translations, so that it doesn't move 
-//          w.r.t. World Coordinates
-//****************************************************
-void lightSetup() {
-    // Light Specific Values
-    GLfloat light_ambient[]=  { 0.4f, 0.6f, 0.8f, 0.4f};
-    GLfloat light_diffuse[]=  { 0.7f, 0.6f, 0.5f, 0.5f};
-    GLfloat light_specular[] = { 0.4, 0.3, 0.8, 0.6};
-
-    GLfloat light_position1[]=    { -2.0f, 2.0f, 1.0f, 0.0f };
-    GLfloat light_position2[]=    { 2.0f, 5.0f, -3.0f, 0.0f };
-
-    glLightfv(GL_LIGHT1, GL_AMBIENT, light_ambient);        
-    glLightfv(GL_LIGHT1, GL_DIFFUSE, light_diffuse);     
-    glLightfv(GL_LIGHT1, GL_SPECULAR,light_specular);
-    glLightfv(GL_LIGHT1, GL_POSITION, light_position1);
-    glEnable(GL_LIGHT1);
-
-    glLightfv(GL_LIGHT2, GL_AMBIENT, light_ambient);        
-    glLightfv(GL_LIGHT2, GL_DIFFUSE, light_diffuse);     
-    glLightfv(GL_LIGHT2, GL_SPECULAR,light_specular);
-    glLightfv(GL_LIGHT2, GL_POSITION, light_position2);
-    glEnable(GL_LIGHT2);
-
-    glEnable(GL_LIGHTING);
-}
-
-//****************************************************
-// Material Setup:
-//      - Sets the Material Properties
-//****************************************************
-void materialSetup() {
-    GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0};
-    GLfloat mat_Ambient[] = { 0.4, 0.6, 0.7, 0.0};
-    GLfloat mat_diffuse[] = { 0.6, 0.6, 0.7, 1.0};
-    GLfloat mat_shininess[] = {40.0 };
-
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, mat_shininess);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, mat_Ambient);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_diffuse);
+    glLoadIdentity();
 }
 
 //****************************************************
@@ -286,8 +299,7 @@ void myReshape(int w, int h) {
 //      - Prints Text @ (x, y) w/ color (r,g,b)
 //****************************************************
 void printText(float x, float y, float r, float g, float b, std::string text) {
-    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
+  
     glColor3f(r,g,b);
     glRasterPos2f(x,y);
 
@@ -393,34 +405,46 @@ void drawTestLine() {
 //****************************************************
 // RenderCloth
 //      - Render's the Cloth
+//      - Defines Vertices CounterClockwise (CCW)
+//      - Each Loop Draws a Row of the Cloth
+//      Ex: 
+//          1 * * * 3 * * * 5 * * * 7
+//          *     * *     * *     * *
+//          *   *   *   *   *   *   *
+//          * *     * *     * *     *
+//          2 * * * 4 * * * 6 * * * 8
+//
 //****************************************************
 void renderCloth() {
     cloth->updateNormals();
  
     for(int h = 0; h < cloth->getHeight()-1; h++) {
         glBegin(GL_TRIANGLE_STRIP);    
+
         for(int w = 0; w < cloth->getWidth(); w++) {
 
-          
-            glColor4f(0.0f,0.4f,0.6f,0.4f);
+            //glColor4f(0.0f,0.4f,0.6f,0.4f);
+            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
 
             Vertex* temp = cloth->getVertex(w, h);
             glNormal3f(temp->getNorm().x, temp->getNorm().y, temp->getNorm().z);
             glVertex3f(temp->getPos().x, temp->getPos().y, temp->getPos().z);
 
             temp = cloth->getVertex(w, h+1);
-
             glNormal3f(temp->getNorm().x, temp->getNorm().y, temp->getNorm().z);
             glVertex3f(temp->getPos().x, temp->getPos().y, temp->getPos().z);
 
         }
-
         glEnd();
-
     }
 }
 
-
+//****************************************************
+// Update Collisions:
+//      - Iterates through each Shape and tests the
+//      Cloth for collisions
+//****************************************************
 void updateCollisions() {
     for(int i = 0; i < shapes.size(); i++) {
         cloth->updateCollision(shapes[i]);
@@ -466,6 +490,7 @@ void myDisplay() {
         std::cout << "myDisplay Called" << std::endl;
     }
 
+    // Sets OpenGL Variables to Render 3D
     glut3DSetup();
     
     //gluLookAt(theta,phi,0,cameraDirection[0],cameraDirection[1],cameraDirection[2],0,1,0);
@@ -477,14 +502,8 @@ void myDisplay() {
     glRotatef(phi, 1.0f, 0.0f, 0.0f);
     glRotatef(theta, 0.0f, 1.0f, 0.0f);
 
-    // Set Lights:
-    lightSetup();
-    materialSetup();
-
-
-    // Iterate through each vertex in the cloth;
-   
-    //drawTestLine();
+    // Set Light & Material Values
+    lightReposition();
    
     // Renders 3D Objects 
     renderCloth(); 
@@ -494,64 +513,17 @@ void myDisplay() {
         glCallList(shapeDrawLists[i]);
     }
     
-    //glut2DSetup();
-
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_LIGHTING);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, viewport.w, viewport.h, 0, -1, 1);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    
-
+    // Sets OpenGL Variables to Render 2D:
+    glut2DSetup();
     printHUD();
-
-
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_LIGHTING);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, viewport.w, viewport.h, 0, -1, 1);
-    glMatrixMode(GL_MODELVIEW);
-    //gluLookAt(cameraDirection[0],cameraDirection[1],cameraDirection[2],theta,phi,0,0,1,0);
-    glLoadIdentity();
-        
-    printHUD();
-
 
     if(running) {
         stepFrame();
     }
 
-
-    // Renders 2D Objects
-    //const char* output = "Theta = ";
-    //printHUD(5,5 , 1.0f, 1.0f, 1.0f, output);
-    // Setup For 2D:
-
-/*
-    glDisable(GL_DEPTH_TEST);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity;
-
-    glOrtho(0, viewport.w, 0, viewport.h, -1, 1);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-    const char* ThetaOutput = "Theta = ";
-    printHUD(-2,-2 , 1.0f, 1.0f, 1.0f, ThetaOutput);
-*/
     glFlush();
     glutSwapBuffers();
-    
+        
     if(running) {
         glutPostRedisplay();
     }
@@ -578,7 +550,7 @@ GLuint drawShape(Shape* s) {
 
         glPushMatrix();
         glTranslatef(center.x, center.y, center.z);
-        glColor3f(0.1f, 0.3f, 0.1f);
+        glColor3f(0.3f, 0.3f, 0.6f);
         
         glutSolidSphere(s->getRadius()-0.1 ,50 ,50 );
         glPopMatrix();
@@ -716,7 +688,6 @@ void loadCloth(const char* input) {
             inpfile >> z;
 
             corners[i] = new Vertex(x,y,z);
-
         }
 
         std::string temp;
@@ -729,7 +700,6 @@ void loadCloth(const char* input) {
         c3 = (temp == "true");
         inpfile >> temp;
         c4 = (temp == "true");
-
     }
     
     inpfile.close();
@@ -749,7 +719,6 @@ void loadCloth(const char* input) {
 void processInputs(int argc, char *argv[]) {
   
     // Help Flag
-
     if(argc == 2 && string(argv[1]) == "-help" || string(argv[1]) == "--help") {
         std::cout << std::endl;
         std::cout << "USAGE: ./Scene <cloth_file> <shape_file> [OPTIONAL]" << std::endl;
@@ -777,10 +746,7 @@ void processInputs(int argc, char *argv[]) {
             } else {
                 euler = true;
             }
-
-
         } else {
-
             euler = true;
             inputFile = "test/cloth.test";
             shapeFile = "shapes/4spheres.test";
