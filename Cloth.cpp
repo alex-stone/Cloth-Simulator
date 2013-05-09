@@ -68,55 +68,17 @@ Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, V
     this->connectSprings();
 }
 
+
+//****************************************************
+// Update Collision:
+//      - Checks if Any of the vertices collide with
+//          Shape s, and if so adjust properly
+//****************************************************
 void Cloth::updateCollision(Shape* s) {
     for(int i = 0; i < height*width; i++) {
         s->collide(vertexMatrix[i]);
     }
 }
-/*
-
-// Iterate through each Square and for each 2 triangles, calculate normals
-void Cloth::updateNormals() {
-
-    for(int i = 0; i < height*width; i++) {
-        vertexMatrix[i]->resetNorm();
-    }
-
-    for(int i = 0; i < this->width - 1; i++) {
-        for(int j = 0; j < this->height - 1; j++) {
-
-            // V1 cross V2
-            Vertex* a = this->getVertex(i+1, j);
-            Vertex* b = this->getVertex(i, j);
-            Vertex* c = this->getVertex(i, j+1);
-
-            glm::vec3 vec1 = b->getPos() - a->getPos();
-            glm::vec3 vec2 = c->getPos() - a->getPos();
-
-            glm::vec3 triNormal = glm::cross(vec1, vec2);
-
-            a->updateNormal(triNormal);
-            b->updateNormal(triNormal);
-            c->updateNormal(triNormal);
-
-            a = this->getVertex(i+1, j+1);
-            b = this->getVertex(i+1, j);
-            c = this->getVertex(i, j+1);
-
-            vec1 = b->getPos() - a->getPos();
-            vec2 = c->getPos() - a->getPos();
-
-            triNormal = glm::cross(vec1, vec2);
-
-            a->updateNormal(triNormal);
-            b->updateNormal(triNormal);
-            c->updateNormal(triNormal);
-
-
-        }
-    }
-
-}*/
 
 //****************************************************
 // Update Normals:
@@ -127,6 +89,34 @@ void Cloth::updateNormals() {
 //          a weighted average of all of the its
 //          surrounding triangles
 //****************************************************
+
+
+void Cloth::updateNormals() {
+    for(int h = 0; h < this->height - 1; h++) {
+        for(int w = 0; w < this->width - 1; w++) {
+            Vertex* v1 = getVertex(h,w);
+            Vertex* v2 = getVertex(h+1, w);
+            Vertex* v3 = getVertex(h, w+1);
+            Vertex* v4 = getVertex(h+1, w+1);
+
+            glm::vec3 triNormal1 = glm::normalize(v2->findNormal(v1,v3));
+
+            v1->updateNormal(triNormal1);
+            v2->updateNormal(triNormal1);
+            v3->updateNormal(triNormal1);
+
+            glm::vec3 triNormal2 = glm::normalize(v4->findNormal(v2,v3));
+            
+            v2->updateNormal(triNormal2);
+            v3->updateNormal(triNormal2);
+            v4->updateNormal(triNormal2);
+        }
+    }
+}
+
+
+/*
+
 void Cloth::updateNormals(){
 
     for(int i = 0; i< this->height -1; i++){
@@ -144,7 +134,7 @@ void Cloth::updateNormals(){
     }
 
     
-}
+}*/
 
 
 //****************************************************
@@ -182,6 +172,7 @@ void Cloth::addTriangleForce(glm::vec3 force){
     }
 }
 
+/*
 
 void Cloth::addExtForce(glm::vec3 force){
     for(int i = 0; i< this->height -1; i++){
@@ -201,7 +192,7 @@ void Cloth::addExtForce(glm::vec3 force){
      }
 }
 
-
+*/
 
 
 
@@ -228,7 +219,12 @@ void Cloth::update(float timestep) {
 }
 */
 
-void Cloth::addExternalForce(glm::vec3 externalForce) {
+//****************************************************
+// Add Constant Force:
+//      - Adds a constant force to each of the cloth's
+//          vertices. I.E. Gravity
+//****************************************************
+void Cloth::addConstantForce(glm::vec3 externalForce) {
     
     for(int i = 0; i < height*width; i++) {
         vertexMatrix[i]->updateAccel(externalForce);

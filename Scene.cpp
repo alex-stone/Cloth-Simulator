@@ -546,7 +546,7 @@ void preUpdateCalculation() {
     cloth->updateNormals();
 
     if(gravity) {
-        cloth->addExternalForce(gravityForce);
+        cloth->addConstantForce(gravityForce);
     }
 
     if(wind) {
