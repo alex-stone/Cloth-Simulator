@@ -74,9 +74,17 @@ const GLfloat Z_TRANSLATE_INC = 0.2f;
 const GLfloat ROTATE_INC = 3.0f;
 
 // Animation Variables:
-float timestep = 0;
-float oldTime = 0;
+float framesPerSecond = 30.0f;
+float frameDuration; // in Milliseconds
+float currentFPS = 0.0f;
+int frameNum = 0;
 
+// If true, use constant STEP value. If false use constant FPS value
+bool constantStep;  
+
+// FPS Calculation Variables
+int oldFrameNum = 0;
+float lastFPStime = 0.0f;
 
 int numTimeSteps = 30;
 const float STEP = 0.008f;
@@ -130,7 +138,6 @@ void lightSetup() {
     GLfloat light_specular[] = { 0.3, 0.3, 0.3, 1.0f};
     GLfloat light_ambient[]=  { 0.0f, 0.0f, 0.0f, 1.0f};
     GLfloat light_diffuse[]=  { 1.0f, 1.0f, 1.0f, 1.0f};
-//    GLfloat light_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f};
 
     glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);        
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);     
@@ -156,8 +163,6 @@ void lightSetup() {
 //****************************************************
 void materialSetup() {
 //    GLfloat mat_specular[] = { 0.5, 0.5, 0.5, 1.0};
-//    GLfloat mat_ambient[] = { 0.4, 0.2, 0.7, 1.0};
-//   GLfloat mat_diffuse[] = { 0.6, 0.6, 0.7, 1.0};
 //    GLfloat mat_shininess[] = { 60.0 };
 
     GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0};
@@ -217,6 +222,10 @@ void initScene() {
     light = true;
     running = false;
     
+    // Initialize Animation Variables:
+    frameDuration = 1000.0f / framesPerSecond;  
+    constantStep = false;
+
     // Initialize External Force Variables
     gravity = true;
     wind = false;
@@ -338,15 +347,12 @@ void printHUD() {
     
     printText(5, 2*LINE_SIZE, r, g, b, phiOut);
 
-    // Print Frames Per Second
-
-    // Print Time:
-    int t = timestep;
-    std::stringstream timeStream;
-    timeStream << "Time Step: " << t;
-    std::string timeOut = timeStream.str();
+    // Print Frame Number
+    std::stringstream frameStream;
+    frameStream << "Frame #: " << frameNum;
+    std::string frameOut = frameStream.str();
     
-    printText(5, 3*LINE_SIZE, r, g, b, timeOut);
+    printText(5, 3*LINE_SIZE, r, g, b, frameOut);
     
     // Print Gravity:
     std::string gravBool;
@@ -375,6 +381,15 @@ void printHUD() {
     std::string windOut = windStream.str();
 
     printText(5, 5*LINE_SIZE, r, g, b, windOut);
+
+
+    // Print Current Frames Per Second:
+    std::stringstream fpsStream;
+    fpsStream << "FPS: " << currentFPS;
+    std::string fpsOut = fpsStream.str();
+
+    printText(5, 6*LINE_SIZE, r, g, b, fpsOut);
+    
 }
 
 //****************************************************
@@ -452,6 +467,76 @@ void updateCollisions() {
 }
 
 //****************************************************
+// Pre Update Calculation:
+//      - Performs all the updates that occur before
+//        doing the time sensitive cloth->update
+//****************************************************
+void preUpdateCalculation() {
+
+    // Note: Needs to be done before wind
+    cloth->updateNormals();
+
+    if(gravity) {
+        cloth->addExternalForce(gravityForce);
+    }
+
+    if(wind) {
+        cloth->addExtForce(extForce);
+    }
+
+    updateCollisions();
+}
+
+
+//****************************************************
+// Process Calculation
+//      - Performs a single Cloth Update, for the time
+//          period (lastUpdateTime - currentTime) 
+//****************************************************
+float processCalculation(float lastUpdateTime) {
+    
+    preUpdateCalculation();
+
+    float currentTime = glutGet(GLUT_ELAPSED_TIME);
+
+    float timeChange = (currentTime - lastUpdateTime + 0.0f)/1000.0f;
+
+    cloth->update(timeChange);
+
+    return currentTime;
+
+}
+
+//****************************************************
+// Process Frame:
+//      - Handles a single drawn Frame, performing
+//          cloth updates, until the frameDuration is
+//          met.
+//      - Setting lastUpdateTime to the returned value
+//          ensures that the change in time passed to
+//          cloth->update is the time difference from
+//          the start of one update to the start of
+//          the next.
+//****************************************************
+void processFrame() {
+    float frameStartTime = glutGet(GLUT_ELAPSED_TIME);
+    float lastUpdateTime = glutGet(GLUT_ELAPSED_TIME);
+
+    while((lastUpdateTime - frameStartTime) < frameDuration) {
+
+        lastUpdateTime = processCalculation(lastUpdateTime);
+
+        // Set lastTimeUpdated to be right after we updated the Cloth
+        //lastUpdateTime = glutGet(GLUT_ELAPSED_TIME);
+    }
+
+    frameNum++;
+
+    // Display the Frame
+    glutPostRedisplay();
+}
+
+//****************************************************
 // Step Frame - steps through one Frame
 //          - Performs numTimeSteps Calculations
 //          - Graph it
@@ -459,27 +544,39 @@ void updateCollisions() {
 void stepFrame() {
     for(int i = 0; i < numTimeSteps; i++) {
         
-        if(gravity) {
-            cloth->addExternalForce(gravityForce);
-        }
+        preUpdateCalculation();
 
-        if(wind) {
-            cloth->addExtForce(extForce);
-        }
-
-        cloth->updateNormals();
-        updateCollisions();
         cloth->update(STEP);
 
-        //updateCollisions();
-
-
-        oldTime += STEP;
     }
-    //cloth->updateNormals();
-    timestep++;
 
+    // The Actual Printed Frame
+    frameNum++;
 }
+
+//****************************************************
+// Calc FPS:
+//      - Called every time a frame is drawn
+//      - After 1 seconds will calculate the number of
+//          frames drawn in that time
+//      - Updates the currentFPS variables which is
+//          then added to the HUD
+//****************************************************
+void calcFPS () {
+
+    float currentFPStime = glutGet(GLUT_ELAPSED_TIME);
+    int timeChange = currentFPStime - lastFPStime;
+
+    // If a second has elapsed
+    if(timeChange > 1000) {
+        currentFPS = (frameNum - oldFrameNum)/ (timeChange / 1000.0f);
+
+        lastFPStime = currentFPStime;
+
+        oldFrameNum = frameNum;
+    }
+}
+
 
 //****************************************************
 // MyDisplay 
@@ -517,29 +614,28 @@ void myDisplay() {
     glut2DSetup();
     printHUD();
 
-    if(running) {
-        stepFrame();
-    }
 
     glFlush();
     glutSwapBuffers();
         
     if(running) {
-        glutPostRedisplay();
-    }
 
-}
-
-
-void runLoop() {
-    while(running) {
-        stepFrame();
-        myDisplay();
-
-       
+        if(constantStep) {
+            stepFrame();
+            calcFPS();
+            glutPostRedisplay();
+        } else {
+            processFrame();
+            calcFPS();
+        }
     }
 }
 
+//****************************************************
+// Draw Shape
+//      - Returns the draw list for a given shape
+//      - Can handle different shapes: Spheres, Planes
+//****************************************************
 GLuint drawShape(Shape* s) {
   
     GLuint shapeList = glGenLists(1);
@@ -772,19 +868,18 @@ void keyPress(unsigned char key, int x, int y) {
     
     switch(key) {
         case 'y':
-            // Reset:
+            // Reset's the Cloth to initial position
             cloth = NULL;
             loadCloth(inputFile);
-            oldTime = 0;
-            timestep = 0;
+            frameNum = 0;
 
             break;
         case 'r':
             running = !running;
 
-            
-            // TODO: Pause Time that is being kept track of
-            // 
+            break;
+        case 'c':
+            constantStep = !constantStep;
             
             break;
         case 's':
@@ -900,6 +995,8 @@ int main(int argc, char *argv[]) {
 
     // Initializes Window & OpenGL Settings
     initScene();
+
+    std::cout << glutGet(GLUT_ELAPSED_TIME) << std::endl;
 
     // Initialize Shape Draw Lists
     shapeDrawLists = new GLuint[numShapes]; 
