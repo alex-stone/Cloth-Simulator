@@ -109,7 +109,7 @@ const int LINE_SIZE = 15;
 
 // Texture Variables:
 GLuint texture0;
-
+GLuint texture1;
 
 //****************************************************
 // Light & Material Property Functions
@@ -180,22 +180,18 @@ void materialSetup() {
 }
 
 void textureSetup() {
-    glGenTextures(1, &texture0);
-
-    glBindTexture(GL_TEXTURE_2D, texture0);
 
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // MAG or MAX
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 }
 
-void loadTexture() {
+void loadTexture(const char* filename) {
     int width, height;
     unsigned char* data;
     FILE* file;
@@ -205,7 +201,7 @@ void loadTexture() {
 
     data = (unsigned char*) malloc(width*height*4);
 
-    file = fopen("textures/texture0.raw", "rb");
+    file = fopen(filename, "rb");
 
     if( file == NULL) {
         return;
@@ -214,12 +210,24 @@ void loadTexture() {
     fread(data, width * height * 4, 1, file);
     fclose(file);
 
-
     textureSetup();
 
     gluBuild2DMipmaps(GL_TEXTURE_2D, 3, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
 
     free(data);
+
+}
+
+void initTextures() {
+    glGenTextures(1, &texture0);
+    glBindTexture(GL_TEXTURE_2D, texture0);
+
+    loadTexture("textures/texture0.raw");
+
+    glGenTextures(1, &texture1);
+    glBindTexture(GL_TEXTURE_2D, texture1);
+
+    loadTexture("textures/texture1.raw");
 
 }
 
@@ -251,7 +259,10 @@ void initScene() {
     // Initializes Light & Material Property Values
     lightSetup();
     materialSetup();
-    loadTexture();
+    initTextures();
+
+    // Initialize which Texture to Use
+    glBindTexture(GL_TEXTURE_2D, texture0);
     
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);  // Initializes Wireframe to be ON 
     glShadeModel(GL_SMOOTH);                    // Initializes Smooth Shading
@@ -993,6 +1004,14 @@ void keyPress(unsigned char key, int x, int y) {
             break;
         case ' ':
             std::exit(1);
+            break;
+        case '1':
+            glBindTexture(GL_TEXTURE_2D, texture0);
+
+            break;
+        case '2':
+            glBindTexture(GL_TEXTURE_2D, texture1);
+
             break;
 
     }
