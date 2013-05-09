@@ -107,6 +107,9 @@ bool debugFunc = false;
 // HUD Variables;
 const int LINE_SIZE = 15;
 
+// Texture Variables:
+GLuint texture0;
+
 
 //****************************************************
 // Light & Material Property Functions
@@ -176,6 +179,51 @@ void materialSetup() {
 
 }
 
+void textureSetup() {
+    glGenTextures(1, &texture0);
+
+    glBindTexture(GL_TEXTURE_2D, texture0);
+
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // MAG or MAX
+
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+}
+
+void loadTexture() {
+    int width, height;
+    unsigned char* data;
+    FILE* file;
+
+    width = 256;
+    height = 256;
+
+    data = (unsigned char*) malloc(width*height*4);
+
+    file = fopen("textures/texture0.raw", "rb");
+
+    if( file == NULL) {
+        return;
+    }
+
+    fread(data, width * height * 4, 1, file);
+    fclose(file);
+
+
+    textureSetup();
+
+    gluBuild2DMipmaps(GL_TEXTURE_2D, 3, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
+
+    free(data);
+
+}
+
+
 //****************************************************
 // Glut Functions
 //****************************************************
@@ -203,6 +251,7 @@ void initScene() {
     // Initializes Light & Material Property Values
     lightSetup();
     materialSetup();
+    loadTexture();
     
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);  // Initializes Wireframe to be ON 
     glShadeModel(GL_SMOOTH);                    // Initializes Smooth Shading
@@ -441,13 +490,22 @@ void renderCloth() {
             //glColor4f(0.0f,0.4f,0.6f,0.4f);
             glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-
             Vertex* temp = cloth->getVertex(w, h);
             glNormal3f(temp->getNorm().x, temp->getNorm().y, temp->getNorm().z);
+
+            // Texture Coordinate Values
+            float s = (float) w / (float) (cloth->getWidth()-1);
+            float t = 1.0f - (float) h / (float) (cloth->getHeight()-1);
+
+            glTexCoord2d(s,t);
             glVertex3f(temp->getPos().x, temp->getPos().y, temp->getPos().z);
 
             temp = cloth->getVertex(w, h+1);
             glNormal3f(temp->getNorm().x, temp->getNorm().y, temp->getNorm().z);
+
+            t = 1.0f - (float) (h+1) / (float) (cloth->getHeight()-1);
+
+            glTexCoord2d(s,t);
             glVertex3f(temp->getPos().x, temp->getPos().y, temp->getPos().z);
 
         }
@@ -603,7 +661,10 @@ void myDisplay() {
     lightReposition();
    
     // Renders 3D Objects 
+    glEnable(GL_TEXTURE_2D);
     renderCloth(); 
+
+    glDisable(GL_TEXTURE_2D);
 
     // Draw Shapes:
     for(int i = 0; i < numShapes; i++) {
