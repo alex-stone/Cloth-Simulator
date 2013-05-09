@@ -194,10 +194,6 @@ void Cloth::addExtForce(glm::vec3 force){
 
 */
 
-
-
-
-
 void Cloth::update(float timestep) {
     // Iterate through vertexMatrix, and update each individual particle
 
