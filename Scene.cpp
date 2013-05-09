@@ -550,7 +550,8 @@ void preUpdateCalculation() {
     }
 
     if(wind) {
-        cloth->addExtForce(extForce);
+        //cloth->addExtForce(extForce);
+        cloth->addTriangleForce(extForce);
     }
 
     updateCollisions();

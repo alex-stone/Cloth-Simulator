@@ -66,7 +66,6 @@ Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, V
     }
 
     this->connectSprings();
-
 }
 
 void Cloth::updateCollision(Shape* s) {
@@ -119,6 +118,15 @@ void Cloth::updateNormals() {
 
 }*/
 
+//****************************************************
+// Update Normals:
+//      - Iterates through each square of the grid of
+//          Vertices and for each of the 2 triangles
+//          in the square computes the normal.
+//      - Adds the normal to the Vertex, so normal is
+//          a weighted average of all of the its
+//          surrounding triangles
+//****************************************************
 void Cloth::updateNormals(){
 
     for(int i = 0; i< this->height -1; i++){
@@ -137,6 +145,43 @@ void Cloth::updateNormals(){
 
     
 }
+
+
+//****************************************************
+// Add Triangle Force:
+//      - Add's a Force that acts on each triangle
+//          as opposed to each vertex
+//      - Iterates through each triangle and calculates
+//          the force, and adds that to each vertex
+//          of the triangle
+//      - TODO: Weight Force (1/3) ?
+//****************************************************
+void Cloth::addTriangleForce(glm::vec3 force){
+    for(int h = 0; h < this->height - 1; h++) {
+        for(int w = 0; w < this->width - 1; w++) {
+            Vertex* v1 = getVertex(h,w);
+            Vertex* v2 = getVertex(h+1, w);
+            Vertex* v3 = getVertex(h, w+1);
+            Vertex* v4 = getVertex(h+1, w+1);
+
+            glm::vec3 triNormal1 = glm::normalize(v2->findNormal(v1,v3));
+            glm::vec3 triForce1 = triNormal1 * glm::dot(triNormal1, force);
+
+            v1->updateAccel(triForce1);
+            v2->updateAccel(triForce1);
+            v3->updateAccel(triForce1);
+
+            glm::vec3 triNormal2 = glm::normalize(v4->findNormal(v2,v3));
+            glm::vec3 triForce2 = triNormal2 * glm::dot(triNormal2, force);
+
+            v2->updateAccel(triForce2);
+            v3->updateAccel(triForce2);
+            v4->updateAccel(triForce2);
+
+        }
+    }
+}
+
 
 void Cloth::addExtForce(glm::vec3 force){
     for(int i = 0; i< this->height -1; i++){
