@@ -60,6 +60,9 @@ const GLdouble FOV_Y = 45.0;
 const GLdouble Z_NEAR = 1.0;
 const GLdouble Z_FAR = 40.0;
 
+    GLfloat LightPosition[]=    { -2.0f, 2.0f,0, 0.0f };
+    GLfloat LightPosition1[]=    { 2.0f, -2.0f,0, 0.0f };
+
 // OpenGL Transformation Variables:
 GLfloat theta;
 GLfloat phi;
@@ -67,6 +70,7 @@ GLfloat xTranslate;
 GLfloat yTranslate;
 GLfloat zTranslate;
 
+GLfloat cameraDirection[] = {xTranslate,yTranslate,zTranslate};
 // OpenGL Transformation Constants;
 const GLfloat TRANSLATE_INC = 0.05f;
 const GLfloat Z_TRANSLATE_INC = 0.2f;
@@ -118,6 +122,12 @@ void initScene() {
     glutInitWindowSize(viewport.w, viewport.h);
     glutInitWindowPosition(0,0);
     glutCreateWindow("CS184 - Final Project");
+  
+    glEnable(GL_DEPTH_TEST);
+    glClearDepth(1.0f);
+    glDepthFunc(GL_LEQUAL);
+    //glEnable(GL_NORMALIZE);
+
 
     // Initialize Camera Properties:
     theta = 0.0f;
@@ -136,6 +146,7 @@ void initScene() {
     wind = false;
 
     // Set up Lights:
+<<<<<<< HEAD
     GLfloat Specular[] = {0.0f, 0.2f, 0.8f};
     GLfloat Ambient[] = {0.3f, 0.3f, 0.4f};
     GLfloat Diffuse[] = {0.6f, 0.6f, 0.6f};
@@ -161,20 +172,64 @@ void initScene() {
 
     glEnable(GL_LIGHT1);
     glEnable(GL_LIGHT2);
+=======
+    //glEnable(GL_CULL_FACE);
+    
+    //glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
+   
+    //glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+    GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0};
+    GLfloat mat_shininess[] = {40.0 };
+    GLfloat LightAmbient[]=  { 0.4f, 0.6f, 0.8f, 0.4f};
+    GLfloat LightDiffuse[]=  { 0.7f, 0.6f, 0.5f, 0.5f};
+    GLfloat light_specular[] = { 0.4, 0.3, 0.8, 0.6};
+    
+     glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);        // Setup The Ambient Light
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, LightDiffuse);     // Setup The Diffuse Light
+    glLightfv(GL_LIGHT0, GL_POSITION,LightPosition);
+    glLightfv(GL_LIGHT0, GL_SPECULAR,light_specular);
+     glLightfv(GL_LIGHT1, GL_POSITION,LightPosition1);
+    //glEnable(GL_LIGHT1);
+
+    glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+      
+    glEnable(GL_LIGHT0);
+>>>>>>> Adding-math
     glEnable(GL_LIGHTING);
+    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);
+   
 
    
     glEnable(GL_COLOR_MATERIAL);
 
+<<<<<<< HEAD
     // Initializes Wireframe to be ON 
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glShadeModel(GL_SMOOTH);
+=======
+    // Initializes Wireframe to be OFF
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glShadeModel(GL_SMOOTH);
 
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
     
+  
+    glEnable(GL_DEPTH_TEST);
+    glClearDepth(1.0f);
+>>>>>>> Adding-math
+
+    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+    
+<<<<<<< HEAD
+=======
+
+}
+>>>>>>> Adding-math
 
     glEnable(GL_DEPTH_TEST);
     glClearDepth(1.0f);
+<<<<<<< HEAD
 
     glDepthFunc(GL_LEQUAL);
     
@@ -206,6 +261,26 @@ void glut3DSetup() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity(); 
 }
+=======
+    
+    if(light) {
+        glEnable(GL_LIGHTING);
+    } else {
+        glDisable(GL_LIGHTING);
+    }
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    
+    // Perspective Camera
+    gluPerspective(FOV_Y, aspectRatio, Z_NEAR, Z_FAR);
+    glMatrixMode(GL_MODELVIEW);
+     //gluLookAt(cameraDirection[0],cameraDirection[1],cameraDirection[2],theta,phi,0,0,1,0);
+
+    glLoadIdentity(); 
+}   
+
+>>>>>>> Adding-math
 
 
 //****************************************************
@@ -228,6 +303,7 @@ void glut2DSetup() {
     glOrtho(0.0, viewport.w, viewport.h, 0, -1, 1);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity(); 
+//       gluLookAt(cameraDirection[0],cameraDirection[1],cameraDirection[2],theta,phi,0,0,1,0);
 
 }
 
@@ -253,8 +329,9 @@ void myReshape(int w, int h) {
     gluPerspective(FOV_Y, aspectRatio, Z_NEAR, Z_FAR);
 
     glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
 
+    glLoadIdentity();
+  
 }
 
 
@@ -373,6 +450,7 @@ void drawTestLine() {
 //****************************************************
 void renderCloth() {
     cloth->updateNormals();
+<<<<<<< HEAD
 
 
     for(int h = 0; h < cloth->getHeight()-1; h++) {
@@ -386,13 +464,44 @@ void renderCloth() {
             glVertex3f(temp->getPos().x, temp->getPos().y, temp->getPos().z);
 
             temp = cloth->getVertex(w, h);
+=======
+    /*glEnable(GL_LIGHTING);
+    GLfloat Specular[] = {0.0f,0.2f,0.8f};
+    GLfloat Ambient[]= { 0.0f, 0.2f, 0.7f};
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, Ambient);    //set material
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, Specular);
+   
+    */
+ 
+    for(int h = 0; h < cloth->getHeight()-1; h++) {
+        glBegin(GL_TRIANGLE_STRIP);    
+        for(int w = 0; w < cloth->getWidth(); w++) {
+
+            //if((w+h)%2 ==0 ){
+          
+                glColor4f(0.0f,0.4f,0.6f,0.4f);
+           /*}
+           else{
+            glColor3f(0.0f,0.0f,0.0f);
+           }*/
+           
+           
+
+            Vertex* temp = cloth->getVertex(w, h);
+            glNormal3f(temp->getNorm().x, temp->getNorm().y, temp->getNorm().z);
+            glVertex3f(temp->getPos().x, temp->getPos().y, temp->getPos().z);
+
+            temp = cloth->getVertex(w, h+1);
+>>>>>>> Adding-math
             glNormal3f(temp->getNorm().x, temp->getNorm().y, temp->getNorm().z);
             glVertex3f(temp->getPos().x, temp->getPos().y, temp->getPos().z);
 
         }
 
         glEnd();
+
     }
+    //glDisable(GL_LIGHTING);
 }
 
 
@@ -421,6 +530,10 @@ void stepFrame() {
         cloth->updateNormals();
         updateCollisions();
         cloth->update(STEP);
+<<<<<<< HEAD
+=======
+        //updateCollisions();
+>>>>>>> Adding-math
 
         oldTime += STEP;
     }
@@ -440,12 +553,14 @@ void myDisplay() {
 
     glut3DSetup();
     
-
+    //gluLookAt(cameraDirection[0],cameraDirection[1],cameraDirection[2],theta,phi,0,0,1,0);
     // Zeroe's Out 
     glLoadIdentity();
 
     // Set Camera
     glTranslatef(xTranslate, yTranslate, zTranslate);
+
+  
    
     glRotatef(phi, 1.0f, 0.0f, 0.0f);
     glRotatef(theta, 0.0f, 1.0f, 0.0f);
@@ -463,6 +578,7 @@ void myDisplay() {
     }
     
     //glut2DSetup();
+<<<<<<< HEAD
 
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
@@ -474,6 +590,20 @@ void myDisplay() {
     glLoadIdentity();
     printHUD();
 
+=======
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_LIGHTING);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, viewport.w, viewport.h, 0, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    //gluLookAt(cameraDirection[0],cameraDirection[1],cameraDirection[2],theta,phi,0,0,1,0);
+    glLoadIdentity();
+        
+    printHUD();
+
+>>>>>>> Adding-math
 
     if(running) {
         stepFrame();
@@ -508,6 +638,7 @@ void myDisplay() {
     if(running) {
         glutPostRedisplay();
     }
+<<<<<<< HEAD
 }
 
 
@@ -574,6 +705,75 @@ GLuint drawShape(Shape* s) {
 }
 
 
+=======
+}
+
+
+
+void runLoop() {
+    while(running) {
+        stepFrame();
+        myDisplay();
+
+        
+    }
+
+}
+
+GLuint drawShape(Shape* s) {
+  
+    GLuint shapeList = glGenLists(1);
+    glNewList(shapeList, GL_COMPILE);
+
+    
+    if(s->getType() == "SPHERE") {
+        glm::vec3 center = s->getCenter();
+
+        glPushMatrix();
+        glTranslatef(center.x, center.y, center.z);
+
+        glColor3f(0.1f, 0.3f, 0.1f);
+        
+        glutSolidSphere(s->getRadius()-0.1 ,50 ,50 );
+        glPopMatrix();
+    } 
+
+    if(s->getType() == "PLANE") {
+
+        glm::vec3 norm = s->getNormal();
+        glm::vec3 point = s->getUL();
+
+
+        glPushMatrix();
+
+        glBegin(GL_QUADS);
+        glColor3f(1.0f, 0.0f, 0.0f);
+        glNormal3f(norm.x, norm.y, norm.z);
+
+        glVertex3f(point.x, point.y, point.z );
+        
+        point = s->getUR();
+        glVertex3f(point.x, point.y, point.z );
+
+        point = s->getLR();
+        glVertex3f(point.x, point.y, point.z );
+        
+        point = s->getLL();
+        glVertex3f(point.x, point.y, point.z );
+
+        glEnd();
+        glPopMatrix();
+  
+    }
+
+
+    glEndList();
+
+    return shapeList;
+}
+
+
+>>>>>>> Adding-math
 //****************************************************
 // Make Draw Lists Function 
 //      - Creates the draw list for all the shapes

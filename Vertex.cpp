@@ -253,9 +253,15 @@ void Vertex::resetNorm() {
 
 
 // Use the cross product of other triangles to calculate. Sum of all the normals of every Triangle
+<<<<<<< HEAD
 void Vertex::setNormal() {
     
 
+=======
+void Vertex::setNormal(glm::vec3 newNormal) {
+    
+    this->normal = newNormal;
+>>>>>>> Adding-math
 
 }
 

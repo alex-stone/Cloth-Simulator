@@ -71,7 +71,11 @@ class Vertex {
     void setPosition(int x, int y);
     void setSpringRestLengths(float stretch, float bend, float shear);
     void setFixedVertex(bool isFixed);
+<<<<<<< HEAD
     void setNormal();
+=======
+    void setNormal(glm::vec3 newNorm);
+>>>>>>> Adding-math
 
     void resetNorm();
 
