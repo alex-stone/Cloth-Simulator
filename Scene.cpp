@@ -396,29 +396,13 @@ void drawTestLine() {
 //****************************************************
 void renderCloth() {
     cloth->updateNormals();
-
-
-    /*glEnable(GL_LIGHTING);
-    GLfloat Specular[] = {0.0f,0.2f,0.8f};
-    GLfloat Ambient[]= { 0.0f, 0.2f, 0.7f};
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, Ambient);    //set material
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, Specular);
-   
-    */
  
     for(int h = 0; h < cloth->getHeight()-1; h++) {
         glBegin(GL_TRIANGLE_STRIP);    
         for(int w = 0; w < cloth->getWidth(); w++) {
 
-            //if((w+h)%2 ==0 ){
           
-                glColor4f(0.0f,0.4f,0.6f,0.4f);
-           /*}
-           else{
-            glColor3f(0.0f,0.0f,0.0f);
-           }*/
-           
-           
+            glColor4f(0.0f,0.4f,0.6f,0.4f);
 
             Vertex* temp = cloth->getVertex(w, h);
             glNormal3f(temp->getNorm().x, temp->getNorm().y, temp->getNorm().z);
@@ -484,7 +468,7 @@ void myDisplay() {
 
     glut3DSetup();
     
-    gluLookAt(theta,phi,0,cameraDirection[0],cameraDirection[1],cameraDirection[2],0,1,0);
+    //gluLookAt(theta,phi,0,cameraDirection[0],cameraDirection[1],cameraDirection[2],0,1,0);
     // Zeroe's Out 
     glLoadIdentity();
 
@@ -520,6 +504,8 @@ void myDisplay() {
     glOrtho(0, viewport.w, viewport.h, 0, -1, 1);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+    
+
     printHUD();
 
 
@@ -573,15 +559,13 @@ void myDisplay() {
 }
 
 
-
 void runLoop() {
     while(running) {
         stepFrame();
         myDisplay();
 
-        
+       
     }
-
 }
 
 GLuint drawShape(Shape* s) {
@@ -589,7 +573,6 @@ GLuint drawShape(Shape* s) {
     GLuint shapeList = glGenLists(1);
     glNewList(shapeList, GL_COMPILE);
 
-    
     if(s->getType() == "SPHERE") {
         glm::vec3 center = s->getCenter();
 
@@ -629,14 +612,10 @@ GLuint drawShape(Shape* s) {
   
     }
 
-
     glEndList();
 
     return shapeList;
 }
-
-
-
 
 //****************************************************
 // Make Draw Lists Function 
@@ -706,12 +685,9 @@ void loadShapes(const char* shapeInput) {
                 s = new Plane(topLeft, topRight, lowRight, lowLeft);    
             }
             
-
             shapes.push_back(s);
         }
-
     }
-
 }
 
 //****************************************************
@@ -763,7 +739,55 @@ void loadCloth(const char* input) {
 
 }
 
+//****************************************************
+// Process Inputs
+//      - Processes Command Line Arguments and sets
+//        Variables and Calls Functions appropriately
+//      - Follows Format:
+//      ./Scene *cloth-test* *shape-test* *
+//****************************************************
+void processInputs(int argc, char *argv[]) {
+  
+    // Help Flag
 
+    if(argc == 2 && string(argv[1]) == "-help" || string(argv[1]) == "--help") {
+        std::cout << std::endl;
+        std::cout << "USAGE: ./Scene <cloth_file> <shape_file> [OPTIONAL]" << std::endl;
+        std::cout << "OPTIONAL: '-v' = Verlet Integration" << std::endl;
+        std::cout << "          blank = Euler Integration" << std::endl;
+        std::cout << std::endl;
+        std::exit(1);
+    }    
+
+    if(argc > 4) {
+        std::cerr << "Too many arguments included" << std::endl;
+        std::exit(1);
+    } else {
+        if(argc >= 3) {
+            inputFile = argv[1];
+            shapeFile = argv[2];
+
+            if(argc == 4) {
+                if(string(argv[3])== "-v") {
+                    euler = false;
+                } else {
+                    std::cerr << "Incorrect Flag Parameter" << std::endl;
+                    std::exit(1);
+                }
+            } else {
+                euler = true;
+            }
+
+
+        } else {
+
+            euler = true;
+            inputFile = "test/cloth.test";
+            shapeFile = "shapes/4spheres.test";
+        }
+    }
+
+}
 
 //****************************************************
 // On keyPress:
@@ -901,39 +925,14 @@ int main(int argc, char *argv[]) {
     // Initialize GLUT
     glutInit(&argc, argv);
     
-    // Process Inputs
-
-    if(argc > 4) {
-        std::cerr << "Too many arguments included" << std::endl;
-        std::exit(1);
-    } else {
-        if(argc >= 3) {
-            inputFile = argv[1];
-            shapeFile = argv[2];
-
-            if(argc == 4) {
-                if(string(argv[3])== "-v") {
-                    euler = false;
-                } else {
-                    std::cerr << "Incorrect Flag Parameter" << std::endl;
-                    std::exit(1);
-                }
-            } else {
-                euler = true;
-            }
-
-
-        } else {
-            euler = true;
-            inputFile = "test/cloth.test";
-            shapeFile = "shapes/4spheres.test";
-        }
-    }
+    // Process Inputs & sets variables: inputFule, shapeFile, euler
+    processInputs(argc, argv);
 
     // Loads Cloth & Shapes Info
     loadCloth(inputFile);
     loadShapes(shapeFile);
 
+    // Initializes Window & OpenGL Settings
     initScene();
 
     // Initialize Shape Draw Lists
