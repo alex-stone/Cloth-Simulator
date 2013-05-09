@@ -44,3 +44,4 @@ glm::vec3 Sphere::getNormal(Vertex* v) {
     return glm::normalize(returnVec);
 }
 
+

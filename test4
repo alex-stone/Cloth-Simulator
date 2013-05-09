@@ -1,0 +1,5 @@
+#!/bin/bash
+echo "Sphere Collision Example: 100x100 Vertex Cloth interacts with sphere"
+echo "Executing: ./Scene test/freefallDetail.test shapes/centerSphere.test -v"
+./Scene test/freefallDetail.test shapes/centerSphere.test -v
+

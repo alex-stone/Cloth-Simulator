@@ -66,17 +66,18 @@ class Vertex {
     glm::vec3 getPos() { return position; };
     glm::vec3 getVelocity() { return velocity; };
     glm::vec3 getAccel() { return acceleration; };
-    glm::vec3 getNormal() { return normal; };
-
-   
+    glm::vec3 getNorm() { return glm::normalize(normal); };
 
     void setPosition(int x, int y);
     void setSpringRestLengths(float stretch, float bend, float shear);
     void setFixedVertex(bool isFixed);
+    void setNormal(glm::vec3 newNorm);
+
+    void resetNorm();
 
     // Connect Vertex a, to this Vertex, in direction n
     void connectStretch(Vertex* a, int n);
-    void connectShear(Vertex* a , int n);;
+    void connectShear(Vertex* a , int n);
     void connectBend(Vertex* a, int n);
 
     // Force Calculation Functions:
@@ -85,16 +86,12 @@ class Vertex {
     void update(float timeChange, bool euler);
 
     void updateAccel(glm::vec3 externalForces);
-    void updateNormal(glm::vec3 triangleNormal);
-    float getNormalX();
-    float getNormalY();
-    float getNormalZ();
-    glm::vec3 findNormal(Vertex *v2, Vertex *v3);
-
+    void updateNormal(glm::vec3 addNorm);
+    glm::vec3 findNormal(Vertex* v2, Vertex* v3);
     
-     void updateCollisions(glm::vec3 &c, float radius);
-     void updateNetForce(glm::vec3 force);
-
+    void updateAfterCollide(glm::vec3 newPos, glm::vec3 newVel);
+   // void updateCollisions(glm::vec3 &c, float radius);
+    
     glm::vec3 getSpringForce();
     glm::vec3 getDampForce();
     glm::vec3 getForceFromSpring(float restLength, float stretchConstant, glm::vec3 springVec);

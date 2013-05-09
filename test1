@@ -1,0 +1,5 @@
+#!/bin/bash
+echo "Gravity Example: 4 Corners Pinned"
+echo "Executing: ./Scene test/horizCloth.test shapes/empty.test -v"
+./Scene test/horizCloth.test shapes/empty.test -v
+

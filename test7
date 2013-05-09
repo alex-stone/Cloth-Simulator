@@ -1,0 +1,5 @@
+#!/bin/bash
+echo "Sphere Collision Example: Cloth in Freefall over 4 Spheres"
+echo "Executing: ./Scene test/freefall.test shapes/4spheres.test -v"
+./Scene test/freefall.test shapes/4spheres.test -v
+

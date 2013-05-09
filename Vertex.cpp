@@ -4,10 +4,10 @@
 
 #include "Vertex.h"
 
-const float DEF_STRETCH = 50.0f;
-const float DEF_SHEAR = 50.0f;
-const float DEF_BEND = 50.0f;
-const float DEF_DAMP = 15.0f;
+const float DEF_STRETCH = 1000.0f;
+const float DEF_SHEAR = 1000.0f;
+const float DEF_BEND = 1000.0f;
+const float DEF_DAMP = 115.0f;
 
 //****************************************************
 // Vertex Class - Constructors
@@ -16,6 +16,7 @@ Vertex::Vertex() {
     initPhysicalProps(0.0f, 0.0f, 0.0f); 
     initSpringToNull(); 
     initSpringConstants(DEF_STRETCH, DEF_SHEAR, DEF_BEND, DEF_DAMP);
+    
     fixed = false;
     lastTimeUpdated = 0.0f;
 }
@@ -77,18 +78,9 @@ void Vertex::initPhysicalProps(float a, float b, float c) {
     this->position = glm::vec3(a, b, c);
     this->velocity = glm::vec3(0.0f);
     this->acceleration = glm::vec3(0.0f);
-    this->normal = glm::vec3(0.0f,0.0f,0.0f);
+
     this->oldPos = glm::vec3(a, b, c);
-
     mass = 1.0f;
-}
-
-void Vertex::initSpringConstants(float stretchConst, float shearConst, float bendConst, float dampConst) {
-    stretchConstant = stretchConst;
-    shearConstant = shearConst;
-    bendConstant = bendConst;
-
-    dampConstant = dampConst;
 }
 
 //****************************************************
@@ -103,6 +95,14 @@ void Vertex::setSpringRestLengths(float stretch, float bend, float shear) {
     stretchRestDist = stretch;
     shearRestDist = shear;
     bendRestDist = bend;
+}
+
+void Vertex::initSpringConstants(float stretchConst, float shearConst, float bendConst, float dampConst) {
+    stretchConstant = stretchConst;
+    shearConstant = shearConst;
+    bendConstant = bendConst;
+
+    dampConstant = dampConst;
 }
 
 void Vertex::setFixedVertex(bool isFixed) {
@@ -182,23 +182,13 @@ void Vertex::updateAccel(glm::vec3 externalForces) {
     acceleration = (spring + damp + externalForces) / mass;
 }
 
-
-
-void Vertex::updateNormal(glm::vec3 triangleNormal){
-    this->normal += triangleNormal;
-}
-
-float Vertex::getNormalX(){
-    glm::vec3 temp = glm::normalize(this->normal);
-    return temp.x;
-}
-float Vertex::getNormalY(){
-    glm::vec3 temp = glm::normalize(this->normal);
-    return temp.y;
-}
-float Vertex::getNormalZ(){
-    glm::vec3 temp = glm::normalize(this->normal);
-    return temp.z;
+//****************************************************
+// Update Acceleration:
+//      - Given External Forces, Spring Forces, and
+//        Dampening Forces, calculate new acceleration
+//****************************************************
+void Vertex::updateNormal(glm::vec3 addNorm) {
+    this->normal += addNorm;
 }
 
 glm::vec3 Vertex::findNormal(Vertex *v2, Vertex *v3){
@@ -207,22 +197,6 @@ glm::vec3 Vertex::findNormal(Vertex *v2, Vertex *v3){
 
     return glm::cross(temp_v1,temp_v2);
 }
-
-void Vertex::updateCollisions(glm::vec3 &center, float r){
-
-        glm::vec3 temp = this->position - center;
-        //check if position of vertex - center of ball is less than radius
-        float n = glm::length(temp);
-        if (n < r)
-        {
-            
-            this->position = glm::normalize(temp)* r + center;
-            this->velocity.x *= .6;
-            this->velocity.y *= .6;
-            this->velocity.z *= .6;
-        }
-    }
-
 
 
 //****************************************************
@@ -272,6 +246,44 @@ glm::vec3 Vertex::getSpringForce() {
 
     return returnVec;
 }
+
+void Vertex::resetNorm() {
+    normal = glm::vec3(0.0f, 0.0f, 0.0f);
+}
+
+
+// Use the cross product of other triangles to calculate. Sum of all the normals of every Triangle
+void Vertex::setNormal(glm::vec3 newNormal) {
+    
+    this->normal = newNormal;
+
+}
+
+
+void Vertex::updateAfterCollide(glm::vec3 newPos, glm::vec3 newVel) {
+    this->position = newPos;
+    
+    this->velocity.x *= .6;
+    this->velocity.y *= .6;
+    this->velocity.z *= .6;
+
+}
+/*
+void Vertex::updateCollisions(glm::vec3 &center, float r){
+
+        glm::vec3 temp = this->position - center;
+        //check if position of vertex - center of ball is less than radius
+        float n = glm::length(temp);
+        if (n < r)
+        {
+            
+            this->position = glm::normalize(temp)* r + center;
+            this->velocity.x *= .4;
+            this->velocity.y *= .4;
+            this->velocity.z *= .4;
+        }
+    }
+*/
 
 glm::vec3 Vertex::getDampForce() {
     glm::vec3 returnVec = - velocity * dampConstant;

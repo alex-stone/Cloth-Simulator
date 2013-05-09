@@ -3,8 +3,6 @@
 #include <vector>
 #include "glm/glm.hpp"
 
-
-
 #include "Cloth.h"
 #include "Vertex.h"
 
@@ -71,26 +69,80 @@ Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, V
 
 }
 
-void Cloth::updateNormals(){
-    for(int i = 0; i< this->height -1; i++){
-        for(int z= 0; z < this->width -1 ; z++){
-            glm::vec3 triNormal =vertexMatrix[z * this->width + (i+1)]->findNormal(vertexMatrix[z * this->width + i], vertexMatrix[(z+1) * this->width + i]);
-            vertexMatrix[z * this->width + (i+1)]->updateNormal(triNormal);
-            vertexMatrix[z * this->width + i]->updateNormal(triNormal);
-            vertexMatrix[(z+1) * this->width + i]->updateNormal(triNormal);
+void Cloth::updateCollision(Shape* s) {
+    for(int i = 0; i < height*width; i++) {
+        s->collide(vertexMatrix[i]);
+    }
+}
+/*
 
-            glm::vec3 tempNormal = vertexMatrix[(z+1) * this->width + (i+1)]->findNormal(vertexMatrix[z * this->width + (i+1)], vertexMatrix[(z+1) * this->width + i]);
-            vertexMatrix[(z+1) * this->width + (i+1)]->updateNormal(tempNormal);
-            vertexMatrix[z * this->width + (i+1)]->updateNormal(tempNormal);
-            vertexMatrix[(z+1) * this->width + i]->updateNormal(tempNormal);
+// Iterate through each Square and for each 2 triangles, calculate normals
+void Cloth::updateNormals() {
+
+    for(int i = 0; i < height*width; i++) {
+        vertexMatrix[i]->resetNorm();
+    }
+
+    for(int i = 0; i < this->width - 1; i++) {
+        for(int j = 0; j < this->height - 1; j++) {
+
+            // V1 cross V2
+            Vertex* a = this->getVertex(i+1, j);
+            Vertex* b = this->getVertex(i, j);
+            Vertex* c = this->getVertex(i, j+1);
+
+            glm::vec3 vec1 = b->getPos() - a->getPos();
+            glm::vec3 vec2 = c->getPos() - a->getPos();
+
+            glm::vec3 triNormal = glm::cross(vec1, vec2);
+
+            a->updateNormal(triNormal);
+            b->updateNormal(triNormal);
+            c->updateNormal(triNormal);
+
+            a = this->getVertex(i+1, j+1);
+            b = this->getVertex(i+1, j);
+            c = this->getVertex(i, j+1);
+
+            vec1 = b->getPos() - a->getPos();
+            vec2 = c->getPos() - a->getPos();
+
+            triNormal = glm::cross(vec1, vec2);
+
+            a->updateNormal(triNormal);
+            b->updateNormal(triNormal);
+            c->updateNormal(triNormal);
+
+
         }
     }
+
+}*/
+
+void Cloth::updateNormals(){
+    for(int i = 0; i< this->width -1; i++){
+        for(int z= 0; z < this->height -1 ; z++){
+            glm::vec3 triNormal =this->getVertex(i+1,z)->findNormal(this->getVertex(i,z), this->getVertex(i,z+1));
+            this->getVertex(i+1,z)->updateNormal(triNormal);
+            this->getVertex(i,z)->updateNormal(triNormal);
+            this->getVertex(i,z+1)->updateNormal(triNormal);
+
+            glm::vec3 tempNormal = this->getVertex(i+1,z+1)->findNormal(this->getVertex(i+1,z), this->getVertex(i,z+1));
+            this->getVertex(i+1,z+1)->updateNormal(tempNormal);
+            this->getVertex(i+1,z)->updateNormal(tempNormal);
+            this->getVertex(i,z+1)->updateNormal(tempNormal);
+        }
+    }
+
     
 }
 
-void Cloth::addDirectionalForce(glm::vec3 force){
-    for(int i = 0; i< this->height -1; i++){
-        for(int z= 0; z < this->width -1 ; z++){
+
+
+
+void Cloth::addExtForce(glm::vec3 force){
+    for(int i = 0; i< this->width -1; i++){
+        for(int z= 0; z < this->height -1 ; z++){
             glm::vec3 triNormal =glm::normalize(vertexMatrix[z * this->width + (i+1)]->findNormal(vertexMatrix[z * this->width + i], vertexMatrix[(z+1) * this->width + i]));
             glm::vec3 tempNormal = glm::normalize(vertexMatrix[(z+1) * this->width + (i+1)]->findNormal(vertexMatrix[z * this->width + (i+1)], vertexMatrix[(z+1) * this->width + i]));
             triNormal *= glm::dot(triNormal, force);
@@ -102,10 +154,25 @@ void Cloth::addDirectionalForce(glm::vec3 force){
             vertexMatrix[(z) * this->width + (i+1)]->updateAccel(tempNormal);
             vertexMatrix[(z+1) * this->width + (i)]->updateAccel(tempNormal);
 
+            }
+     }
 }
+
+
+
+
+
+
+void Cloth::update(float timestep) {
+    // Iterate through vertexMatrix, and update each individual particle
+
+    for(int i = 0; i < height*width; i++) {
+        vertexMatrix[i]->update(timestep, euler);
+    }
+
 }
-}
-void Cloth::update(float timestep,glm::vec3 spherePos, float sphereRadius) {
+
+/*void Cloth::update(float timestep,glm::vec3 spherePos, float sphereRadius) {
     // Iterate through vertexMatrix, and update each individual particle
 
     for(int i = 0; i < height*width; i++) {
@@ -115,8 +182,7 @@ void Cloth::update(float timestep,glm::vec3 spherePos, float sphereRadius) {
     }
 
 }
-
-
+*/
 
 void Cloth::addExternalForce(glm::vec3 externalForce) {
     
@@ -215,3 +281,4 @@ void Cloth::connectSprings() {
         }
     }
 }
+

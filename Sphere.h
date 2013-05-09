@@ -25,6 +25,7 @@ class Sphere : public Shape {
     std::string getType() { return "SPHERE"; };
     float getRadius() { return radius; };
     glm::vec3 getCenter() { return center; };
+    glm::vec3 getNormal() { return glm::vec3(1.0f, 0.0f, 0.0f); };
 };
 
 #endif
