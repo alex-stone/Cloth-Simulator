@@ -53,6 +53,7 @@ bool wire;
 bool smooth;
 bool running;   // Is simulation running in real-time or paused for step through
 bool light;
+bool showOptions;
 
 // OpenGL Perspective Variables & Constants:
 GLdouble aspectRatio;
@@ -79,6 +80,10 @@ float frameDuration; // in Milliseconds
 float currentFPS = 0.0f;
 int frameNum = 0;
 
+float calcsPerFrame = 0.0f;
+int numCalculations = 0;
+
+
 // If true, use constant STEP value. If false use constant FPS value
 bool constantStep;  
 
@@ -89,16 +94,19 @@ float lastFPStime = 0.0f;
 int numTimeSteps = 30;
 const float STEP = 0.008f;
 
+const float STEP_INC = 0.001f;
+float timestep = 0.005f;
+
 // Position Update Method Variables: Command Lines
 bool euler;
 
 // Forces:
 bool gravity;
-glm::vec3 gravityForce(0.0f, -1.0f, 0.0f);
+glm::vec3 gravityAccel(0.0f, -9.81f, 0.0f);
 
 //TODO: WIND INFO
 bool wind;
-glm::vec3 extForce(0.0f, 0.0f, -1.0f);
+glm::vec3 windForce(0.0f, 0.0f, -1.0f);
 float windScale = 1.0f;
 float windINC = 0.5f;
 
@@ -109,9 +117,11 @@ float windINC = 0.5f;
 bool debugFunc = false;
 
 // HUD Variables;
-const int LINE_SIZE = 15;
+const int LINE_SIZE = 18;
+const int LARGE_LINE_SIZE = 20;
 
 // Texture Variables:
+std::string currentTexture="";
 GLuint texture0;
 GLuint texture1;
 
@@ -267,6 +277,7 @@ void initScene() {
 
     // Initialize which Texture to Use
     glBindTexture(GL_TEXTURE_2D, texture0);
+    currentTexture = "CHECKERBOARD";
     
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);  // Initializes Wireframe to be ON 
     glShadeModel(GL_SMOOTH);                    // Initializes Smooth Shading
@@ -285,6 +296,7 @@ void initScene() {
     smooth = true;
     light = true;
     running = false;
+    showOptions = true;
     
     // Initialize Animation Variables:
     frameDuration = 1000.0f / framesPerSecond;  
@@ -371,13 +383,13 @@ void myReshape(int w, int h) {
 // Print Text:
 //      - Prints Text @ (x, y) w/ color (r,g,b)
 //****************************************************
-void printText(float x, float y, float r, float g, float b, std::string text) {
+void printText(float x, float y, float r, float g, float b, std::string text, void *font) {
   
     glColor3f(r,g,b);
     glRasterPos2f(x,y);
 
     for(int i = 0; i < text.length(); i++) {
-        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, text[i]);
+        glutBitmapCharacter(font, text[i]);
     }
 
 }
@@ -385,8 +397,8 @@ void printText(float x, float y, float r, float g, float b, std::string text) {
 //****************************************************
 // Print HUD
 //      - Prints the Heads Up Display:
-//      Variables To be Printed:
-//          - Timestep
+//      - Variables: Angles, FrameNum, Gravity?, wind?
+//          windForce, FPS
 //****************************************************
 void printHUD() {
     float r = 1.0f;
@@ -400,7 +412,7 @@ void printHUD() {
     thetaStream << "Theta: " << thetaAngle;
     std::string thetaOut = thetaStream.str();
     
-    printText(5, LINE_SIZE, r, g, b, thetaOut); 
+    printText(5, LINE_SIZE, r, g, b, thetaOut, GLUT_BITMAP_HELVETICA_12); 
 
     // Print Phi 
     int phiAngle = phi;
@@ -409,16 +421,128 @@ void printHUD() {
     phiStream << "Phi: " << phiAngle;
     std::string phiOut = phiStream.str();
     
-    printText(5, 2*LINE_SIZE, r, g, b, phiOut);
+    printText(5, 2*LINE_SIZE, r, g, b, phiOut, GLUT_BITMAP_HELVETICA_12);
 
     // Print Frame Number
     std::stringstream frameStream;
     frameStream << "Frame #: " << frameNum;
     std::string frameOut = frameStream.str();
     
-    printText(5, 3*LINE_SIZE, r, g, b, frameOut);
+    printText(5, 3*LINE_SIZE, r, g, b, frameOut, GLUT_BITMAP_HELVETICA_12);
     
     // Print Gravity:
+    std::string gravOut;
+    if(gravity) {
+        gravOut = "Gravity: ON";
+    } else {
+        gravOut = "Gravity: OFF";
+    }
+
+    printText(5, 4*LINE_SIZE, r, g, b, gravOut, GLUT_BITMAP_HELVETICA_12);
+
+    // Print Wind:
+    std::string windOut;
+    if(wind) {
+        windOut = "Wind: ON";
+    } else {
+        windOut = "Wind: OFF";
+    }
+
+    printText(5, 5*LINE_SIZE, r, g, b, windOut, GLUT_BITMAP_HELVETICA_12);
+
+    std::stringstream windForceStream;
+
+    // Print Wind Force
+    windForceStream << "Wind Force: " << glm::length(windForce);
+    std::string windForceOut = windForceStream.str();
+
+    printText(5, 6*LINE_SIZE, r, g, b, windForceOut, GLUT_BITMAP_HELVETICA_12);
+
+    // Print Current Frames Per Second:
+    std::stringstream fpsStream;
+    fpsStream << "FPS: " << currentFPS;
+    std::string fpsOut = fpsStream.str();
+
+    printText(5, 7*LINE_SIZE, r, g, b, fpsOut, GLUT_BITMAP_HELVETICA_12);
+
+    // Print Calculations Per Frame:
+    std::stringstream calcStream;
+    calcStream << "Calcs Per Frame: " << calcsPerFrame;
+    std::string calcOut = calcStream.str();
+
+    printText(5, 8*LINE_SIZE, r, g, b, calcOut, GLUT_BITMAP_HELVETICA_12);
+
+    
+}
+
+
+//****************************************************
+// Print Options Helpers:
+//      - Each one Prints a Column
+
+//****************************************************
+void displayPerformance(int leftBound, int upBound, glm::vec3 color) {
+
+    //Print Performance Header
+    printText(leftBound+5, upBound + LARGE_LINE_SIZE, color.x, color.y, color.z, "PERFORMANCE: ", GLUT_BITMAP_HELVETICA_18);
+
+    // Print Running Info:
+    std::string runOut;
+    if(running) {
+        runOut = "Toggle Running (R):  ON";
+    } else {
+        runOut = "Toggle Running (R):  OFF";
+    }
+
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + LINE_SIZE, color.x, color.y, color.z, runOut, GLUT_BITMAP_HELVETICA_12);
+
+    // Toggle Constant FPS v.s. Constant Timestep (Variable v.s. Fixed Timestep)
+    std::string constantOut;
+
+    if(constantStep) {
+        constantOut = "Toggle Timestep (C): Fixed";
+    } else {
+        constantOut = "Toggle Timestep (C): Variable";
+    }
+
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 2*LINE_SIZE, color.x, color.y, color.z, constantOut, GLUT_BITMAP_HELVETICA_12);
+
+    // Frame Number:
+    std::stringstream frameStream;
+    frameStream << "Frame Number: " << frameNum;
+    std::string frameOut = frameStream.str();
+
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 3*LINE_SIZE, color.x, color.y, color.z, frameOut, GLUT_BITMAP_HELVETICA_12);
+
+
+
+    // If Constant Timestep Show Timestep:
+    if(constantStep || !running) {
+        std::stringstream stepStream;
+        stepStream << "Timestep: " << timestep;
+        std::string stepOut = stepStream.str();
+
+
+
+        printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 4*LINE_SIZE, color.x, color.y, color.z, stepOut, GLUT_BITMAP_HELVETICA_12);
+    } else {
+        std::stringstream fpsStream;
+        fpsStream << "FPS: " << currentFPS;
+        std::string fpsOut = fpsStream.str();
+
+        printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 4*LINE_SIZE, color.x, color.y, color.z, fpsOut, GLUT_BITMAP_HELVETICA_12);
+    }
+
+
+    // Dividing Lines?
+}
+
+void displayForce(int leftBound, int upBound, glm::vec3 color) {
+    
+    // Print Force Header:
+    printText(leftBound+5, upBound + LARGE_LINE_SIZE, color.x, color.y, color.z, "FORCES: ", GLUT_BITMAP_HELVETICA_18);
+
+    // Print Gravity Info:
     std::string gravBool;
     if(gravity) {
         gravBool = "ON";
@@ -426,13 +550,11 @@ void printHUD() {
         gravBool = "OFF";
     }
 
-    std::stringstream gravStream;
-    gravStream << "Gravity: " << gravBool;
-    std::string gravOut = gravStream.str(); 
+    std::string gravOut = "Toggle Gravity (G): " + gravBool;
 
-    printText(5, 4*LINE_SIZE, r, g, b, gravOut);
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + LINE_SIZE, color.x, color.y, color.z, gravOut, GLUT_BITMAP_HELVETICA_12);
 
-    // Print Wind:
+    // Print Wind Info:
     std::string windBool;
     if(wind) {
         windBool = "ON";
@@ -440,26 +562,186 @@ void printHUD() {
         windBool = "OFF";
     }
 
-    std::stringstream windStream;
-    windStream << "Wind: " << windBool;
-    std::string windOut = windStream.str();
+    std::string windOut = "Toggle Wind (F): " + windBool;
 
-    printText(5, 5*LINE_SIZE, r, g, b, windOut);
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 2*LINE_SIZE, color.x, color.y, color.z, windOut, GLUT_BITMAP_HELVETICA_12);
 
-    std::stringstream windForceStream;
-    windForceStream << "Wind Force: " << glm::length(extForce);
-    std::string windForceOut = windForceStream.str();
+    // Print Wind Direction
+    std::stringstream windDirStream;
+    windDirStream << "Wind Direction: " << "(" << windForce.x << ", " << windForce.y << ", " << windForce.z << ")";
+    std::string windDirOut = windDirStream.str();
 
-    printText(5, 6*LINE_SIZE, r, g, b, windForceOut);
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 3*LINE_SIZE, color.x, color.y, color.z, windDirOut, GLUT_BITMAP_HELVETICA_12);
 
+    // Print Wind Force Magnitude
+    std::stringstream windMagStream;
+    windMagStream << "Wind Magnitude: " << glm::length(windForce);
+    std::string windMagOut = windMagStream.str();
 
-    // Print Current Frames Per Second:
-    std::stringstream fpsStream;
-    fpsStream << "FPS: " << currentFPS;
-    std::string fpsOut = fpsStream.str();
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 4*LINE_SIZE, color.x, color.y, color.z, windMagOut, GLUT_BITMAP_HELVETICA_12);
 
-    printText(5, 7*LINE_SIZE, r, g, b, fpsOut);
+    std::string windIncrease = "Increase Wind Force: (J)";
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 5*LINE_SIZE, color.x, color.y, color.z, windIncrease, GLUT_BITMAP_HELVETICA_12);
     
+    std::string windDecrease = "Decrease Wind Force: (K)";
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 6*LINE_SIZE, color.x, color.y, color.z, windDecrease, GLUT_BITMAP_HELVETICA_12);
+
+
+}
+
+void displayShading(int leftBound, int upBound, glm::vec3 color) {
+    
+    // Print Shading Header:
+    printText(leftBound+5, upBound + LARGE_LINE_SIZE, color.x, color.y, color.z, "SHADING: ", GLUT_BITMAP_HELVETICA_18);
+
+    // Print Smooth Shading Info:
+    std::string smoothOut;
+    if(smooth) {
+        smoothOut = "Smooth Shading: ON";
+    } else {
+        smoothOut = "Smooth Shading: OFF";
+    }
+
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + LINE_SIZE, color.x, color.y, color.z, smoothOut, GLUT_BITMAP_HELVETICA_12);
+
+   // Print Lighting Info:
+    std::string lightOut;
+    if(light) {
+        lightOut = "Lighting: ON";
+    } else {
+        lightOut = "Lighting: OFF";
+    }
+
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 2*LINE_SIZE, color.x, color.y, color.z, lightOut, GLUT_BITMAP_HELVETICA_12);
+
+       // Print Smooth Shading Info:
+    std::string wireOut;
+    if(wire) {
+        wireOut = "Wireframe: ON";
+    } else {
+        wireOut = "Wireframe: OFF";
+    }
+
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 3*LINE_SIZE, color.x, color.y, color.z, wireOut, GLUT_BITMAP_HELVETICA_12);
+    
+    // Print Current texture
+    std::string textureOut = "Texture: " + currentTexture;
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 4*LINE_SIZE, color.x, color.y, color.z, textureOut, GLUT_BITMAP_HELVETICA_12);
+
+    // Print How to Change Textures
+    std::string changeTexOut = "Change Texture: Numpad: 1, 2";
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 5*LINE_SIZE, color.x, color.y, color.z, changeTexOut, GLUT_BITMAP_HELVETICA_12);
+
+
+}
+
+void displayCamera(int leftBound, int upBound, glm::vec3 color) {
+
+    // Print Camera Header:
+    printText(leftBound+5, upBound + LARGE_LINE_SIZE, color.x, color.y, color.z, "CAMERA: ", GLUT_BITMAP_HELVETICA_18);
+
+
+    // Print Theta:
+    int thetaAngle = theta;
+    thetaAngle = thetaAngle%360;
+    std::stringstream thetaStream;
+    thetaStream << "Theta: " << thetaAngle;
+    std::string thetaOut = thetaStream.str();
+    
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 2 + LINE_SIZE, color.x, color.y, color.z, thetaOut, GLUT_BITMAP_HELVETICA_12);
+
+    // Print Phi 
+    int phiAngle = phi;
+    phiAngle = phiAngle%360;
+    std::stringstream phiStream;
+    phiStream << "Phi: " << phiAngle;
+    std::string phiOut = phiStream.str();
+    
+    printText(leftBound, upBound + LARGE_LINE_SIZE +2+ 2*LINE_SIZE, color.x, color.y, color.z, phiOut, GLUT_BITMAP_HELVETICA_12);
+
+
+}
+
+//****************************************************
+// Print Options:
+//      - Prints out all of the Different Buttons
+//      - And what they do
+//****************************************************
+void printOptions() {
+
+    glm::vec3 color(0.0f, 0.0f, 0.0f);
+
+    float r = 0.0f;
+    float g = 0.0f;
+    float b = 0.0f;
+
+    int topHeight = viewport.h - 150;
+
+    // Print Background:
+    glBegin(GL_QUADS);
+        glColor3f(1.0f, 1.0f, 1.0f);
+
+        glVertex2f(0, viewport.h-150);
+        glVertex2f(0, viewport.h);
+        glVertex2f(viewport.w, viewport.h);
+        glVertex2f(viewport.w, viewport.h-150);
+    glEnd();
+
+    int width = viewport.w/4;
+
+
+    displayPerformance(5, topHeight, color);
+    displayForce(width + 5, topHeight, color);
+    displayShading(2*width+5, topHeight, color);
+    displayCamera(3*width+5, topHeight, color);
+
+
+    glBegin(GL_LINES);
+        glVertex2f(width, topHeight);
+        glVertex2f(width, viewport.h);
+
+        glVertex2f(2*width, topHeight);
+        glVertex2f(2*width, viewport.h);
+
+        glVertex2f(3*width, topHeight);
+        glVertex2f(3*width, viewport.h);
+
+        glVertex2f(0, topHeight+25);
+        glVertex2f(viewport.w, topHeight+25);
+
+    glEnd();
+
+}
+
+void printOptionsHeader() {
+
+    glm::vec3 color(0.0f, 0.0f, 0.0f);
+
+    int bottom;
+    int middle = viewport.w / 2;
+    int height = 30;
+
+    // Determine Where to start drawing
+    if(showOptions) {
+        bottom = viewport.h - 150;
+    } else {
+        bottom = viewport.h;
+    }
+
+    // Print Background
+    glBegin(GL_QUADS);
+        glColor3f(0.543f, 0.535f, 0.535f);
+
+        glVertex2f(0, bottom - height);
+        glVertex2f(0, bottom);
+        glVertex2f(viewport.w, bottom);
+        glVertex2f(viewport.w, bottom - height);
+    
+    glEnd();
+
+    // Print's Title
+    printText(middle-100, bottom - 10, color.x, color.y, color.z, "TOGGLE OPTIONS: (O) ", GLUT_BITMAP_HELVETICA_18);
+
 }
 
 //****************************************************
@@ -556,11 +838,11 @@ void preUpdateCalculation() {
     cloth->updateNormals();
 
     if(gravity) {
-        cloth->addExternalForce(gravityForce);
+        cloth->addConstantAccel(gravityAccel);
     }
 
     if(wind) {
-        cloth->addExtForce(extForce);
+        cloth->addTriangleForce(windForce);
     }
 
     //updateCollisions();
@@ -609,6 +891,7 @@ void processFrame() {
 
         // Set lastTimeUpdated to be right after we updated the Cloth
         //lastUpdateTime = glutGet(GLUT_ELAPSED_TIME);
+        numCalculations++;
     }
 
     frameNum++;
@@ -627,8 +910,10 @@ void stepFrame() {
         
         preUpdateCalculation();
 
-        cloth->update(STEP);
+        // 
+        cloth->update(timestep);
 
+        numCalculations++;
     }
 
     // The Actual Printed Frame
@@ -652,9 +937,13 @@ void calcFPS () {
     if(timeChange > 1000) {
         currentFPS = (frameNum - oldFrameNum)/ (timeChange / 1000.0f);
 
+        // Calculations Per Frame
+        calcsPerFrame = (numCalculations / (frameNum - oldFrameNum));
+
         lastFPStime = currentFPStime;
 
         oldFrameNum = frameNum;
+        numCalculations = 0;
     }
 }
 
@@ -697,7 +986,11 @@ void myDisplay() {
     // Sets OpenGL Variables to Render 2D:
     glut2DSetup();
     printHUD();
+    printOptionsHeader();
 
+    if(showOptions) {
+        printOptions();
+    }
 
     glFlush();
     glutSwapBuffers();
@@ -851,16 +1144,19 @@ void loadShapes(const char* shapeInput) {
 void loadCloth(const char* input) {
     std::ifstream inpfile(input, ifstream::in);
     
-    int width, height;
+    //int width, height;
+    int density;
     bool c1, c2, c3, c4;
     bool euler;
 
     Vertex* corners[4];
 
     if(inpfile.good()) {
-        inpfile >> width;
-        inpfile >> height; 
+        //inpfile >> width;
+        //inpfile >> height; 
         
+        inpfile >> density;
+
         for(int i = 0; i < 4; i++) {
             float x,y,z;
             inpfile >> x;
@@ -884,7 +1180,9 @@ void loadCloth(const char* input) {
     
     inpfile.close();
     
-    cloth = new Cloth(width, height, corners[0], corners[1], corners[2], corners[3], euler);
+    cloth = new Cloth(density, corners[0], corners[1], corners[2], corners[3], euler);
+
+    //cloth = new Cloth(width, height, corners[0], corners[1], corners[2], corners[3], euler);
     cloth->setFixedCorners(c1, c2, c3, c4);
 
 }
@@ -951,30 +1249,40 @@ void processInputs(int argc, char *argv[]) {
 void keyPress(unsigned char key, int x, int y) {
     
     switch(key) {
-        case 'y':
-            // Reset's the Cloth to initial position
+
+        // Performance Modifying Keys
+        case 'r':           // Toggles if program is running
+            running = !running;
+            break;
+
+        case 'c':           // Switches between Constant FPS & TimeStep
+            constantStep = !constantStep;
+            break;
+
+        case 't':           // Steps through numTimeStep Calculations
+            if(!running) {
+                stepFrame();
+            }
+            break;
+
+        case 'y':           // Increases Timestep Value
+            timestep += STEP_INC;
+            break;
+
+        case 'u':           // Decreases Timestep Value
+            if(timestep >= 0.002f) {
+                timestep -= STEP_INC;
+            }
+            break;
+
+        case 'q':           // Reset's the Cloth to initial position
             cloth = NULL;
             loadCloth(inputFile);
             frameNum = 0;
-
             break;
-        case 'r':
-            running = !running;
-
-            break;
-        case 'c':
-            constantStep = !constantStep;
-            
-            break;
-        case 's':
-            smooth = !smooth;
-            if(smooth) {
-                glShadeModel(GL_SMOOTH);
-            } else {
-                glShadeModel(GL_FLAT);
-            }
-            break;
-        case 'g':
+        
+        // Force Modifying Keys
+        case 'g':           // Toggle Gravity
             gravity = !gravity;
             std::cout << "Gravity is now ";
             if(gravity) {
@@ -982,27 +1290,31 @@ void keyPress(unsigned char key, int x, int y) {
             } else {
                 std::cout << "OFF" << std::endl;
             }
-            // Redo Forces?
             break;
-        case 'f':
+
+        case 'f':           // Toggle Wind
             wind = !wind;
             break;
-        case 'j':
 
-            extForce = glm::normalize(extForce) * (glm::length(extForce) + windINC);
-
+        case 'j':           // Increment Wind Force
+            windForce = glm::normalize(windForce) * (glm::length(windForce) + windINC);
             break;
-        case 'k':
 
-            extForce = glm::normalize(extForce) * (glm::length(extForce) - windINC);
-
+        case 'k':           // Decrement Wind Force
+            windForce = glm::normalize(windForce) * (glm::length(windForce) - windINC);
             break;
-        case 't':
-            if(!running) {
-                stepFrame();
+
+        // Shading, Drawing and Texture Modifying Keys
+        case 's':           // Toggle Smooth Shading
+            smooth = !smooth;
+            if(smooth) {
+                glShadeModel(GL_SMOOTH);
+            } else {
+                glShadeModel(GL_FLAT);
             }
             break;
-        case 'l':
+
+        case 'l':           // Toggle Lighting
             light = !light;
             if(light) {
                  glEnable(GL_LIGHTING);
@@ -1010,7 +1322,8 @@ void keyPress(unsigned char key, int x, int y) {
                  glDisable(GL_LIGHTING);
             }
             break;
-        case 'w':
+
+        case 'w':           // Toggle Wireframe Mode
             wire = !wire;
             if(wire) {
                 glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -1018,24 +1331,34 @@ void keyPress(unsigned char key, int x, int y) {
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             }
             break;
+
+        case '1':   // Checkerboard Texture
+            glBindTexture(GL_TEXTURE_2D, texture0);
+            currentTexture = "CHECKERBOARD";
+            break;
+
+        case '2':   // American Flag Texture
+            glBindTexture(GL_TEXTURE_2D, texture1);
+            currentTexture = "AMERICAN_FLAG";
+            break;
+
+        case 'o':           // Toggles whether the Options List is shown
+            showOptions = !showOptions;
+            break;
+
+        // Orientation Modifying Keys
         case '+':
             zTranslate += Z_TRANSLATE_INC;
             break;
+
         case '-':
             zTranslate -= Z_TRANSLATE_INC;
             break;
+
+        // Exits the Program
         case ' ':
             std::exit(1);
             break;
-        case '1':
-            glBindTexture(GL_TEXTURE_2D, texture0);
-
-            break;
-        case '2':
-            glBindTexture(GL_TEXTURE_2D, texture1);
-
-            break;
-
     }
 
     myDisplay();
