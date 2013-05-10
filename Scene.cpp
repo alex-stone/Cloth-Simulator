@@ -53,7 +53,10 @@ bool wire;
 bool smooth;
 bool running;   // Is simulation running in real-time or paused for step through
 bool light;
+
+// Options Menu Drawing Variables
 bool showOptions;
+bool reopenOptions;
 
 // OpenGL Perspective Variables & Constants:
 GLdouble aspectRatio;
@@ -110,14 +113,11 @@ glm::vec3 windForce(0.0f, 0.0f, -1.0f);
 float windScale = 1.0f;
 float windINC = 0.5f;
 
-
-//glm::vec3 extForce(1.0f, -0.7f, 1.0f);
-
 // Debug Variables:
 bool debugFunc = false;
 
 // HUD Variables;
-const int LINE_SIZE = 18;
+const int LINE_SIZE = 15;
 const int LARGE_LINE_SIZE = 20;
 
 // Texture Variables:
@@ -325,6 +325,12 @@ void glut3DSetup() {
         glDisable(GL_LIGHTING);
     }
 
+    if(wire) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    } else {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     
@@ -343,6 +349,7 @@ void glut3DSetup() {
 void glut2DSetup() {
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -359,6 +366,16 @@ void myReshape(int w, int h) {
     
     if(debugFunc) {
         std::cout << "myReshape Called" << std::endl;
+    }
+
+    if(w > 700 && reopenOptions) {
+        showOptions = true;
+        reopenOptions = false;
+    }
+
+    if(w < 700) {
+        showOptions = false;
+        reopenOptions = true;
     }
 
     viewport.w = w;
@@ -484,17 +501,17 @@ void printHUD() {
 void displayPerformance(int leftBound, int upBound, glm::vec3 color) {
 
     //Print Performance Header
-    printText(leftBound+5, upBound + LARGE_LINE_SIZE, color.x, color.y, color.z, "PERFORMANCE: ", GLUT_BITMAP_HELVETICA_18);
+    printText(leftBound+5, upBound + LARGE_LINE_SIZE, color.x, color.y, color.z, "INTEGRATION: ", GLUT_BITMAP_HELVETICA_18);
 
-    // Print Running Info:
-    std::string runOut;
-    if(running) {
-        runOut = "Toggle Running (R):  ON";
+    // Print Integration Type:
+    std::string intType;
+    if(euler) {
+        intType = "Method: Euler Integration";
     } else {
-        runOut = "Toggle Running (R):  OFF";
+        intType = "Method: Verlet Integration";
     }
 
-    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + LINE_SIZE, color.x, color.y, color.z, runOut, GLUT_BITMAP_HELVETICA_12);
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + LINE_SIZE, color.x, color.y, color.z, intType, GLUT_BITMAP_HELVETICA_12);
 
     // Toggle Constant FPS v.s. Constant Timestep (Variable v.s. Fixed Timestep)
     std::string constantOut;
@@ -507,34 +524,21 @@ void displayPerformance(int leftBound, int upBound, glm::vec3 color) {
 
     printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 2*LINE_SIZE, color.x, color.y, color.z, constantOut, GLUT_BITMAP_HELVETICA_12);
 
-    // Frame Number:
-    std::stringstream frameStream;
-    frameStream << "Frame Number: " << frameNum;
-    std::string frameOut = frameStream.str();
+    // Print Timestep
+    std::stringstream stepStream;
+    stepStream << "Timestep: " << timestep << "s";
+    std::string stepOut = stepStream.str();
 
-    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 3*LINE_SIZE, color.x, color.y, color.z, frameOut, GLUT_BITMAP_HELVETICA_12);
-
-
-
-    // If Constant Timestep Show Timestep:
-    if(constantStep || !running) {
-        std::stringstream stepStream;
-        stepStream << "Timestep: " << timestep;
-        std::string stepOut = stepStream.str();
-
-
-
-        printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 4*LINE_SIZE, color.x, color.y, color.z, stepOut, GLUT_BITMAP_HELVETICA_12);
-    } else {
-        std::stringstream fpsStream;
-        fpsStream << "FPS: " << currentFPS;
-        std::string fpsOut = fpsStream.str();
-
-        printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 4*LINE_SIZE, color.x, color.y, color.z, fpsOut, GLUT_BITMAP_HELVETICA_12);
-    }
-
-
-    // Dividing Lines?
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 3*LINE_SIZE, color.x, color.y, color.z, stepOut, GLUT_BITMAP_HELVETICA_12);
+ 
+    // Print how to Increase Timestep
+    std::string incStep = "Increase Timestep: (Y)";
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 4*LINE_SIZE, color.x, color.y, color.z, incStep, GLUT_BITMAP_HELVETICA_12);
+ 
+    // Print How to decrease Timestep
+    std::string decStep = "Decrease Timestep: (U)";
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 5*LINE_SIZE, color.x, color.y, color.z, decStep, GLUT_BITMAP_HELVETICA_12);
+ 
 }
 
 void displayForce(int leftBound, int upBound, glm::vec3 color) {
@@ -629,7 +633,7 @@ void displayShading(int leftBound, int upBound, glm::vec3 color) {
     printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 4*LINE_SIZE, color.x, color.y, color.z, textureOut, GLUT_BITMAP_HELVETICA_12);
 
     // Print How to Change Textures
-    std::string changeTexOut = "Change Texture: Numpad: 1, 2";
+    std::string changeTexOut = "Change Texture: 1, 2";
     printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 5*LINE_SIZE, color.x, color.y, color.z, changeTexOut, GLUT_BITMAP_HELVETICA_12);
 
 
@@ -638,27 +642,83 @@ void displayShading(int leftBound, int upBound, glm::vec3 color) {
 void displayCamera(int leftBound, int upBound, glm::vec3 color) {
 
     // Print Camera Header:
-    printText(leftBound+5, upBound + LARGE_LINE_SIZE, color.x, color.y, color.z, "CAMERA: ", GLUT_BITMAP_HELVETICA_18);
+    printText(leftBound+5, upBound + LARGE_LINE_SIZE, color.x, color.y, color.z, "SIMULATION: ", GLUT_BITMAP_HELVETICA_18);
 
+
+    // Print Running Info:
+    std::string runOut;
+    if(running) {
+        runOut = "Toggle Running (R):  ON";
+    } else {
+        runOut = "Toggle Running (R):  OFF";
+    }
+
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + LINE_SIZE, color.x, color.y, color.z, runOut, GLUT_BITMAP_HELVETICA_12);
+
+    // Frame Number:
+    std::stringstream frameStream;
+    frameStream << "Frame Number: " << frameNum;
+    std::string frameOut = frameStream.str();
+
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 2*LINE_SIZE, color.x, color.y, color.z, frameOut, GLUT_BITMAP_HELVETICA_12);
+
+
+    // Print Frames Per Second
+    std::stringstream fpsStream;
+    fpsStream << "FPS: " << currentFPS;
+    std::string fpsOut = fpsStream.str();
+
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 3*LINE_SIZE, color.x, color.y, color.z, fpsOut, GLUT_BITMAP_HELVETICA_12);
+
+
+    // Print Calculations Per Frame:
+    std::stringstream calcStream;
+    calcStream << "Calcs Per Frame: " << calcsPerFrame;
+    std::string calcOut = calcStream.str();
+
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 4*LINE_SIZE, color.x, color.y, color.z, calcOut, GLUT_BITMAP_HELVETICA_12);
 
     // Print Theta:
     int thetaAngle = theta;
     thetaAngle = thetaAngle%360;
     std::stringstream thetaStream;
-    thetaStream << "Theta: " << thetaAngle;
+    thetaStream << "Theta Angle: " << thetaAngle;
     std::string thetaOut = thetaStream.str();
     
-    printText(leftBound, upBound + LARGE_LINE_SIZE + 2 + LINE_SIZE, color.x, color.y, color.z, thetaOut, GLUT_BITMAP_HELVETICA_12);
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 5*LINE_SIZE, color.x, color.y, color.z, thetaOut, GLUT_BITMAP_HELVETICA_12);
 
     // Print Phi 
     int phiAngle = phi;
     phiAngle = phiAngle%360;
     std::stringstream phiStream;
-    phiStream << "Phi: " << phiAngle;
+    phiStream << "Phi Angle: " << phiAngle;
     std::string phiOut = phiStream.str();
     
-    printText(leftBound, upBound + LARGE_LINE_SIZE +2+ 2*LINE_SIZE, color.x, color.y, color.z, phiOut, GLUT_BITMAP_HELVETICA_12);
+    printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 6*LINE_SIZE, color.x, color.y, color.z, phiOut, GLUT_BITMAP_HELVETICA_12);
 
+
+
+}
+
+void printSideOptions() {
+    glm::vec3 color (0.0f, 0.0f, 0.0f);
+
+    int rightBound = 150;
+
+    glBegin(GL_QUADS);
+        glColor3f(1.0f, 1.0f, 1.0f);
+
+        glVertex2f(0,0);
+        glVertex2f(0,viewport.h);
+        glVertex2f(rightBound, viewport.h);
+        glVertex2f(rightBound, 0);
+
+    glEnd();
+
+    displayPerformance(5, 5, color);
+    displayForce(5, 200, color);
+    displayShading(5, 500, color);
+    displayCamera(5, 700, color);
 
 }
 
@@ -691,9 +751,10 @@ void printOptions() {
 
 
     displayPerformance(5, topHeight, color);
-    displayForce(width + 5, topHeight, color);
-    displayShading(2*width+5, topHeight, color);
-    displayCamera(3*width+5, topHeight, color);
+    displayCamera(width+5, topHeight, color);
+    displayForce(2*width + 5, topHeight, color);
+    displayShading(3*width+5, topHeight, color);
+    
 
 
     glBegin(GL_LINES);
@@ -1343,7 +1404,12 @@ void keyPress(unsigned char key, int x, int y) {
             break;
 
         case 'o':           // Toggles whether the Options List is shown
-            showOptions = !showOptions;
+            if(viewport.w < 700) {
+                showOptions = false;
+                reopenOptions = true;
+            } else {
+                showOptions = !showOptions;
+            }
             break;
 
         // Orientation Modifying Keys
