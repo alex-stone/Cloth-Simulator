@@ -205,9 +205,11 @@ glm::vec3 Vertex::findNormal(Vertex *v2, Vertex *v3){
 //              Direction of Force
 //              Length;
 //****************************************************
-glm::vec3 Vertex::getForceFromSpring(float restLength, float springConstant, glm::vec3 springVec) {
+glm::vec3 Vertex::getForceFromSpring(float restLength, float springConstant, Vertex* v2) {//glm::vec3 springVec) {
 
     // Displacement
+    glm::vec3 springVec = this->vectorTo(v2);
+
     float diff = glm::length(springVec) - restLength;
 
     // Direction of Force
@@ -215,6 +217,21 @@ glm::vec3 Vertex::getForceFromSpring(float restLength, float springConstant, glm
     
     // ReturnVec = (k * x) * direction
     returnVec = returnVec * springConstant * diff;
+
+    // Stiffness Proportional damping
+
+
+    // Mass Proportional Damping
+
+    glm::vec3 springDir = glm::normalize(springVec);
+    glm::vec3 vel1 = springDir * glm::dot(velocity, springDir);
+    
+    glm::vec3 vel2 = springDir * glm::dot(v2->getVelocity(), springDir);
+
+
+    glm::vec3 damp = (-.5f) * (vel1 - vel2);
+
+    //returnVec += damp;
 
     return returnVec;
 }
@@ -231,15 +248,15 @@ glm::vec3 Vertex::getSpringForce() {
 
     for(int i = 0; i < 4; i++) {
         if(stretch[i] != NULL) {
-            returnVec += getForceFromSpring(stretchRestDist, stretchConstant, this->vectorTo(stretch[i]));
+            returnVec += getForceFromSpring(stretchRestDist, stretchConstant, stretch[i]); //this->vectorTo(stretch[i]));
         }
 
         if(shear[i] != NULL) {
-            returnVec += getForceFromSpring(shearRestDist, shearConstant, this->vectorTo(shear[i]));
+            returnVec += getForceFromSpring(shearRestDist, shearConstant, shear[i]);//this->vectorTo(shear[i]));
         }
 
         if(bend[i] != NULL) {
-            returnVec += getForceFromSpring(bendRestDist, bendConstant, this->vectorTo(bend[i]));
+            returnVec += getForceFromSpring(bendRestDist, bendConstant, bend[i]);//this->vectorTo(bend[i]));
         }
   
     }

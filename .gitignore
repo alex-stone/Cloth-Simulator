@@ -3,3 +3,4 @@ Scene.o
 Vertex.o
 Plane.o
 Sphere.o
+.DS_STORE

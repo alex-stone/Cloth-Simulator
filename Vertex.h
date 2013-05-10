@@ -98,7 +98,7 @@ class Vertex {
     
     glm::vec3 getSpringForce();
     glm::vec3 getDampForce();
-    glm::vec3 getForceFromSpring(float restLength, float stretchConstant, glm::vec3 springVec);
+    glm::vec3 getForceFromSpring(float restLength, float stretchConstant, Vertex* v2);//glm::vec3 springVec);
 
     // Direction To Vertex:
     glm::vec3 vectorTo(Vertex* a);
