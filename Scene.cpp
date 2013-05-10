@@ -98,7 +98,11 @@ glm::vec3 gravityForce(0.0f, -1.0f, 0.0f);
 
 //TODO: WIND INFO
 bool wind;
-glm::vec3 extForce(0.0f, 0.0f, 1.0f);
+glm::vec3 extForce(0.0f, 0.0f, -1.0f);
+float windScale = 1.0f;
+float windINC = 0.5f;
+
+
 //glm::vec3 extForce(1.0f, -0.7f, 1.0f);
 
 // Debug Variables:
@@ -442,13 +446,19 @@ void printHUD() {
 
     printText(5, 5*LINE_SIZE, r, g, b, windOut);
 
+    std::stringstream windForceStream;
+    windForceStream << "Wind Force: " << glm::length(extForce);
+    std::string windForceOut = windForceStream.str();
+
+    printText(5, 6*LINE_SIZE, r, g, b, windForceOut);
+
 
     // Print Current Frames Per Second:
     std::stringstream fpsStream;
     fpsStream << "FPS: " << currentFPS;
     std::string fpsOut = fpsStream.str();
 
-    printText(5, 6*LINE_SIZE, r, g, b, fpsOut);
+    printText(5, 7*LINE_SIZE, r, g, b, fpsOut);
     
 }
 
@@ -553,7 +563,7 @@ void preUpdateCalculation() {
         cloth->addExtForce(extForce);
     }
 
-    updateCollisions();
+    //updateCollisions();
 }
 
 
@@ -571,6 +581,8 @@ float processCalculation(float lastUpdateTime) {
     float timeChange = (currentTime - lastUpdateTime + 0.0f)/1000.0f;
 
     cloth->update(timeChange);
+
+    updateCollisions();
 
     return currentTime;
 
@@ -974,6 +986,16 @@ void keyPress(unsigned char key, int x, int y) {
             break;
         case 'f':
             wind = !wind;
+            break;
+        case 'j':
+
+            extForce = glm::normalize(extForce) * (glm::length(extForce) + windINC);
+
+            break;
+        case 'k':
+
+            extForce = glm::normalize(extForce) * (glm::length(extForce) - windINC);
+
             break;
         case 't':
             if(!running) {
