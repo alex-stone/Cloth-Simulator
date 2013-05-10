@@ -1,6 +1,4 @@
-Cloth.o
-Scene.o
-Vertex.o
-Plane.o
-Sphere.o
+*.swp
+*.swo
+*.o
 .DS_STORE
