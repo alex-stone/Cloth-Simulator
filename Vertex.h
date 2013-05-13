@@ -21,6 +21,8 @@ class Vertex {
 
     // Verlet Integration Properties:
     glm::vec3 oldPos;
+    float oldTimeChange;
+    bool firstUpdate;
 
     // TODO: Spring Connections:
     // 4 Stretch Spring: Left, Up, Right, Down
@@ -73,9 +75,7 @@ class Vertex {
     void setFixedVertex(bool isFixed);
 
     void setNormal();
-
     void setNormal(glm::vec3 newNorm);
-
 
     void resetNorm();
 
@@ -89,7 +89,18 @@ class Vertex {
     void updateEuler(float timeChange);
     void update(float timeChange, bool euler);
 
-    void updateAccel(glm::vec3 externalForces);
+    //void updateAccel(glm::vec3 externalForces);
+    
+
+    void resetAccel();
+
+    // Add Constant Acceleration's i.e. Gravity
+    void addAccel(glm::vec3 accel);
+
+    void addForce(glm::vec3 force);
+
+    void updateInternal();
+
     void updateNormal(glm::vec3 addNorm);
     glm::vec3 findNormal(Vertex* v2, Vertex* v3);
     
