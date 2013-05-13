@@ -10,12 +10,15 @@
 //****************************************************
 // Spring Class - Constants
 //****************************************************
-const float UNIT_SPRING = 100.0f;
-int vertexCount = 0;
-int errorCount = 0;
-int stretchError = 0;
-int shearError = 0;
-int bendError = 0;
+const float UNIT_SPRING = 10.0f;
+int stretchCount = 0;
+int shearCount = 0;
+int bendCount = 0;
+
+// Class Variables
+int stretchConst;
+int shearConst;
+int bendConst;
 
 //****************************************************
 // Spring Class - Constructors
@@ -24,66 +27,28 @@ Spring::Spring(Vertex* v1, Vertex* v2, std::string t) {
 	vertex1 = v1;
 	vertex2 = v2;
 
-	restDistance = glm::length(v2->getPos() - v1->getPos());
-
-
-	if(restDistance < 0.0f) {
-		if(false) {
-			std::cout << std::endl;
-			std::cout << "Rest Distance < 0 Between Vertices:" << std::endl;
-			std::cout << "Vertex1: ";
-			v1->printCoordinate();
-			v1->printPosition();
-
-			std::cout << "Vertex2: ";
-			v2->printCoordinate();
-			v2->printPosition();
-
-		}
-
-		if(t == "STRETCH") {
-			stretchError++;
-		}
-		if(t == "SHEAR") {
-			shearError++;
-
-			std::cout << std::endl;
-			std::cout << "Rest Distance < 0 Between Vertices:" << std::endl;
-
-
-			std::cout << "Vertex1: ";
-			v1->printCoordinate();
-			v1->printPosition();
-
-			std::cout << "Vertex2: ";
-			v2->printCoordinate();
-			v2->printPosition();
-		}
-		if(t == "BEND") {
-			bendError++;
-		}
-
-		errorCount++;
-	}
-
-	vertexCount++;
-
-	springConstant = UNIT_SPRING / restDistance;
-
-	/*
-	if(springConstant < 0.0f) {
-		std::cout << "Spring Constant < 0" << std::endl;
-	}*/
-
-
 	type = t;
 
-	if(vertexCount >= 3352) {
-		std::cout << "# of Springs = " << vertexCount << std::endl;
-		std::cout << "# of Error Springs = " << errorCount << std::endl;
-		std::cout << "# of STRETCH Error Springs = " << stretchError << std::endl;
-		std::cout << "# of SHEAR Error Springs = " << shearError<< std::endl;
-		std::cout << "# of BEND Error Springs = " << bendError << std::endl;
+	restDistance = glm::length(v2->getPos() - v1->getPos());
+
+	// Value Increases with smaller size
+	springConstant = UNIT_SPRING / restDistance;
+
+
+	// Sets the Constants to Class Variables for Display
+	if(t == "STRETCH" && stretchCount == 0) {
+		stretchConst = springConstant;
+		stretchCount++;
+	}
+
+	if(t == "SHEAR" && shearCount == 0) {
+		shearConst = springConstant;
+		shearCount++;
+	}
+
+	if(t == "BEND" && bendCount == 0) {
+		bendConst = springConstant;
+		bendCount++;
 	}
 }
 
@@ -125,8 +90,17 @@ void Spring::applyForce() {
 	float displacement = glm::length(springVec) - restDistance;
 	float magnitude = springConstant * displacement;
 
-	vertex1->addForce(springVec * magnitude);
-	vertex2->addForce(springVec * magnitude * (-1.0f));
+	glm::vec3 dir = glm::normalize(springVec);
+
+	vertex1->addForce(dir * magnitude);
+	vertex2->addForce(dir * magnitude * (-1.0f));
+
+	if(vertex1->getXPos() == 2 && vertex1->getYPos() == 2) {
+		std::cout << std::endl;
+		std::cout << "Type: " << type << std::endl;
+		std::cout << "Force Magnitude == " << magnitude << std::endl;
+		std::cout << "Force Direction == (" << dir.x << ", " << dir.y << ", " << dir.z << ")" << std::endl;
+	}
 
 }
 
@@ -143,4 +117,17 @@ void Spring::applyCorrection() {
 	vertex1->offsetCorrection(correction);
 	vertex2->offsetCorrection(-correction);
 
+}
+
+//****************************************************
+// Print Stats
+//      - Prints Spring Stats:
+//****************************************************
+void Spring::printStats() {
+    std::cout << "---------------------------------------" << std::endl;
+    std::cout << " Spring Information: " << std::endl;
+    std::cout << "---------------------------------------" << std::endl;    
+    std::cout << "Spring constant STRETCH: " << stretchConst << std::endl;
+    std::cout << "Spring constant   SHEAR: " << shearConst << std::endl;
+    std::cout << "Spring constant    BEND: " << bendConst << std::endl;
 }

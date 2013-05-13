@@ -41,5 +41,8 @@ class Spring {
     // Directly moves position instead of adding force
     void applyCorrection();
 
+    // Prints Stats about Springs
+    void static printStats();
+
 };
 #endif

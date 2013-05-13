@@ -23,12 +23,14 @@ bool useSpringForce = true;
 //****************************************************
 Cloth::Cloth() {
     euler = true;
+    initCounts();
 
     createDefaultCloth(20, 20);
 }
 
 Cloth::Cloth(int w, int h) {
     euler = true;
+    initCounts();
 
     createDefaultCloth(w, h);
 }
@@ -45,6 +47,7 @@ Cloth::Cloth(int w, int h) {
 //          on the length of the divisions
 //****************************************************
 Cloth::Cloth(int density, Vertex* upLeft, Vertex* upRight, Vertex* downRight, Vertex* downLeft, bool isEuler) {
+    initCounts();
 
     // Determine which edge is shorter:
     glm::vec3 horizVec = upLeft->vectorTo(upRight);
@@ -55,7 +58,7 @@ Cloth::Cloth(int density, Vertex* upLeft, Vertex* upRight, Vertex* downRight, Ve
 
     if(horizLength < vertLength) {
         this->width = density;
-        this->height = (int) ((density * vertLength) / horizLength);
+        this->height = (int) ((density * vertLength) / horizLength); 
 
     } else {
         this->height = density;
@@ -76,7 +79,9 @@ Cloth::Cloth(int density, Vertex* upLeft, Vertex* upRight, Vertex* downRight, Ve
 
     // Create the vertices and Connect all the Springs
     createVertices(upLeft->getPos(), vertVec, horizVec);
-    connectSprings();
+    
+
+    //connectSprings();
 
     connectNewSprings();
 
@@ -90,10 +95,8 @@ Cloth::Cloth(int density, Vertex* upLeft, Vertex* upRight, Vertex* downRight, Ve
 //
 //****************************************************
 Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, Vertex* downLeft, bool isEuler) {
-    // Sets the size of the vector to W*H 
-    vertexMatrix.resize(w * h); 
+    initCounts();
 
-    // Set Dimensions of Cloth
     this->width = w;
     this->height = h;
 
@@ -105,11 +108,24 @@ Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, V
     glm::vec3 vertStep = vertVec / (float)(h-1);
     glm::vec3 horizStep = horizVec / (float)(w-1);
 
+
     createVertices(upLeft->getPos(), vertStep, horizStep);
 
-    connectSprings();
+    //connectSprings();
+    
     connectNewSprings();
 }
+
+//****************************************************
+// Cloth Class - Constuctor Helpers
+//****************************************************
+void Cloth::initCounts() {
+    numVertices = 0;
+    numStretchSprings = 0;
+    numShearSprings = 0;
+    numBendSprings = 0;
+}
+
 
 //****************************************************
 // Cloth Constructor Helpers:
@@ -127,7 +143,8 @@ void Cloth::createDefaultCloth(int w, int h) {
 
     createVertices(upLeft, vertStep, horizStep);
     
-    connectSprings();
+    //connectSprings();
+    
     connectNewSprings();
 }
 
@@ -144,8 +161,13 @@ void Cloth::createVertices(glm::vec3 upLeft, glm::vec3 vertStep, glm::vec3 horiz
     pointDrawSize = glm::length(horizStep)*0.2;
 
     // Sets size of the Vector holding the vertices to W * H
-    vertexMatrix.resize(this->width * this->height);
+    numVertices = this->width * this->height;
+    vertexMatrix.resize(numVertices);
 
+    actualWidth = glm::length(horizStep) * (this->width - 1);
+    actualHeight = glm::length(vertStep) * (this->height - 1);
+
+    /*
     // Set Spring Rest Lengths   
     float stretchLength = glm::length(horizStep);
     float bendLength = 2 * stretchLength;
@@ -154,7 +176,7 @@ void Cloth::createVertices(glm::vec3 upLeft, glm::vec3 vertStep, glm::vec3 horiz
     stretchConst = UNIT_STRETCH / stretchLength;
     shearConst = UNIT_SHEAR / shearLength;
     bendConst = UNIT_BEND / bendLength;
-
+    */
 
     // Iterate through and create each Vertex
     for(int h = 0; h < this->height; h++) {
@@ -165,8 +187,10 @@ void Cloth::createVertices(glm::vec3 upLeft, glm::vec3 vertStep, glm::vec3 horiz
 
             glm::vec3 temp = upLeft + ((float)h * vertStep) + ((float)w * horizStep);
             
-            vertexMatrix[vertIndex] = new Vertex(temp.x, temp.y, temp.z, stretchConst, shearConst, bendConst);
-            vertexMatrix[vertIndex]->setSpringRestLengths(stretchLength, bendLength, shearLength); 
+            vertexMatrix[vertIndex] = new Vertex(temp.x, temp.y, temp.z);
+
+            //vertexMatrix[vertIndex] = new Vertex(temp.x, temp.y, temp.z, stretchConst, shearConst, bendConst);
+            //vertexMatrix[vertIndex]->setSpringRestLengths(stretchLength, bendLength, shearLength); 
 
             // Sets its position in the Grid of the cloth
             vertexMatrix[vertIndex]->setPosition(w, h);
@@ -419,6 +443,7 @@ void Cloth::addStretch(int x1, int y1, int x2, int y2) {
 
     Spring* temp = new Spring(v1, v2, "STRETCH");
     stretchMatrix.push_back(temp);
+    numStretchSprings++;
 }
 //****************************************************
 // Add Shear
@@ -427,8 +452,10 @@ void Cloth::addStretch(int x1, int y1, int x2, int y2) {
 void Cloth::addShear(int x1, int y1, int x2, int y2) {
     Vertex* v1 = this->getVertex(x1, y1);
     Vertex* v2 = this->getVertex(x2, y2);
+
     Spring* temp = new Spring(v1, v2, "SHEAR");
     shearMatrix.push_back(temp);
+    numShearSprings++;
 }
 //****************************************************
 // Add Bend
@@ -437,9 +464,35 @@ void Cloth::addShear(int x1, int y1, int x2, int y2) {
 void Cloth::addBend(int x1, int y1, int x2, int y2) {
     Vertex* v1 = this->getVertex(x1, y1);
     Vertex* v2 = this->getVertex(x2, y2);
+
     Spring* temp = new Spring(v1, v2, "BEND");
     bendMatrix.push_back(temp);   
+    numBendSprings++;
 }
+
+//****************************************************
+// Print Stats
+//      - Prints Cloth Stats:
+//****************************************************
+void Cloth::printStats() {
+    std::cout << std::endl;
+    std::cout << "---------------------------------------" << std::endl;
+    std::cout << " Cloth Information: " << std::endl;
+    std::cout << "---------------------------------------" << std::endl;    
+    std::cout << "Actual Dimensions: " << actualWidth << " x " << actualHeight << std::endl;
+    std::cout << "Vertex Dimensions: " << width << " x " << height << std::endl;
+    std::cout << "Total # of Vertices: " << numVertices << std::endl;
+    std::cout << "Total # of Springs: " << numStretchSprings + numShearSprings + numBendSprings << std::endl;
+    std::cout << "# of STRETCH: " << numStretchSprings << std::endl;
+    std::cout << "# of   SHEAR: " << numShearSprings << std::endl;
+    std::cout << "# of    BEND: " << numBendSprings << std::endl;
+
+    Spring::printStats();
+
+    std::cout << "---------------------------------------" << std::endl;        
+
+}
+
 
 
 //****************************************************
@@ -448,6 +501,9 @@ void Cloth::addBend(int x1, int y1, int x2, int y2) {
 //        performing tests near the edge where certain
 //        springs wouldn't have anything to connect to.
 //****************************************************
+
+/*
+
 void Cloth::connectSprings() {
     for(int h = 0; h < height; h++) {
         for(int w = 0; w < width; w++) {
@@ -519,4 +575,4 @@ void Cloth::connectSprings() {
     }
 }
 
-
+*/

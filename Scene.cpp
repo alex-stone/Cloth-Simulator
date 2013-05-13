@@ -87,7 +87,6 @@ float calcsPerFrame = 0.0f;
 int numCalculations = 0;
 
 // Drawing Cloth Structure Variables:
-const float DRAW_RADIUS = 0.02f;
 bool spherePoints = true;
 
 
@@ -98,7 +97,7 @@ bool constantStep;
 int oldFrameNum = 0;
 float lastFPStime = 0.0f;
 
-int numTimeSteps = 10;
+int numTimeSteps = 1;
 const float STEP = 0.007f;
 
 const float STEP_INC = 0.001f;
@@ -119,6 +118,7 @@ float windINC = 0.4f;
 
 // Debug Variables:
 bool debugFunc = false;
+bool debugStats = true;
 
 // HUD Variables;
 const int LINE_SIZE = 15;
@@ -864,6 +864,8 @@ void drawTestLine() {
 //****************************************************
 void drawClothPoints() {
   
+    float radius = cloth->getPointDrawSize();
+
     if(spherePoints) {
 
          for(int h = 0; h < cloth->getHeight(); h++) {
@@ -878,7 +880,7 @@ void drawClothPoints() {
                 glPushMatrix();
                 glTranslatef(center.x, center.y, center.z);
                 
-                glutSolidSphere(DRAW_RADIUS , 10 , 10 );
+                glutSolidSphere(radius , 10 , 10 );
                 glPopMatrix();
 
             }
@@ -1454,6 +1456,10 @@ void loadCloth(const char* input) {
     inpfile.close();
     
     cloth = new Cloth(density, corners[0], corners[1], corners[2], corners[3], euler);
+
+    if(debugStats) {
+        cloth->printStats();
+    }
 
     //cloth = new Cloth(width, height, corners[0], corners[1], corners[2], corners[3], euler);
     cloth->setFixedCorners(c1, c2, c3, c4);
