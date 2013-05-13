@@ -11,6 +11,9 @@ const float DEF_SHEAR = 1000.0f;
 const float DEF_BEND = 1000.0f;
 const float DEF_DAMP = 100.0f;
 
+// New Useful Variables:
+const float DAMP_FACTOR = 0.8f;
+
 bool DEBUG = true ;
 
 //****************************************************
@@ -138,7 +141,11 @@ void Vertex::connectBend(Vertex* a, int n) {
 void Vertex::updateVerlet(float timeChange) {
 
     // Works but is really slow
-   glm::vec3 newPos = position + (position - oldPos)*(timeChange/oldTimeChange)+ acceleration * (timeChange * timeChange);
+   //glm::vec3 newPos = position + (position - oldPos)*(timeChange/oldTimeChange)+ acceleration * (timeChange * timeChange);
+
+
+    glm::vec3 newPos = position + (position - oldPos)*(1.0f - DAMP_FACTOR)+ acceleration * (timeChange * timeChange);
+
 
 
     //glm::vec3 newPos = position + (position - oldPos) * (timeChange / oldTimeChange) + acceleration * (timeChange * timeChange);
@@ -184,7 +191,7 @@ void Vertex::update(float timeChange, bool euler) {
         firstUpdate = false;
     }
 
-    updateInternal();
+  //  updateInternal();
 
     if(!fixed) {
         if(euler) {
@@ -197,6 +204,16 @@ void Vertex::update(float timeChange, bool euler) {
     // Make sure this is correct
     this->acceleration = glm::vec3(0,0,0);
 }
+
+
+void Vertex::offsetCorrection(glm::vec3 correctionVec) {
+    if(!fixed){
+        position += correctionVec;
+    }
+
+}
+
+
 
 //****************************************************
 // Update Internal Forces:
@@ -214,7 +231,7 @@ void Vertex::updateInternal() {
     if(xPos == 1 && yPos == 1 && DEBUG) {
         std::cout << "Internal Acceleration " << "(" << internalAccel.x << ", " << internalAccel.y << ", " << internalAccel.z << ")" << std::endl;
 
-    }
+    } 
 
 
     // Net Acceleration = Sum of 3 vectors
@@ -402,6 +419,15 @@ glm::vec3 Vertex::vectorTo(Vertex* a) {
     glm::vec3 returnVec = posA - this->position;
 
     return returnVec;
+}
+
+//****************************************************
+// Print Helper Functions:
+//      - For Displaying Info and Debugging
+//****************************************************
+
+void Vertex::printCoordinate() {
+    std::cout << "(" << xPos << ", " << yPos << ")" << std::endl;
 }
 
 void Vertex::printPosition() {

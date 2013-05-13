@@ -16,6 +16,7 @@ const float UNIT_BEND = 50.0f;
 
 // Debug Variables
 bool debug = false;
+bool useSpringForce = true;
 
 //****************************************************
 // Cloth Class - Constructors
@@ -70,6 +71,8 @@ Cloth::Cloth(int density, Vertex* upLeft, Vertex* upRight, Vertex* downRight, Ve
 
     horizVec = horizVec / (float)(this->width - 1);
     vertVec = vertVec / (float)(this->height - 1);
+
+
 
     // Create the vertices and Connect all the Springs
     createVertices(upLeft->getPos(), vertVec, horizVec);
@@ -137,6 +140,9 @@ void Cloth::createDefaultCloth(int w, int h) {
 //****************************************************
 void Cloth::createVertices(glm::vec3 upLeft, glm::vec3 vertStep, glm::vec3 horizStep) {
     
+    // Sets the radius of the spheres that will be drawn for the points when drawing the structure
+    pointDrawSize = glm::length(horizStep)*0.2;
+
     // Sets size of the Vector holding the vertices to W * H
     vertexMatrix.resize(this->width * this->height);
 
@@ -170,14 +176,60 @@ void Cloth::createVertices(glm::vec3 upLeft, glm::vec3 vertStep, glm::vec3 horiz
 }
 
 //****************************************************
-// Reset Acceleration:
-//      - Resets Acceleration for all Vertices to 0.
+// Update:
+//      - Calls update on each vertex for given
+//          timestep
+//      - TODO: Separate Spring Class, then do
+//          satisfy constraints after update.
 //****************************************************
-void Cloth::resetAccel() {
+void Cloth::update(float timestep) {
+    // Iterate through vertexMatrix, and update each individual particle
+
+    updateSprings();
+
     for(int i = 0; i < height*width; i++) {
-        vertexMatrix[i]->resetAccel();
+        vertexMatrix[i]->update(timestep, euler);
     }
+
 }
+
+
+//****************************************************
+// Update Springs:
+//      - Goes through Spring and applies the force
+//        to Vertices its connected to
+//****************************************************
+void Cloth::updateSprings() {
+    if(useSpringForce) {
+
+        for(int i = 0; i < stretchMatrix.size(); i++) {
+            stretchMatrix[i]->applyForce();
+        }
+
+        for(int j = 0; j < shearMatrix.size(); j++) {
+            shearMatrix[j]->applyForce();
+        }
+
+        for(int k = 0; k < stretchMatrix.size(); k++) {
+            stretchMatrix[k]->applyForce();
+        }
+
+    } else {
+        for(int i = 0; i < stretchMatrix.size(); i++) {
+            stretchMatrix[i]->applyCorrection();
+        }
+
+        for(int j = 0; j < shearMatrix.size(); j++) {
+            shearMatrix[j]->applyCorrection();
+        }
+
+        for(int k = 0; k < stretchMatrix.size(); k++) {
+            stretchMatrix[k]->applyCorrection();
+        }
+    }
+
+}
+
 
 //****************************************************
 // Update Collision:
@@ -223,6 +275,17 @@ void Cloth::updateNormals() {
             v4->updateNormal(triNormal2);
 
         }
+    }
+}
+
+
+//****************************************************
+// Reset Acceleration:
+//      - Resets Acceleration for all Vertices to 0.
+//****************************************************
+void Cloth::resetAccel() {
+    for(int i = 0; i < height*width; i++) {
+        vertexMatrix[i]->resetAccel();
     }
 }
 
@@ -278,22 +341,6 @@ void Cloth::addConstantAccel(glm::vec3 accel) {
 
 }
 
-
-//****************************************************
-// Update:
-//      - Calls update on each vertex for given
-//          timestep
-//      - TODO: Separate Spring Class, then do
-//          satisfy constraints after update.
-//****************************************************
-void Cloth::update(float timestep) {
-    // Iterate through vertexMatrix, and update each individual particle
-
-    for(int i = 0; i < height*width; i++) {
-        vertexMatrix[i]->update(timestep, euler);
-    }
-
-}
 
 //****************************************************
 // Set Fixed Corners:

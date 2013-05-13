@@ -28,9 +28,18 @@ class Spring {
   	// Getters
   	std::string getType() { return type; };
 
+    Vertex* getV1() { return vertex1; };
+    Vertex* getV2() { return vertex2; };
+
+    glm::vec3 getPos1() { return vertex1->getPos(); };
+    glm::vec3 getPos2() { return vertex2->getPos(); };
+
   	// Force Due to Spring:
   	glm::vec3 getForce();
   	void applyForce();
+
+    // Directly moves position instead of adding force
+    void applyCorrection();
 
 };
 #endif

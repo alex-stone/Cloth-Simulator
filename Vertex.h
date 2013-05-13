@@ -70,39 +70,43 @@ class Vertex {
     glm::vec3 getAccel() { return acceleration; };
     glm::vec3 getNorm() { return glm::normalize(normal); };
 
+
+
     void setPosition(int x, int y);
     void setSpringRestLengths(float stretch, float bend, float shear);
     void setFixedVertex(bool isFixed);
 
-    void setNormal();
-    void setNormal(glm::vec3 newNorm);
+    // Updates Position based on Acceleration & Timestep
+    void update(float timeChange, bool euler);
+    void updateVerlet(float timeChange);
+    void updateEuler(float timeChange);
 
-    void resetNorm();
+
+    void offsetCorrection(glm::vec3 correctionVec);
+
 
     // Connect Vertex a, to this Vertex, in direction n
     void connectStretch(Vertex* a, int n);
     void connectShear(Vertex* a , int n);
     void connectBend(Vertex* a, int n);
 
-    // Force Calculation Functions:
-    void updateVerlet(float timeChange);
-    void updateEuler(float timeChange);
-    void update(float timeChange, bool euler);
-
-    //void updateAccel(glm::vec3 externalForces);
-    
 
     void resetAccel();
 
     // Add Constant Acceleration's i.e. Gravity
     void addAccel(glm::vec3 accel);
-
     void addForce(glm::vec3 force);
 
     void updateInternal();
 
+    // Manage Normals
     void updateNormal(glm::vec3 addNorm);
     glm::vec3 findNormal(Vertex* v2, Vertex* v3);
+
+    void setNormal();
+    void setNormal(glm::vec3 newNorm);
+    void resetNorm();
+
     
     void updateAfterCollide(glm::vec3 newPos, glm::vec3 newVel);
    // void updateCollisions(glm::vec3 &c, float radius);
@@ -111,16 +115,14 @@ class Vertex {
     glm::vec3 getDampForce();
     glm::vec3 getForceFromSpring(float restLength, float stretchConstant, Vertex* v2);//glm::vec3 springVec);
 
+
+    // Vertex Helper Functions:
+
     // Direction To Vertex:
     glm::vec3 vectorTo(Vertex* a);
 
-
-    // Force Calculation Functions
-    //      External Forces:
-    //          - Gravity, Wind, etc...
-    //      Internal Forces:
-    //          - 12 Spring Connections
-
+    // Print Functions
+    void printCoordinate();
     void printPosition();
     void printVelocity();
     void printAccel();
