@@ -4,6 +4,7 @@
 #include <vector>
 #include "Vertex.h"
 #include "Shape.h"
+#include "Spring.h"
 
 //****************************************************
 // Cloth Header Definition
@@ -22,8 +23,11 @@ class Cloth {
     //      Spring Constants
     //      Dampening Constants
 
-    // Spring Constants - Defined for 1 UNIT Length (1 m)
+    std::vector<Spring*> stretchMatrix;
+    std::vector<Spring*> shearMatrix;
+    std::vector<Spring*> bendMatrix;
 
+    // Spring Constants - Defined for 1 UNIT Length (1 m)
 
     float springConstant;
 
@@ -61,15 +65,14 @@ class Cloth {
     // Update Cloth:
     void update(float timestep);
     void updateNormals();
-    //void update(float timestep,glm::vec3 spherePosition, float sphereRadius);
+  
+
     void updateCollision(Shape* s);
 
     void addConstantAccel(glm::vec3 accel);
     void addTriangleForce(glm::vec3 force);
-    /*
-    void addExtForce(glm::vec3 force);
-    void addExternalForce(glm::vec3 externalForce);
-*/
+
+
     void setFixedCorners(bool c1, bool c2, bool c3, bool c4);
     void connectSprings();
 
