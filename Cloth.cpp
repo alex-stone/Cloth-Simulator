@@ -6,23 +6,72 @@
 #include "Cloth.h"
 #include "Vertex.h"
 
+
+//****************************************************
+// Cloth Class - Constans
+//****************************************************
+const float UNIT_STRETCH = 100.0f;
+const float UNIT_SHEAR = 100.0f;
+const float UNIT_BEND = 50.0f;
+
+
 //****************************************************
 // Cloth Class - Constructors
 //****************************************************
-
 Cloth::Cloth() {
-    this->width = 4;
-    this->height = 4;
-
     euler = true;
+
+    createDefaultCloth(20, 20);
 }
 
 Cloth::Cloth(int w, int h) {
-    this->width = w;
-    this->height = h;
-
     euler = true;
+
+    createDefaultCloth(w, h);
 }
+
+//****************************************************
+// Cloth Constructor:
+//      - Takes 4 points and a density value
+//      - The density value indicates the # of divisions
+//          that will occur on the shorter edge of the
+//          Cloth
+//      - This ensures that in rectangular cloth's the
+//          grid is still made up of squares
+//      - Also determines the spring constants based
+//          on the length of the divisions
+//****************************************************
+Cloth::Cloth(int density, Vertex* upLeft, Vertex* upRight, Vertex* downRight, Vertex* downLeft, bool isEuler) {
+
+    // Determine which edge is shorter:
+    glm::vec3 horizVec = upLeft->vectorTo(upRight);
+    glm::vec3 vertVec = upLeft->vectorTo(downLeft);
+
+    float horizLength = glm::length(horizVec);
+    float vertLength = glm::length(vertVec);
+
+    if(horizLength < vertLength) {
+        this->width = density;
+        this->height = (int) ((density * vertLength) / horizLength);
+
+    } else {
+        this->height = density;
+        this->width = (int) ((density * horizLength) / vertLength);
+    }
+
+    // Sets size of the Vector holding the vertices to W * H
+    vertexMatrix.resize(this->width * this->height);
+    euler = isEuler;
+
+    horizVec = horizVec / (float)(this->width - 1);
+    vertVec = vertVec / (float)(this->height - 1);
+
+    // Create the vertices and Connect all the Springs
+    createVertices(upLeft->getPos(), vertVec, horizVec);
+    connectSprings();
+
+}
+
 
 //****************************************************
 // Cloth Constructor called from Parser
@@ -46,122 +95,179 @@ Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, V
     glm::vec3 vertStep = vertVec / (float)(h-1);
     glm::vec3 horizStep = horizVec / (float)(w-1);
 
+    createVertices(upLeft->getPos(), vertStep, horizStep);
+
+}
+
+//****************************************************
+// Cloth Constructor Helpers:
+//****************************************************
+void Cloth::createDefaultCloth(int w, int h) {
+    this->width = w;
+    this->height = h;
+
+    glm::vec3 upLeft(-1, 0, 1);
+    glm::vec3 horizStep(2, 0, 0);
+    glm::vec3 vertStep(0, 0, -2);
+
+    horizStep = horizStep / (float) (w - 1);
+    vertStep = vertStep / (float) (h - 1);
+
+    createVertices(upLeft, vertStep, horizStep);
+    connectSprings();
+}
+
+//****************************************************
+// Create Vertices:
+//      - Sets up the vertices, based on the top left
+//          point, and the vector that goes to the
+//          next vertex, both vertically & horizontally
+//      - Width & Height already determined
+//****************************************************
+void Cloth::createVertices(glm::vec3 upLeft, glm::vec3 vertStep, glm::vec3 horizStep) {
+
     // Set Spring Rest Lengths   
     float stretchLength = glm::length(horizStep);
     float bendLength = 2 * stretchLength;
     float shearLength = sqrt(2 * stretchLength * stretchLength);
 
-    // Iterate through and create each Vertex
-    for(int i = 0; i < h; i++) {
-        for(int j = 0; j < w; j++) {
-            glm::vec3 temp = upLeft->getPos() + ((float)i * vertStep) + ((float)j * horizStep);
-            
-            //I*W + j indexes vertexMatrix like a 2D array vertexMatrix[i][j]; 
-            vertexMatrix[i*w + j] = new Vertex(temp.x, temp.y, temp.z);
-            vertexMatrix[i*w + j]->setSpringRestLengths(stretchLength, bendLength, shearLength); 
-            //vertexMatrix[i*w + j]->setSpringConstants(stretchConst, shearConst, bendConst);
+    std::cout << "STRETCH LENGTH = " << stretchLength << std::endl;
 
-            vertexMatrix[i*w + j]->setPosition(j, i);
+    stretchConst = UNIT_STRETCH / stretchLength;
+    shearConst = UNIT_SHEAR / shearLength;
+    bendConst = UNIT_BEND / bendLength;
+
+    // Iterate through and create each Vertex
+    for(int h = 0; h < this->height; h++) {
+        for(int w = 0; w < this->width; w++) {
+
+            //I*W + j indexes vertexMatrix like a 2D array vertexMatrix[i][j]; 
+            int vertIndex = h * (this->width) + w;
+
+            glm::vec3 temp = upLeft + ((float)h * vertStep) + ((float)w * horizStep);
+            
+            vertexMatrix[vertIndex] = new Vertex(temp.x, temp.y, temp.z, stretchConst, shearConst, bendConst);
+            vertexMatrix[vertIndex]->setSpringRestLengths(stretchLength, bendLength, shearLength); 
+
+            // Sets its position in the Grid of the cloth
+            vertexMatrix[vertIndex]->setPosition(w, h);
         }
     }
-
-    this->connectSprings();
-
 }
 
+//****************************************************
+// Reset Acceleration:
+//      - Resets Acceleration for all Vertices to 0.
+//****************************************************
+void Cloth::resetAccel() {
+    for(int i = 0; i < height*width; i++) {
+        vertexMatrix[i]->resetAccel();
+    }
+}
+
+//****************************************************
+// Update Collision:
+//      - Iterates through each vertex and tests if it
+//          intersects with the shape
+//****************************************************
 void Cloth::updateCollision(Shape* s) {
     for(int i = 0; i < height*width; i++) {
         s->collide(vertexMatrix[i]);
     }
 }
-/*
 
-// Iterate through each Square and for each 2 triangles, calculate normals
+//****************************************************
+// Update Normals:
+//      - Iterates through each square of the grid of
+//          Vertices and for each of the 2 triangles
+//          in the square computes the normal.
+//      - Adds the normal to the Vertex, so normal is
+//          a weighted average of all of the its
+//          surrounding triangles
+//****************************************************
 void Cloth::updateNormals() {
+    for(int h = 0; h < this->height - 1; h++) {
+        for(int w = 0; w < this->width - 1; w++) {
+            Vertex* v1 = getVertex(h,w);
+            Vertex* v2 = getVertex(h+1, w);
+            Vertex* v3 = getVertex(h, w+1);
+            Vertex* v4 = getVertex(h+1, w+1);
 
-    for(int i = 0; i < height*width; i++) {
-        vertexMatrix[i]->resetNorm();
+            glm::vec3 triNormal1 = glm::normalize(v2->findNormal(v1,v3));
+
+            v1->updateNormal(triNormal1);
+            v2->updateNormal(triNormal1);
+            v3->updateNormal(triNormal1);
+
+            glm::vec3 triNormal2 = glm::normalize(v4->findNormal(v2,v3));
+            
+            v2->updateNormal(triNormal2);
+            v3->updateNormal(triNormal2);
+            v4->updateNormal(triNormal2);
+        }
     }
+}
 
-    for(int i = 0; i < this->width - 1; i++) {
-        for(int j = 0; j < this->height - 1; j++) {
+//****************************************************
+// Add Triangle Force:
+//      - Add's a Force that acts on each triangle
+//          as opposed to each vertex
+//      - Iterates through each triangle and calculates
+//          the force, and adds that to each vertex
+//          of the triangle
+//      - TODO: Weight Force (1/3) ?
+//****************************************************
+void Cloth::addTriangleForce(glm::vec3 force){
+    for(int h = 0; h < this->height - 1; h++) {
+        for(int w = 0; w < this->width - 1; w++) {
+            Vertex* v1 = getVertex(h,w);
+            Vertex* v2 = getVertex(h+1, w);
+            Vertex* v3 = getVertex(h, w+1);
+            Vertex* v4 = getVertex(h+1, w+1);
 
-            // V1 cross V2
-            Vertex* a = this->getVertex(i+1, j);
-            Vertex* b = this->getVertex(i, j);
-            Vertex* c = this->getVertex(i, j+1);
+            // Calculates Force Contribution on the first Triangle
+            glm::vec3 triNormal1 = glm::normalize(v2->findNormal(v1,v3));
+            glm::vec3 triForce1 = triNormal1 * glm::dot(triNormal1, force);
 
-            glm::vec3 vec1 = b->getPos() - a->getPos();
-            glm::vec3 vec2 = c->getPos() - a->getPos();
+            v1->addForce(triForce1);
+            v2->addForce(triForce1);
+            v3->addForce(triForce1);
 
-            glm::vec3 triNormal = glm::cross(vec1, vec2);
+            // Calculates Force Contribution on the Second Triangle
+            glm::vec3 triNormal2 = glm::normalize(v4->findNormal(v2,v3));
+            glm::vec3 triForce2 = triNormal2 * glm::dot(triNormal2, force);
 
-            a->updateNormal(triNormal);
-            b->updateNormal(triNormal);
-            c->updateNormal(triNormal);
-
-            a = this->getVertex(i+1, j+1);
-            b = this->getVertex(i+1, j);
-            c = this->getVertex(i, j+1);
-
-            vec1 = b->getPos() - a->getPos();
-            vec2 = c->getPos() - a->getPos();
-
-            triNormal = glm::cross(vec1, vec2);
-
-            a->updateNormal(triNormal);
-            b->updateNormal(triNormal);
-            c->updateNormal(triNormal);
-
+            v2->addForce(triForce2);
+            v3->addForce(triForce2);
+            v4->addForce(triForce2);
 
         }
     }
+}
 
-}*/
 
-void Cloth::updateNormals(){
-
-    for(int i = 0; i< this->height -1; i++){
-        for(int z= 0; z < this->width -1 ; z++){
-            glm::vec3 triNormal =vertexMatrix[z * this->width + (i+1)]->findNormal(vertexMatrix[z * this->width + i], vertexMatrix[(z+1) * this->width + i]);
-            vertexMatrix[z * this->width + (i+1)]->updateNormal(triNormal);
-            vertexMatrix[z * this->width + i]->updateNormal(triNormal);
-            vertexMatrix[(z+1) * this->width + i]->updateNormal(triNormal);
-
-            glm::vec3 tempNormal = vertexMatrix[(z+1) * this->width + (i+1)]->findNormal(vertexMatrix[z * this->width + (i+1)], vertexMatrix[(z+1) * this->width + i]);
-            vertexMatrix[(z+1) * this->width + (i+1)]->updateNormal(tempNormal);
-            vertexMatrix[z * this->width + (i+1)]->updateNormal(tempNormal);
-            vertexMatrix[(z+1) * this->width + i]->updateNormal(tempNormal);
-        }
-    }
-
+//****************************************************
+// Add Constant Accel:
+//      - Adds a constant force to each of the cloth's
+//          vertices. I.E. Gravity
+//****************************************************
+void Cloth::addConstantAccel(glm::vec3 accel) {
     
-}
+    for(int i = 0; i < height*width; i++) {
+       // vertexMatrix[i]->updateAccel(externalForce);
+        vertexMatrix[i]->addAccel(accel);
+    }
 
-void Cloth::addExtForce(glm::vec3 force){
-    for(int i = 0; i< this->height -1; i++){
-        for(int z= 0; z < this->width -1 ; z++){
-            glm::vec3 triNormal =glm::normalize(vertexMatrix[z * this->width + (i+1)]->findNormal(vertexMatrix[z * this->width + i], vertexMatrix[(z+1) * this->width + i]));
-            glm::vec3 tempNormal = glm::normalize(vertexMatrix[(z+1) * this->width + (i+1)]->findNormal(vertexMatrix[z * this->width + (i+1)], vertexMatrix[(z+1) * this->width + i]));
-            triNormal *= glm::dot(triNormal, force);
-            tempNormal *= glm::dot(tempNormal, force);
-            vertexMatrix[z * this->width + (i+1)]->updateAccel(triNormal);
-            vertexMatrix[z * this->width + (i)]->updateAccel(triNormal);
-            vertexMatrix[(z+1) * this->width + (i)]->updateAccel(triNormal);
-            vertexMatrix[(z+1) * this->width + (i+1)]->updateAccel(tempNormal);
-            vertexMatrix[(z) * this->width + (i+1)]->updateAccel(tempNormal);
-            vertexMatrix[(z+1) * this->width + (i)]->updateAccel(tempNormal);
-
-            }
-     }
 }
 
 
-
-
-
-
-
+//****************************************************
+// Update:
+//      - Calls update on each vertex for given
+//          timestep
+//      - TODO: Separate Spring Class, then do
+//          satisfy constraints after update.
+//****************************************************
 void Cloth::update(float timestep) {
     // Iterate through vertexMatrix, and update each individual particle
 
@@ -171,26 +277,11 @@ void Cloth::update(float timestep) {
 
 }
 
-/*void Cloth::update(float timestep,glm::vec3 spherePos, float sphereRadius) {
-    // Iterate through vertexMatrix, and update each individual particle
-
-    for(int i = 0; i < height*width; i++) {
-        vertexMatrix[i]->updateCollisions(spherePos,sphereRadius);
-        vertexMatrix[i]->update(timestep,euler);
-        
-    }
-
-}
-*/
-
-void Cloth::addExternalForce(glm::vec3 externalForce) {
-    
-    for(int i = 0; i < height*width; i++) {
-        vertexMatrix[i]->updateAccel(externalForce);
-    }
-
-}
-
+//****************************************************
+// Set Fixed Corners:
+//      - Sets certain corners to be fixed in space /
+//          unmovable
+//****************************************************
 void Cloth::setFixedCorners(bool c1, bool c2, bool c3, bool c4) {
     
     if(c1) {
@@ -210,6 +301,12 @@ void Cloth::setFixedCorners(bool c1, bool c2, bool c3, bool c4) {
     }
 }
 
+//****************************************************
+// Connect Springs:
+//      - Connects all of the springs in the cloths
+//        performing tests near the edge where certain
+//        springs wouldn't have anything to connect to.
+//****************************************************
 void Cloth::connectSprings() {
     for(int i = 0; i < width; i++) {
         for(int j = 0; j < height; j++) {
