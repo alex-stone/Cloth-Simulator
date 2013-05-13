@@ -3,6 +3,7 @@
 #include <fstream>
 #include <cmath>
 #include <sstream>
+#include "FreeImage.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -54,6 +55,9 @@ bool smooth;
 bool running;       // Is simulation running in real-time or paused for step through
 bool light;
 
+// Output Photo Flag
+bool saveImage;
+
 // Options Menu Drawing Variables
 bool showOptions;
 bool reopenOptions;     // Indicates to reopen Options menu if resized to width > 700.
@@ -82,6 +86,7 @@ float framesPerSecond = 30.0f;
 float frameDuration; // in Milliseconds
 float currentFPS = 0.0f;
 int frameNum = 0;
+int cameraNum = 0;
 
 float calcsPerFrame = 0.0f;
 int numCalculations = 0;
@@ -97,8 +102,8 @@ bool constantStep;
 int oldFrameNum = 0;
 float lastFPStime = 0.0f;
 
-int numTimeSteps = 5;
-const float STEP = 0.007f;
+int numTimeSteps = 15;
+const float STEP = 0.005f;
 
 const float STEP_INC = 0.001f;
 float timestep = 0.005f;
@@ -113,6 +118,7 @@ glm::vec3 gravityAccel(0.0f, -9.81f, 0.0f);// -9.81f, 0.0f);
 //TODO: WIND INFO
 bool wind;
 glm::vec3 windForce(0.0f, 0.0f, -1.0f);
+
 float windScale = 1.0f;
 float windINC = 0.4f;
 
@@ -323,6 +329,8 @@ void initScene() {
     // Initialize External Force Variables
     gravity = true;
     wind = false;
+
+    saveImage = false;
 }
 
 //****************************************************
@@ -390,7 +398,8 @@ void myReshape(int w, int h) {
     }
 
     // If the window was resized from a smaller size and Options were open, then reopen.
-    if(w > 700 && reopenOptions) {
+    if(w > 700 && reopenOptions && !saveImage) {
+
         showOptions = true;
         reopenOptions = false;
     }
@@ -829,7 +838,14 @@ void printOptionsHeader() {
     glEnd();
 
     // Print's Title
-    printText(middle-100, bottom - 10, color.x, color.y, color.z, "TOGGLE OPTIONS: (O) ", GLUT_BITMAP_HELVETICA_18);
+    printText(5, bottom - 10, color.x, color.y, color.z, "TOGGLE OPTIONS: (O) ", GLUT_BITMAP_HELVETICA_18);
+    
+    if(saveImage) {
+        printText(viewport.w-150, bottom - 10, 1.0f, 0.0f, 0.0f, "RECORDING (P)", GLUT_BITMAP_HELVETICA_18);
+    } else {
+        printText(viewport.w-200, bottom - 10, color.x, color.y, color.z, "NOT", GLUT_BITMAP_HELVETICA_18);
+        printText(viewport.w-150, bottom - 10, color.x, color.y, color.z, "RECORDING (P)", GLUT_BITMAP_HELVETICA_18);
+    }
 
 }
 
@@ -863,7 +879,7 @@ void drawTestLine() {
 //     - Draws all of the points in the cloth
 //****************************************************
 void drawClothPoints() {
-  
+
     float radius = cloth->getPointDrawSize();
 
     if(spherePoints) {
@@ -918,8 +934,10 @@ void drawClothPoints() {
 //     - Draws all of the stretch springs
 //****************************************************
 void drawStretchSprings() {
+
     vector<Spring*> temp = cloth->getStretchSprings();
 
+    glPushMatrix();
     glBegin(GL_LINES);
 
     glColor3f(1.0f, 0.0f, 0.0f);
@@ -935,6 +953,8 @@ void drawStretchSprings() {
     }
 
     glEnd();
+    glPopMatrix();
+
 
 }
 
@@ -1079,6 +1099,61 @@ void renderCloth() {
 
 }
 
+
+//****************************************************
+// Write Image
+//      - Reads in the Buffer and outputs it to an
+//        image.
+//****************************************************
+void writeImage(int imageNum) {
+    // Do Stuff
+
+    // Note: Bitmaps have their origin (0, 0) at bottom left, and our (0,0) is top left
+
+    std::string fileName = "test.png";
+
+    FreeImage_Initialise();
+    
+    FIBITMAP* bitmap = FreeImage_Allocate(viewport.w, viewport.h, 24);
+    RGBQUAD color;
+
+    int W = viewport.w;
+    int H = viewport.h;
+
+    char *pixel_data = new char[3*W*H];
+
+    glReadBuffer(GL_FRONT);
+    glReadPixels(0, 30, W, H, GL_BGR, GL_UNSIGNED_BYTE, pixel_data);
+
+    // Iterate through pixelBucket and do FreeImage.SetPixelColor
+    // Note that FreePixel's Blue and Red are switched.
+    for(int i = 0; i < viewport.w; i++) {
+        for(int j = 0; j < viewport.h; j++) {
+
+        color.rgbRed = pixel_data[i*(viewport.h*3) + j*3];
+        color.rgbGreen = pixel_data[i*viewport.h*3 + j*3+1];
+        color.rgbBlue = pixel_data[i*viewport.h*3 + j*3+2];
+
+        FreeImage_SetPixelColor(bitmap, j, i, &color);
+        }
+
+    } 
+
+    int count = cameraNum;
+
+    std::stringstream frameStream;
+    frameStream << "images/frame" << count << ".png";
+    std::string frameOut = frameStream.str();
+
+    if (FreeImage_Save(FIF_PNG, bitmap, frameOut.c_str(), 0))
+    cout << "Image Successfuly Saved to file: " << frameOut << "!" << std::endl;
+
+    FreeImage_DeInitialise();
+
+    cameraNum++;
+}
+
+
 //****************************************************
 // Update Collisions:
 //      - Iterates through each Shape and tests the
@@ -1166,6 +1241,9 @@ void processFrame() {
         //lastUpdateTime = glutGet(GLUT_ELAPSED_TIME);
 
     }
+    if(saveImage) {
+        writeImage(frameNum);
+    }
 
     frameNum++;
 
@@ -1189,6 +1267,10 @@ void stepFrame() {
         updateCollisions();
 
         numCalculations++;
+    }
+
+    if(saveImage) {
+        writeImage(frameNum);
     }
 
     // The Actual Printed Frame
@@ -1269,7 +1351,7 @@ void myDisplay() {
     
     // Sets OpenGL Variables to Render 2D:
     glut2DSetup();
-    printHUD();
+    //printHUD();
     printOptionsHeader();
 
     if(showOptions) {
@@ -1310,32 +1392,34 @@ GLuint drawShape(Shape* s) {
         glColor3f(0.3f, 0.3f, 0.6f);
         
         // TODO: 
-        glutSolidSphere(s->getRadius() - 0.1f, 50 ,50 );
+        glutSolidSphere(s->getRadius() - 0.01f, 50 ,50 );
         glPopMatrix();
     } 
 
     if(s->getType() == "PLANE") {
 
+
+
         glm::vec3 norm = s->getNormal();
         glm::vec3 point = s->getUL();
-
 
         glPushMatrix();
 
         glBegin(GL_QUADS);
-        glColor3f(1.0f, 0.0f, 0.0f);
-        glNormal3f(norm.x, norm.y, norm.z);
+            glColor3f(0.804f, 0.412f, 0.118f);
+            
+            glNormal3f(norm.x, norm.y, norm.z);
 
-        glVertex3f(point.x, point.y, point.z );
-        
-        point = s->getUR();
-        glVertex3f(point.x, point.y, point.z );
+            glVertex3f(point.x, point.y, point.z );
+            
+            point = s->getUR();
+            glVertex3f(point.x, point.y, point.z );
 
-        point = s->getLR();
-        glVertex3f(point.x, point.y, point.z );
-        
-        point = s->getLL();
-        glVertex3f(point.x, point.y, point.z );
+            point = s->getLR();
+            glVertex3f(point.x, point.y, point.z );
+            
+            point = s->getLL();
+            glVertex3f(point.x, point.y, point.z );
 
         glEnd();
         glPopMatrix();
@@ -1643,7 +1727,9 @@ void keyPress(unsigned char key, int x, int y) {
                 showOptions = false;
                 reopenOptions = true;
             } else {
-                showOptions = !showOptions;
+                if(!saveImage) {
+                    showOptions = !showOptions;
+                }
             }
             break;
 
@@ -1657,6 +1743,11 @@ void keyPress(unsigned char key, int x, int y) {
             break;
 
         // Exits the Program
+        case 'p':
+            saveImage = !saveImage;
+            showOptions = false;
+            break;
+
         case ' ':
             std::exit(1);
             break;
@@ -1706,6 +1797,21 @@ void arrowKeyPress(int key, int x, int y) {
     myDisplay();
 }
 
+/*
+void screendump(int W, int H) {
+    FILE   *out = fopen("screenshot.tga","wb");
+    char   *pixel_data = new char[3*W*H];
+    short  TGAhead[] = { 0, 2, 0, 0, 0, 0, W, H, 24 };
+     
+    glReadBuffer(GL_FRONT);
+    glReadPixels(0, 0, W, H, GL_BGR, GL_UNSIGNED_BYTE, pixel_data);
+     
+    fwrite(&amp; TGAhead, sizeof(TGAhead), 1, out);
+    fwrite(pixel_data, 3*W*H, 1, out);
+    fclose(out);
+ 
+    delete[] pixel_data; 
+}*/
 
 int main(int argc, char *argv[]) {
    
