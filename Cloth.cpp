@@ -75,6 +75,8 @@ Cloth::Cloth(int density, Vertex* upLeft, Vertex* upRight, Vertex* downRight, Ve
     createVertices(upLeft->getPos(), vertVec, horizVec);
     connectSprings();
 
+    connectNewSprings();
+
 }
 
 
@@ -102,6 +104,8 @@ Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, V
 
     createVertices(upLeft->getPos(), vertStep, horizStep);
 
+    connectSprings();
+    connectNewSprings();
 }
 
 //****************************************************
@@ -119,7 +123,9 @@ void Cloth::createDefaultCloth(int w, int h) {
     vertStep = vertStep / (float) (h - 1);
 
     createVertices(upLeft, vertStep, horizStep);
+    
     connectSprings();
+    connectNewSprings();
 }
 
 //****************************************************
@@ -315,9 +321,9 @@ void Cloth::setFixedCorners(bool c1, bool c2, bool c3, bool c4) {
 
 //****************************************************
 // Connect Springs:
-//      - Connects all of the springs in the cloths
-//        performing tests near the edge where certain
-//        springs wouldn't have anything to connect to.
+//      - Connects all of the Springs in the Cloth
+//      - Only Checks % adds Springs downwards and
+//          leftwards, to avoid duplicates
 //****************************************************
 void Cloth::connectNewSprings() {
     for(int h = 0; h < this->height; h++) {
@@ -329,18 +335,16 @@ void Cloth::connectNewSprings() {
             if(w < width - 1) {                    // If there is a vertex 1 spaces to the right
                 this->addStretch(w, h, w+1, h);
 
-                
                 if(w < width - 2) {                // If there is a vertex 2 spaces to the right
                     this->addBend(w, h, w+2, h);
                 }
             }
 
             // Connect Downwards
-            if(h < height - 1) {
+            if(h < height - 1) {                // If There are vertices 1 spaces down
                 addStretch(w, h, w, h+1);
 
-                // If There are vertices 2 spaces down
-                if(h < height - 2) {
+                if(h < height - 2) {            // If There are vertices 2 spaces down
                     addBend(w, h, w, h+2);
                 }
             }
@@ -365,7 +369,7 @@ void Cloth::connectNewSprings() {
 void Cloth::addStretch(int x1, int y1, int x2, int y2) {
     Vertex* v1 = this->getVertex(x1, y1);
     Vertex* v2 = this->getVertex(x2, y2);
-    
+
     Spring* temp = new Spring(v1, v2, "STRETCH");
     stretchMatrix.push_back(temp);
 }

@@ -22,6 +22,7 @@ class Spring {
 
   public:
   	// Constructors
+    Spring(Vertex* v1, Vertex* v2, std::string t);
   	Spring(Vertex* v1, Vertex* v2, float kconstant, std::string t);
 
   	// Getters

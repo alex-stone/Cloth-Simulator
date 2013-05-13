@@ -50,7 +50,7 @@ class Cloth {
 
     void addStretch(int x1, int y1, int x2, int y2);
     void addShear(int x1, int y1, int x2, int y2);
-    void andBend(int x1, int y1, int x2, int y2);
+    void addBend(int x1, int y1, int x2, int y2);
 
   public:
     // Constructors:
