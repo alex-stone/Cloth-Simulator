@@ -267,7 +267,6 @@ void Cloth::addTriangleForce(glm::vec3 force){
 void Cloth::addConstantAccel(glm::vec3 accel) {
     
     for(int i = 0; i < height*width; i++) {
-       // vertexMatrix[i]->updateAccel(externalForce);
         vertexMatrix[i]->addAccel(accel);
     }
 
