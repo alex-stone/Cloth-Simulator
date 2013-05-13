@@ -15,6 +15,8 @@ Plane::Plane(){
     lowRight = glm::vec3(0.5f, -1.0f, -0.5f);
     lowLeft = glm::vec3(-0.5f, -1.0f, -0.5f);
     normal = calcNormal();
+
+    isFloor = false;
 }
 
 Plane::Plane(glm::vec3 ul, glm::vec3 ur, glm::vec3 lr, glm::vec3 ll) {
@@ -23,6 +25,8 @@ Plane::Plane(glm::vec3 ul, glm::vec3 ur, glm::vec3 lr, glm::vec3 ll) {
     lowRight = lr;
     lowLeft = ll;
     normal = calcNormal();
+
+    isFloor = false;
 }
 
 Plane::Plane(glm::vec3 ul, glm::vec3 vecToRight, glm::vec3 vecToLow) {
@@ -31,13 +35,16 @@ Plane::Plane(glm::vec3 ul, glm::vec3 vecToRight, glm::vec3 vecToLow) {
     lowRight = ul+vecToRight + vecToLow;
     lowLeft = ul + vecToLow;
     normal = calcNormal();
+
+    isFloor = false;
 }
 
+
 glm::vec3 Plane::calcNormal() {
-    glm::vec3 v1 = lowRight - topLeft;
+    glm::vec3 v1 = lowLeft - topLeft;
     glm::vec3 v2 = topRight - topLeft;
 
-    return glm::cross(v1, v2);
+    return glm::cross(v2, v1);
 }
 
 bool Plane::isPointInPlane(glm::vec3 pointOnPlane) {
@@ -59,6 +66,7 @@ bool Plane::isPointInPlane(glm::vec3 pointOnPlane) {
     float lowPtDist = glm::dot(glm::normalize(vecToLow), vecToPoint);
 
     //float buffer = 0.09;
+    //float buffer = 0.15;
     float buffer = 0.15;
 
     bool rightRange = (rightPtDist <= rightDist+buffer) && (rightPtDist >= - buffer);
@@ -99,7 +107,8 @@ bool Plane::collide(Vertex* v) {
 
     glm::vec3 pointOnPlane = v->getPos() - (distToPlane * normal);    
 
-    if(distToPlane < 0.01) {
+    if(distToPlane < 0.1) {
+ 
         if(glm::dot(normal, v->getVelocity()) > 0.0f) {
 
             if(isPointInPlane(pointOnPlane)) {
@@ -109,17 +118,22 @@ bool Plane::collide(Vertex* v) {
                 glm::vec3 tangential = v->getVelocity() - parallel;
 
                 // V' = tangential - Kf * parallel
-                float kf = 0.1f;
+                float kf = 0.0f;
 
 //                glm::vec3 newVel = - v->getVelocity() ;
 
-//            glm::vec3 newVel = tangential - kf * parallel;
-//            glm::vec3 newPos = v->getPos() - v->getVelocity();
+               //glm::vec3 direction = glm::normalize(-v->getVelocity());
+
+                //glm::vec3 newPos = v->getOldPosition();
+
+                //glm::vec3 newVel = tangential - kf * parallel;
+                //::vec3 newPos = v->getPos() - 0.6f * v->getVelocity();
                 
                 glm::vec3 newPos = v->getPos() - v->getVelocity();
     
                 glm::vec3 testVel = v->getVelocity();
-                glm::vec3 newVel(testVel.x*0.9, testVel.y*0.9, testVel.z*0.9);
+
+                glm::vec3 newVel(testVel.x*0.2, testVel.y*0.2, testVel.z*0.2);
 //                glm::vec3 newPos = v->getPos() - v->getVelocity();
 
                 v->updateAfterCollide(newPos, newVel);

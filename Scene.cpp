@@ -54,6 +54,7 @@ bool wire;          // Draw Springs vs. not springs
 bool smooth;
 bool running;       // Is simulation running in real-time or paused for step through
 bool light;
+bool useFloor;
 
 // Output Photo Flag
 bool saveImage;
@@ -132,10 +133,22 @@ const int LARGE_LINE_SIZE = 20;
 
 // Texture Variables:
 std::string currentTexture="";
+
+GLuint* textures;
+GLuint* floorTextures;
+
+int currentTex;
+int currentFloor;
+
+/*
 GLuint texture0;
 GLuint texture1;
 GLuint texture2;
 
+GLuint floor0;
+GLuint floor1;
+GLuint floor2;
+*/
 //****************************************************
 // Light & Material Property Functions
 //****************************************************
@@ -253,6 +266,19 @@ void loadTexture(const char* filename) {
 //          binds the textures so they can be loaded.
 //****************************************************
 void initTextures() {
+
+    glGenTextures(3, textures);
+
+    glBindTexture(GL_TEXTURE_2D, textures[0]);
+    loadTexture("textures/texture0.raw");
+
+    glBindTexture(GL_TEXTURE_2D, textures[1]);
+    loadTexture("textures/texture1.raw");
+
+    glBindTexture(GL_TEXTURE_2D, textures[2]);
+    loadTexture("textures/texture2.raw");
+
+/*
     glGenTextures(1, &texture0);
     glBindTexture(GL_TEXTURE_2D, texture0);
 
@@ -267,6 +293,36 @@ void initTextures() {
     glBindTexture(GL_TEXTURE_2D, texture2);
 
     loadTexture("textures/texture2.raw");
+
+*/
+
+    glGenTextures(3, floorTextures);
+
+    glBindTexture(GL_TEXTURE_2D, floorTextures[0]);
+    loadTexture("textures/floor0.raw");
+
+    glBindTexture(GL_TEXTURE_2D, floorTextures[1]);
+    loadTexture("textures/floor1.raw");
+
+    glBindTexture(GL_TEXTURE_2D, floorTextures[2]);
+    loadTexture("textures/floor2.raw");
+
+    /*
+    glGenTextures(1, &floor0);
+    glBindTexture(GL_TEXTURE_2D, floor0);
+
+    loadTexture("textures/floor0.raw");
+
+    glGenTextures(1, &floor1);
+    glBindTexture(GL_TEXTURE_2D, floor1);
+
+    loadTexture("textures/floor1.raw");
+
+    glGenTextures(1, &floor2);
+    glBindTexture(GL_TEXTURE_2D, floor2);
+
+    loadTexture("textures/floor2.raw"); */
+
 
 }
 
@@ -297,11 +353,20 @@ void initScene() {
     // Initializes Light & Material Property Values
     lightSetup();
     materialSetup();
+
+
+    textures = new GLuint[3];
+    floorTextures = new GLuint[3];
+
     initTextures();
 
     // Initialize which Texture to Use
-    glBindTexture(GL_TEXTURE_2D, texture0);
+
+    currentTex = 1;
+    glBindTexture(GL_TEXTURE_2D, textures[currentTex]);
+    //glBindTexture(GL_TEXTURE_2D, texture0);
     currentTexture = "CHECKERBOARD";
+
     
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);  // Initializes Wireframe to be ON 
     glShadeModel(GL_SMOOTH);                    // Initializes Smooth Shading
@@ -321,6 +386,8 @@ void initScene() {
     light = true;
     running = false;
     showOptions = false;
+
+    useFloor = true;
     
     // Initialize Animation Variables:
     frameDuration = 1000.0f / framesPerSecond;  
@@ -1331,12 +1398,14 @@ void myDisplay() {
    
     if(wire) {
         //glDisable(GL_LIGHTING);
+        glDisable(GL_TEXTURE_2D);
         renderClothStructure();
 
     } else {
 
         // Renders 3D Objects 
         glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, textures[currentTex]);
         renderCloth(); 
 
         glDisable(GL_TEXTURE_2D);
@@ -1375,6 +1444,86 @@ void myDisplay() {
 }
 
 //****************************************************
+// Draw Sphere
+//      - Draws a Sphere with given Center, Radius
+//        and Color
+//      - Used in conjunction with drawShape to create
+//        drawLists
+//****************************************************
+void drawSphere(glm::vec3 center, float radius, glm::vec3 color) {
+
+    glPushMatrix();
+    glTranslatef(center.x, center.y, center.z);
+    glColor3f(color.x, color.y, color.z);
+    
+    // TODO: 
+    glutSolidSphere(radius - 0.01f, 50 ,50 );
+    glPopMatrix();
+
+}
+
+//****************************************************
+// Draw Plane:
+//      - Draws a Plane with given vertices, normal,
+//        and color.
+//      - Used in conjunction with drawShape to create
+//        drawLists
+//****************************************************
+void drawPlane(glm::vec3 ul, glm::vec3 ur, glm::vec3 lr, glm::vec3 ll, glm::vec3 norm, glm::vec3 color) {
+    glPushMatrix();
+
+    glBegin(GL_QUADS);
+        glColor3f(color.x, color.y, color.z);
+        
+        //glNormal3f(norm.x, norm.y, norm.z);
+
+        // Draw Counter ClockWISE!!! 
+        glVertex3f(ul.x, ul.y, ul.z );
+        glVertex3f(ll.x, ll.y, ll.z );
+        glVertex3f(lr.x, lr.y, lr.z );
+        glVertex3f(ur.x, ur.y, ur.z );
+       
+        
+
+    glEnd();
+    glPopMatrix();
+}
+
+void drawFloor(glm::vec3 ul, glm::vec3 ur, glm::vec3 lr, glm::vec3 ll, glm::vec3 norm, glm::vec3 color) {
+
+    glEnable(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D, floorTextures[0]);
+
+    glPushMatrix();
+
+    glBegin(GL_QUADS);
+        glColor3f(color.x, color.y, color.z);
+        
+        //glNormal3f(-norm.x, -norm.y, -norm.z);
+
+        // Draw Counter ClockWISE!!! 
+        glTexCoord2d(0.0f, 0.0f);
+        glVertex3f(ul.x, ul.y, ul.z );
+
+        glTexCoord2d(1.0f, 0.0f);
+        glVertex3f(ll.x, ll.y, ll.z );
+
+        glTexCoord2d(1.0f, 1.0f);
+        glVertex3f(lr.x, lr.y, lr.z );
+
+        glTexCoord2d(0.0f, 1.0f);
+        glVertex3f(ur.x, ur.y, ur.z );
+       
+    glEnd();
+    glPopMatrix();
+
+    glDisable(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D, textures[currentTex]);
+}
+
+//****************************************************
 // Draw Shape
 //      - Returns the draw list for a given shape
 //      - Can handle different shapes: Spheres, Planes
@@ -1385,51 +1534,50 @@ GLuint drawShape(Shape* s) {
     glNewList(shapeList, GL_COMPILE);
 
     if(s->getType() == "SPHERE") {
-        glm::vec3 center = s->getCenter();
 
-        glPushMatrix();
-        glTranslatef(center.x, center.y, center.z);
-        glColor3f(0.3f, 0.3f, 0.6f);
-        
-        // TODO: 
-        glutSolidSphere(s->getRadius() - 0.01f, 50 ,50 );
-        glPopMatrix();
+        glm::vec3 color(0.3f, 0.3f, 0.6f);
+
+        drawSphere(s->getCenter(), s->getRadius(), color);
+
     } 
 
     if(s->getType() == "PLANE") {
 
+        glm::vec3 color(0.804f, 0.412f, 0.118f);
 
+        if(s->isTypeFloor()) {
+            drawFloor(s->getUL(), s->getUR(), s->getLR(), s->getLL(), s->getNormal(), color); 
 
-        glm::vec3 norm = s->getNormal();
-        glm::vec3 point = s->getUL();
-
-        glPushMatrix();
-
-        glBegin(GL_QUADS);
-            glColor3f(0.804f, 0.412f, 0.118f);
-            
-            glNormal3f(norm.x, norm.y, norm.z);
-
-            glVertex3f(point.x, point.y, point.z );
-            
-            point = s->getUR();
-            glVertex3f(point.x, point.y, point.z );
-
-            point = s->getLR();
-            glVertex3f(point.x, point.y, point.z );
-            
-            point = s->getLL();
-            glVertex3f(point.x, point.y, point.z );
-
-        glEnd();
-        glPopMatrix();
-  
+        } else {
+            drawPlane(s->getUL(), s->getUR(), s->getLR(), s->getLL(), s->getNormal(), color); 
+        }
     }
 
     glEndList();
 
     return shapeList;
 }
+
+void addFloor() {
+
+    numShapes++;
+
+    Shape* s;
+
+    float width = 5.0f;
+    float height = -2.0f;
+
+    glm::vec3 topLeft(-width, height, -width);
+    glm::vec3 topRight(width, height, -width);
+    glm::vec3 lowRight(width, height, width);
+    glm::vec3 lowLeft(-width, height, width);
+
+    s = new Plane(topLeft, topRight, lowRight, lowLeft);
+    s->setFloor();
+
+    shapes.push_back(s);
+}
+
 
 //****************************************************
 // Make Draw Lists Function 
@@ -1689,37 +1837,47 @@ void keyPress(unsigned char key, int x, int y) {
 
         case 'l':           // Toggle Lighting
             light = !light;
-            if(light) {
-                std::cout << "Setting Light On" << std::endl;
-               // glEnable(GL_LIGHTING);
-            } else {
-               // glDisable(GL_LIGHTING);
-            }
+
             break;
 
         case 'w':           // Toggle Wireframe Mode
             wire = !wire;
-            /*
-            if(wire) {
-                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            } else {
-                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            }*/
+
             break;
 
         case '1':   // Checkerboard Texture
+            /*
             glBindTexture(GL_TEXTURE_2D, texture0);
             currentTexture = "CHECKERBOARD";
+            */
+            currentTex = 0;
+            glBindTexture(GL_TEXTURE_2D, textures[0]);
+            currentTexture = "CHECKERBOARD";
+
             break;
 
         case '2':   // American Flag Texture
-            glBindTexture(GL_TEXTURE_2D, texture1);
+            currentTex = 1;
+            glBindTexture(GL_TEXTURE_2D, textures[1]);
             currentTexture = "AMERICAN_FLAG";
             break;
 
         case '3':   // American Flag Texture
-            glBindTexture(GL_TEXTURE_2D, texture2);
+            currentTex = 2;
+            glBindTexture(GL_TEXTURE_2D, textures[2]);
             currentTexture = "GRADIENT";
+            break;
+
+        case '4':
+            currentFloor = 0;
+            break;
+
+        case '5':
+            currentFloor = 1;
+            break;
+
+        case '6':
+            currentFloor = 2;
             break;
 
         case 'o':           // Toggles whether the Options List is shown
@@ -1825,8 +1983,14 @@ int main(int argc, char *argv[]) {
     loadCloth(inputFile);
     loadShapes(shapeFile);
 
-    // Initializes Window & OpenGL Settings
     initScene();
+
+    if(useFloor) {
+         addFloor();
+    }
+
+    // Initializes Window & OpenGL Settings
+    
 
     // Initialize Shape Draw Lists
     shapeDrawLists = new GLuint[numShapes]; 

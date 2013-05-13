@@ -25,6 +25,9 @@ class Shape {
     virtual glm::vec3 getUR(){ return glm::vec3(0.0f, 0.0f, 0.0f); };
     virtual glm::vec3 getLR(){ return glm::vec3(0.0f, 0.0f, 0.0f); };
     virtual glm::vec3 getLL(){ return glm::vec3(0.0f, 0.0f, 0.0f); };
+
+    virtual bool isTypeFloor() { return false; };
+    virtual void setFloor() {};
 };
 
 #endif

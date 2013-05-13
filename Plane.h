@@ -6,7 +6,7 @@
 #include "Vertex.h"
 
 //****************************************************
-// Sphere Header Definition
+// Plane Header Definition
 //****************************************************
 
 class Plane : public Shape {
@@ -16,6 +16,8 @@ class Plane : public Shape {
     glm::vec3 lowRight;
     glm::vec3 lowLeft;
     glm::vec3 normal;
+
+    bool isFloor;
 
   public:
     // Constructors
@@ -32,9 +34,12 @@ class Plane : public Shape {
 
     bool isPointInPlane(glm::vec3 pointOnPlane);
 
+    void setFloor() {isFloor = true;};
+
     // Shape - Abstract Functions
     bool collide(Vertex* v); 
     std::string getType() { return "PLANE"; };
+    bool isTypeFloor() { return isFloor; };
 
     glm::vec3 getNormal() {return normal;};
     
