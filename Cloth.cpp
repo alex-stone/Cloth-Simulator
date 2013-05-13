@@ -8,12 +8,14 @@
 
 
 //****************************************************
-// Cloth Class - Constans
+// Cloth Class - Constants
 //****************************************************
 const float UNIT_STRETCH = 100.0f;
 const float UNIT_SHEAR = 100.0f;
 const float UNIT_BEND = 50.0f;
 
+// Debug Variables
+bool debug = true;
 
 //****************************************************
 // Cloth Class - Constructors
@@ -59,8 +61,11 @@ Cloth::Cloth(int density, Vertex* upLeft, Vertex* upRight, Vertex* downRight, Ve
         this->width = (int) ((density * horizLength) / vertLength);
     }
 
-    // Sets size of the Vector holding the vertices to W * H
-    vertexMatrix.resize(this->width * this->height);
+    if(debug) {
+        std::cout << "This Cloth is of dimensions Width: " << this->width << " by Height: " << this->height << std::endl;
+    }
+
+
     euler = isEuler;
 
     horizVec = horizVec / (float)(this->width - 1);
@@ -125,21 +130,31 @@ void Cloth::createDefaultCloth(int w, int h) {
 //      - Width & Height already determined
 //****************************************************
 void Cloth::createVertices(glm::vec3 upLeft, glm::vec3 vertStep, glm::vec3 horizStep) {
+    
+    // Sets size of the Vector holding the vertices to W * H
+    vertexMatrix.resize(this->width * this->height);
 
     // Set Spring Rest Lengths   
     float stretchLength = glm::length(horizStep);
     float bendLength = 2 * stretchLength;
     float shearLength = sqrt(2 * stretchLength * stretchLength);
 
-    std::cout << "STRETCH LENGTH = " << stretchLength << std::endl;
+    if(debug) {
+        std::cout << "STRETCH LENGTH = " << stretchLength << std::endl;
+    }
 
     stretchConst = UNIT_STRETCH / stretchLength;
     shearConst = UNIT_SHEAR / shearLength;
     bendConst = UNIT_BEND / bendLength;
 
+
     // Iterate through and create each Vertex
     for(int h = 0; h < this->height; h++) {
         for(int w = 0; w < this->width; w++) {
+
+           if(debug) {
+                std::cout << "Row # " << h << "  Col # " << w << std::endl;
+            }
 
             //I*W + j indexes vertexMatrix like a 2D array vertexMatrix[i][j]; 
             int vertIndex = h * (this->width) + w;
@@ -151,7 +166,8 @@ void Cloth::createVertices(glm::vec3 upLeft, glm::vec3 vertStep, glm::vec3 horiz
 
             // Sets its position in the Grid of the cloth
             vertexMatrix[vertIndex]->setPosition(w, h);
-        }
+
+        }        
     }
 }
 
@@ -186,12 +202,25 @@ void Cloth::updateCollision(Shape* s) {
 //          surrounding triangles
 //****************************************************
 void Cloth::updateNormals() {
+
+    bool debug = true;
+
+    if(debug) {
+        std::cout << "Update Normals Called" << std::endl;
+    }
+
     for(int h = 0; h < this->height - 1; h++) {
         for(int w = 0; w < this->width - 1; w++) {
-            Vertex* v1 = getVertex(h,w);
-            Vertex* v2 = getVertex(h+1, w);
-            Vertex* v3 = getVertex(h, w+1);
-            Vertex* v4 = getVertex(h+1, w+1);
+            if(debug) {
+                std::cout << "Row # " << h << "  Col # " << w << std::endl;
+            }
+
+            // Get Vertex must be called (width, height);
+            Vertex* v1 = getVertex(w, h);
+            Vertex* v2 = getVertex(w, h+1);
+            Vertex* v3 = getVertex(w+1, h);
+            Vertex* v4 = getVertex(w+1, h+1);
+
 
             glm::vec3 triNormal1 = glm::normalize(v2->findNormal(v1,v3));
 
@@ -204,6 +233,7 @@ void Cloth::updateNormals() {
             v2->updateNormal(triNormal2);
             v3->updateNormal(triNormal2);
             v4->updateNormal(triNormal2);
+
         }
     }
 }
@@ -220,10 +250,11 @@ void Cloth::updateNormals() {
 void Cloth::addTriangleForce(glm::vec3 force){
     for(int h = 0; h < this->height - 1; h++) {
         for(int w = 0; w < this->width - 1; w++) {
-            Vertex* v1 = getVertex(h,w);
-            Vertex* v2 = getVertex(h+1, w);
-            Vertex* v3 = getVertex(h, w+1);
-            Vertex* v4 = getVertex(h+1, w+1);
+
+            Vertex* v1 = getVertex(w,h);
+            Vertex* v2 = getVertex(w, h+1);
+            Vertex* v3 = getVertex(w+1, h);
+            Vertex* v4 = getVertex(w+1, h+1);            
 
             // Calculates Force Contribution on the first Triangle
             glm::vec3 triNormal1 = glm::normalize(v2->findNormal(v1,v3));
@@ -308,6 +339,81 @@ void Cloth::setFixedCorners(bool c1, bool c2, bool c3, bool c4) {
 //        springs wouldn't have anything to connect to.
 //****************************************************
 void Cloth::connectSprings() {
+    for(int h = 0; h < height; h++) {
+        for(int w = 0; w < width; w++) {
+            Vertex* vert = this->getVertex(w, h);
+
+            // Connections to the Left:
+            if(i >= 2) {
+                vert->connectBend(this->getVertex(w-2, h), 0);
+                vert->connectStretch(this->getVertex(w-1, h), 0);
+            } else {
+                if(w == 1) {
+                    vert->connectStretch(this->getVertex(w-1, h), 0);
+                }
+            }   
+
+            // Connections Upwards:
+            if(h >= 2) {
+                vert->connectBend(this->getVertex(w, h-2), 1);
+                vert->connectStretch(this->getVertex(w, h-1), 1);
+            } else {
+                if(h == 1) {
+                    vert->connectStretch(this->getVertex(w, h-1), 1);
+                }
+            }
+
+
+            // Connections to the Right
+            if(w <= width - 3) {
+                vert->connectBend(this->getVertex(w+2, h), 2);
+                vert->connectStretch(this->getVertex(w+1, h), 2);
+            } else {
+                if(w == width - 2) {
+                    vert->connectStretch(this->getVertex(w+1, h), 2);
+                }
+            }
+
+            // Connections Downwards:
+            if(h <= height - 3) {
+                vert->connectBend(this->getVertex(w, h+2), 3);
+                vert->connectStretch(this->getVertex(w, h+1), 3);   
+            } else {
+                if(h == height - 2) {
+                    vert->connectStretch(this->getVertex(w, h+1), 3);
+                }
+            }
+
+            // Diagonal Conections:
+            
+            // Connection Up-Left
+            if(w >= 1 && h >= 1) {
+                vert->connectShear(this->getVertex(w-1, h-1), 0);
+            }
+
+            // Conection Up-Right
+            if(w <= (width - 2) && h >= 1) {
+                vert->connectShear(this->getVertex(w+1, h-1), 1);
+            }
+
+            // Connection Down-Right:
+            if(w <= (width - 2) && h <= (height - 2)) {
+                vert->connectShear(this->getVertex(w+1, h+1), 2);
+            }
+
+            // Connection Down-Left:
+            if(w >= 1 && h <= (height - 2)) {
+                vert->connectShear(this->getVertex(w-1, h+1), 3);
+            }
+
+
+
+        }
+    }
+
+
+/*
+
     for(int i = 0; i < width; i++) {
         for(int j = 0; j < height; j++) {
             Vertex* vert = this->getVertex(i, j);
@@ -376,5 +482,6 @@ void Cloth::connectSprings() {
 
         }
     }
+    */
 }
 
