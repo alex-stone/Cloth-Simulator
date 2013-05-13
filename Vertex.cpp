@@ -4,15 +4,15 @@
 
 #include "Vertex.h"
 
-
+/*
 // Spring Constants for 1meter, i.e. 1 unit length of 
 const float DEF_STRETCH = 1000.0f;
 const float DEF_SHEAR = 1000.0f;
 const float DEF_BEND = 1000.0f;
 const float DEF_DAMP = 100.0f;
-
+*/
 // New Useful Variables:
-const float DAMP_FACTOR = 0.8f;
+const float DAMP_FACTOR = 0.004f;
 
 bool DEBUG = true ;
 
@@ -21,8 +21,8 @@ bool DEBUG = true ;
 //****************************************************
 Vertex::Vertex() {
     initPhysicalProps(0.0f, 0.0f, 0.0f); 
-    initSpringToNull(); 
-    initSpringConstants(DEF_STRETCH, DEF_SHEAR, DEF_BEND, DEF_DAMP);
+    //initSpringToNull(); 
+    //initSpringConstants(DEF_STRETCH, DEF_SHEAR, DEF_BEND, DEF_DAMP);
     
     fixed = false;
     lastTimeUpdated = 0.0f;
@@ -30,8 +30,8 @@ Vertex::Vertex() {
 
 Vertex::Vertex(float a, float b, float c) {
     initPhysicalProps(a, b, c);
-    initSpringToNull(); 
-    initSpringConstants(DEF_STRETCH, DEF_SHEAR, DEF_BEND, DEF_DAMP);
+    //initSpringToNull(); 
+   // initSpringConstants(DEF_STRETCH, DEF_SHEAR, DEF_BEND, DEF_DAMP);
 
     fixed = false;
     lastTimeUpdated = 0.0f;
@@ -39,17 +39,17 @@ Vertex::Vertex(float a, float b, float c) {
 
 Vertex::Vertex(float a, float b, float c, bool isFixed) {
     initPhysicalProps(a, b, c);
-    initSpringToNull();
-    initSpringConstants(DEF_STRETCH, DEF_SHEAR, DEF_BEND, DEF_DAMP);
+    //initSpringToNull();
+   // initSpringConstants(DEF_STRETCH, DEF_SHEAR, DEF_BEND, DEF_DAMP);
     
     fixed = isFixed;
     lastTimeUpdated = 0.0f;
 }
 
-Vertex::Vertex(float a, float b, float c, float stretchConst, float shearConst, float bendConst) {
+/*Vertex::Vertex(float a, float b, float c, float stretchConst, float shearConst, float bendConst) {
     initPhysicalProps(a, b, c);
     initSpringToNull();
-    initSpringConstants(stretchConst, shearConst, bendConst, DEF_DAMP);
+    //initSpringConstants(stretchConst, shearConst, bendConst, DEF_DAMP);
 
     fixed = false;
     lastTimeUpdated = 0.0f;
@@ -58,17 +58,18 @@ Vertex::Vertex(float a, float b, float c, float stretchConst, float shearConst, 
 Vertex::Vertex(float a, float b, float c, float stretchConst, float shearConst, float bendConst, bool isFixed) {
     initPhysicalProps(a, b, c);
     initSpringToNull();
-    initSpringConstants(stretchConst, shearConst, bendConst, DEF_DAMP);
+    //initSpringConstants(stretchConst, shearConst, bendConst, DEF_DAMP);
 
     fixed = isFixed;
     lastTimeUpdated = 0.0f;
 
-}
+}*/
 
 
 //****************************************************
 // Vertex Class - Private Functions
 //****************************************************
+/*
 void Vertex::initSpringToNull() {
     stretch = new Vertex*[4];
     shear = new Vertex*[4];
@@ -79,7 +80,7 @@ void Vertex::initSpringToNull() {
         shear[i] = NULL;
         bend[i] = NULL;
     }
-}
+}*/
 
 void Vertex::initPhysicalProps(float a, float b, float c) {
     this->position = glm::vec3(a, b, c);
@@ -101,7 +102,7 @@ void Vertex::setPosition(int x, int y) {
     xPos = x;   // X is width
     yPos = y;   // Y is Height
 }
-
+/*
 void Vertex::setSpringRestLengths(float stretch, float bend, float shear) {
     stretchRestDist = stretch;
     shearRestDist = shear;
@@ -114,15 +115,18 @@ void Vertex::initSpringConstants(float stretchConst, float shearConst, float ben
     bendConstant = bendConst;
 
     dampConstant = dampConst;
-}
+}*/
 
 void Vertex::setFixedVertex(bool isFixed) {
     fixed = isFixed;
 }
 
+
 //****************************************************
 // Vertex Class - Functions
 //****************************************************
+/*
+
 void Vertex::connectStretch(Vertex* a, int n) {
     stretch[n] = a;
 }
@@ -133,28 +137,51 @@ void Vertex::connectShear(Vertex* a, int n) {
 
 void Vertex::connectBend(Vertex* a, int n) {
     bend[n] = a;
-}
+}*/
 
 //****************************************************
 // Verlet Integration - Update Position      
 //****************************************************
 void Vertex::updateVerlet(float timeChange) {
 
+
+    glm::vec3 temp = position;
+
+    position = position + (position - oldPos)*(1.0f - DAMP_FACTOR) + acceleration * (timeChange * timeChange);
+
+    if(oldTimeChange == 0.0f) {
+        oldTimeChange = 0.1f;
+    }
+
+    float factor = timeChange / oldTimeChange;
+
+    //std::cout << "Factor = " << factor << std::endl;
+
+
+    //position = position + (position - oldPos)*(timeChange/oldTimeChange) + acceleration * (timeChange * timeChange);
+
+    oldPos = temp;
+    acceleration = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    oldTimeChange = timeChange;
+
     // Works but is really slow
    //glm::vec3 newPos = position + (position - oldPos)*(timeChange/oldTimeChange)+ acceleration * (timeChange * timeChange);
 
 
-    glm::vec3 newPos = position + (position - oldPos)*(1.0f - DAMP_FACTOR)+ acceleration * (timeChange * timeChange);
+    //glm::vec3 newPos = position + (position - oldPos)*(1.0f - DAMP_FACTOR)+ acceleration * (timeChange * timeChange);
 
 
+    //glm::vec3 newPos = position
 
     //glm::vec3 newPos = position + (position - oldPos) * (timeChange / oldTimeChange) + acceleration * (timeChange * timeChange);
 
-//  glm::vec3 newPos = (2.0f * position) - oldPos + acceleration * (timeChange * timeChange);
+  //glm::vec3 newPos = (2.0f * position) - oldPos + acceleration * (timeChange * timeChange);
 
 
 //    glm::vec3 newPos = (float)2 *position - oldPos + acceleration * (timeChange * timeChange);
 
+    /*
     if(xPos == 1 && yPos == 1 && DEBUG) {
         std::cout << std::endl;
 
@@ -162,12 +189,14 @@ void Vertex::updateVerlet(float timeChange) {
         printPosition();
         printVelocity();
         printAccel();
-    }
+    } */
+
+        /*
 
     oldPos = position;
     position = newPos;
     velocity = position - oldPos;
-    oldTimeChange = timeChange;
+    oldTimeChange = timeChange; */
 }
 
 //****************************************************
@@ -214,11 +243,12 @@ void Vertex::offsetCorrection(glm::vec3 correctionVec) {
 }
 
 
-
 //****************************************************
 // Update Internal Forces:
 //      - Update Acceleration given Internal Forces
 //****************************************************
+
+/*
 void Vertex::updateInternal() {
     glm::vec3 spring = this->getSpringForce();
     //glm::vec3 damp = this->getDampForce();
@@ -236,7 +266,7 @@ void Vertex::updateInternal() {
 
     // Net Acceleration = Sum of 3 vectors
     //acceleration = (spring + damp + externalForces) / mass;
-}
+} */
 
 //****************************************************
 // Reset Acceleration:
@@ -287,12 +317,15 @@ glm::vec3 Vertex::findNormal(Vertex *v2, Vertex *v3){
     return glm::cross(temp_v1,temp_v2);
 }
 
+
 //****************************************************
 // GetAccelFromSpring       From a Single Spring 
 //      - springVec
 //              Direction of Force
 //              Length;
 //****************************************************
+
+/*
 glm::vec3 Vertex::getForceFromSpring(float restLength, float springConstant, Vertex* v2) {//glm::vec3 springVec) {
 
     // Displacement
@@ -335,13 +368,15 @@ glm::vec3 Vertex::getForceFromSpring(float restLength, float springConstant, Ver
     //returnVec += damp;
 
     return returnVec;
-}
+}*/
 
 //****************************************************
 // GetSpringAccel
 //      - Calculates the net Acceleration from all
 //        12 of the springs.
 //****************************************************
+
+/*
 glm::vec3 Vertex::getSpringForce() {
     // Iterate through each spring connection and calculate force 
 
@@ -364,7 +399,7 @@ glm::vec3 Vertex::getSpringForce() {
     }
 
     return stretchVec + shearVec + bendVec;
-}
+} */
 
 //****************************************************
 // Reset Normal:

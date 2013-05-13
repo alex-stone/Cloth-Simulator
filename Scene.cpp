@@ -97,7 +97,7 @@ bool constantStep;
 int oldFrameNum = 0;
 float lastFPStime = 0.0f;
 
-int numTimeSteps = 1;
+int numTimeSteps = 30;
 const float STEP = 0.007f;
 
 const float STEP_INC = 0.001f;
@@ -108,7 +108,7 @@ bool euler;
 
 // Forces:
 bool gravity;
-glm::vec3 gravityAccel(0.0f, -1.0f, 0.0f);// -9.81f, 0.0f);
+glm::vec3 gravityAccel(0.0f, -9.81f, 0.0f);// -9.81f, 0.0f);
 
 //TODO: WIND INFO
 bool wind;
@@ -880,7 +880,7 @@ void drawClothPoints() {
                 glPushMatrix();
                 glTranslatef(center.x, center.y, center.z);
                 
-                glutSolidSphere(radius , 10 , 10 );
+                glutSolidSphere(radius, 10 , 10 );
                 glPopMatrix();
 
             }
@@ -1029,7 +1029,7 @@ void renderCloth() {
         cout << "Render Cloth Called" << endl;
     }
 
-
+    // Update Normals to be drawn
     cloth->updateNormals();
 
     if(debugFunc) {
@@ -1097,16 +1097,17 @@ void updateCollisions() {
 //****************************************************
 void preUpdateCalculation() {
     // Clear Acceleration Here:
-    cloth->resetAccel();
+   // cloth->resetAccel();
 
     // Note: Needs to be done before wind
-    cloth->updateNormals();
+    //cloth->updateNormals();
 
     if(gravity) {
         cloth->addConstantAccel(gravityAccel);
     }
 
     if(wind) {
+        cloth->updateNormals(); // Only update Normals if NEEDED
         cloth->addTriangleForce(windForce);
     }
 
@@ -1300,7 +1301,7 @@ GLuint drawShape(Shape* s) {
         glColor3f(0.3f, 0.3f, 0.6f);
         
         // TODO: 
-        glutSolidSphere(s->getRadius(), 50 ,50 );
+        glutSolidSphere(s->getRadius() - 0.05, 50 ,50 );
         glPopMatrix();
     } 
 

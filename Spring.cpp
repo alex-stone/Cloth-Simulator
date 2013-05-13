@@ -10,7 +10,7 @@
 //****************************************************
 // Spring Class - Constants
 //****************************************************
-const float UNIT_SPRING = 10.0f;
+const float UNIT_SPRING = 300.0f;
 int stretchCount = 0;
 int shearCount = 0;
 int bendCount = 0;
@@ -94,13 +94,6 @@ void Spring::applyForce() {
 
 	vertex1->addForce(dir * magnitude);
 	vertex2->addForce(dir * magnitude * (-1.0f));
-
-	if(vertex1->getXPos() == 2 && vertex1->getYPos() == 2) {
-		std::cout << std::endl;
-		std::cout << "Type: " << type << std::endl;
-		std::cout << "Force Magnitude == " << magnitude << std::endl;
-		std::cout << "Force Direction == (" << dir.x << ", " << dir.y << ", " << dir.z << ")" << std::endl;
-	}
 
 }
 

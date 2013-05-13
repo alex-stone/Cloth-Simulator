@@ -38,15 +38,10 @@ class Cloth {
     int numBendSprings;
     int numVertices;
 
-    // Spring Constants - Defined for 1 UNIT Length (1 m)
-
-    float springConstant;
-
-    float stretchConst;
-    float shearConst;
-    float bendConst;
     
-    float dampeningConstant;
+    bool areNormalsUpdated;
+
+
 
     // Integration Type
     bool euler;

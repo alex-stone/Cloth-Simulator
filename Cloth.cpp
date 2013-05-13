@@ -10,9 +10,6 @@
 //****************************************************
 // Cloth Class - Constants
 //****************************************************
-const float UNIT_STRETCH = 100.0f;
-const float UNIT_SHEAR = 100.0f;
-const float UNIT_BEND = 50.0f;
 
 // Debug Variables
 bool debug = false;
@@ -124,6 +121,8 @@ void Cloth::initCounts() {
     numStretchSprings = 0;
     numShearSprings = 0;
     numBendSprings = 0;
+
+    areNormalsUpdated = false;
 }
 
 
@@ -215,6 +214,7 @@ void Cloth::update(float timestep) {
         vertexMatrix[i]->update(timestep, euler);
     }
 
+    areNormalsUpdated = false;
 }
 
 
@@ -277,28 +277,35 @@ void Cloth::updateCollision(Shape* s) {
 //****************************************************
 void Cloth::updateNormals() {
 
-    for(int h = 0; h < this->height - 1; h++) {
-        for(int w = 0; w < this->width - 1; w++) {
+    // Only Update if they are not updated
+    if(!areNormalsUpdated) {
 
-            // Get Vertex must be called (width, height);
-            Vertex* v1 = getVertex(w, h);
-            Vertex* v2 = getVertex(w, h+1);
-            Vertex* v3 = getVertex(w+1, h);
-            Vertex* v4 = getVertex(w+1, h+1);
+        for(int h = 0; h < this->height - 1; h++) {
+            for(int w = 0; w < this->width - 1; w++) {
 
-            glm::vec3 triNormal1 = glm::normalize(v1->findNormal(v2,v3));
+                // Get Vertex must be called (width, height);
+                Vertex* v1 = getVertex(w, h);
+                Vertex* v2 = getVertex(w, h+1);
+                Vertex* v3 = getVertex(w+1, h);
+                Vertex* v4 = getVertex(w+1, h+1);
 
-            v1->updateNormal(triNormal1);
-            v2->updateNormal(triNormal1);
-            v3->updateNormal(triNormal1);
+                glm::vec3 triNormal1 = glm::normalize(v1->findNormal(v2,v3));
 
-            glm::vec3 triNormal2 = glm::normalize(v4->findNormal(v3,v2));
-            
-            v2->updateNormal(triNormal2);
-            v3->updateNormal(triNormal2);
-            v4->updateNormal(triNormal2);
+                v1->updateNormal(triNormal1);
+                v2->updateNormal(triNormal1);
+                v3->updateNormal(triNormal1);
 
+                glm::vec3 triNormal2 = glm::normalize(v4->findNormal(v3,v2));
+                
+                v2->updateNormal(triNormal2);
+                v3->updateNormal(triNormal2);
+                v4->updateNormal(triNormal2);
+
+            }
         }
+
+        areNormalsUpdated = true;
+
     }
 }
 
@@ -475,7 +482,7 @@ void Cloth::addBend(int x1, int y1, int x2, int y2) {
 //      - Prints Cloth Stats:
 //****************************************************
 void Cloth::printStats() {
-    std::cout << std::endl;
+    std::cout << "---------------------------------------" << std::endl;
     std::cout << "---------------------------------------" << std::endl;
     std::cout << " Cloth Information: " << std::endl;
     std::cout << "---------------------------------------" << std::endl;    
@@ -489,7 +496,8 @@ void Cloth::printStats() {
 
     Spring::printStats();
 
-    std::cout << "---------------------------------------" << std::endl;        
+    std::cout << "---------------------------------------" << std::endl;   
+    std::cout << "---------------------------------------" << std::endl;           
 
 }
 

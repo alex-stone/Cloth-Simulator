@@ -24,19 +24,6 @@ class Vertex {
     float oldTimeChange;
     bool firstUpdate;
 
-    // TODO: Spring Connections:
-    // 4 Stretch Spring: Left, Up, Right, Down
-    Vertex** stretch;
-    float stretchRestDist;
-
-    // 4 Shear Springs: Up-Left, Up-Right, Down-Right, Down-Left
-    Vertex** shear;
-    float shearRestDist;
-    
-    // 4 Bend Springs: Left, Up, Right, Down
-    Vertex** bend;
-    float bendRestDist;
-
     // TODO: Variables
     float lastTimeUpdated;
     bool fixed;
@@ -44,25 +31,21 @@ class Vertex {
 
     bool euler;
 
-    // Spring Constants - Stretch, Shear, Bend
-    float stretchConstant;
-    float shearConstant;
-    float bendConstant;
 
     float dampConstant;
 
     // Function Initializations:
-    void initSpringToNull();
+  //  void initSpringToNull();
     void initPhysicalProps(float a, float b, float c); 
-    void initSpringConstants(float stretchConst, float shearConst, float bendConst, float dampConstant);
+   // void initSpringConstants(float stretchConst, float shearConst, float bendConst, float dampConstant);
 
   public:
     // Constructors:
     Vertex();
     Vertex(float a, float b, float c);
     Vertex(float a, float b, float c, bool isFixed);
-    Vertex(float a, float b, float c, float stretchConst, float shearConst, float bendConst);
-    Vertex(float a, float b, float c, float stretchConst, float shearConst, float bendConst, bool isFixed);
+   // Vertex(float a, float b, float c, float stretchConst, float shearConst, float bendConst);
+   // Vertex(float a, float b, float c, float stretchConst, float shearConst, float bendConst, bool isFixed);
 
     // Getters
     glm::vec3 getPos() { return position; };
@@ -70,10 +53,12 @@ class Vertex {
     glm::vec3 getAccel() { return acceleration; };
     glm::vec3 getNorm() { return glm::normalize(normal); };
 
+    int getXPos() { return xPos; };
+    int getYPos() { return yPos; };
 
 
     void setPosition(int x, int y);
-    void setSpringRestLengths(float stretch, float bend, float shear);
+    //void setSpringRestLengths(float stretch, float bend, float shear);
     void setFixedVertex(bool isFixed);
 
     // Updates Position based on Acceleration & Timestep
@@ -111,9 +96,9 @@ class Vertex {
     void updateAfterCollide(glm::vec3 newPos, glm::vec3 newVel);
    // void updateCollisions(glm::vec3 &c, float radius);
     
-    glm::vec3 getSpringForce();
+   // glm::vec3 getSpringForce();
     glm::vec3 getDampForce();
-    glm::vec3 getForceFromSpring(float restLength, float stretchConstant, Vertex* v2);//glm::vec3 springVec);
+    //glm::vec3 getForceFromSpring(float restLength, float stretchConstant, Vertex* v2);//glm::vec3 springVec);
 
 
     // Vertex Helper Functions:
