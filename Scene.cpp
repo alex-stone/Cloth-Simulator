@@ -94,8 +94,8 @@ bool constantStep;
 int oldFrameNum = 0;
 float lastFPStime = 0.0f;
 
-int numTimeSteps = 30;
-const float STEP = 0.008f;
+int numTimeSteps = 10;
+const float STEP = 0.007f;
 
 const float STEP_INC = 0.001f;
 float timestep = 0.005f;
@@ -105,13 +105,13 @@ bool euler;
 
 // Forces:
 bool gravity;
-glm::vec3 gravityAccel(0.0f, -9.81f, 0.0f);
+glm::vec3 gravityAccel(0.0f, -1.0f, 0.0f);// -9.81f, 0.0f);
 
 //TODO: WIND INFO
 bool wind;
 glm::vec3 windForce(0.0f, 0.0f, -1.0f);
 float windScale = 1.0f;
-float windINC = 0.5f;
+float windINC = 0.4f;
 
 // Debug Variables:
 bool debugFunc = false;
@@ -296,7 +296,7 @@ void initScene() {
     smooth = true;
     light = true;
     running = false;
-    showOptions = true;
+    showOptions = false;
     
     // Initialize Animation Variables:
     frameDuration = 1000.0f / framesPerSecond;  
@@ -758,6 +758,9 @@ void printOptions() {
 
 
     glBegin(GL_LINES);
+        glVertex2f(0, topHeight);
+        glVertex2f(viewport.w, topHeight);
+
         glVertex2f(width, topHeight);
         glVertex2f(width, viewport.h);
 
@@ -894,6 +897,9 @@ void updateCollisions() {
 //        doing the time sensitive cloth->update
 //****************************************************
 void preUpdateCalculation() {
+    // Clear Acceleration Here:
+    cloth->resetAccel();
+
 
     // Note: Needs to be done before wind
     cloth->updateNormals();
@@ -922,6 +928,8 @@ float processCalculation(float lastUpdateTime) {
     float currentTime = glutGet(GLUT_ELAPSED_TIME);
 
     float timeChange = (currentTime - lastUpdateTime + 0.0f)/1000.0f;
+
+    //cloth->update(timestep);
 
     cloth->update(timeChange);
 
@@ -973,6 +981,8 @@ void stepFrame() {
 
         // 
         cloth->update(timestep);
+
+        updateCollisions();
 
         numCalculations++;
     }
