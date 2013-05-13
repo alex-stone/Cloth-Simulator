@@ -19,6 +19,17 @@ Spring::Spring(Vertex* v1, Vertex* v2, float kconstant, std::string t) {
 	type = t;
 }
 
+Spring::Spring(Vertex* v1, Vertex* v2, std::string t) {
+	vertex1 = v1;
+	vertex2 = v2;
+
+	restDistance = glm::length(v2-v1);
+	springConstant = 1;
+
+	type = t;
+}
+
+
 //****************************************************
 // Spring Class - Magnitude of Force due to Spring
 //****************************************************

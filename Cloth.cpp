@@ -319,6 +319,51 @@ void Cloth::setFixedCorners(bool c1, bool c2, bool c3, bool c4) {
 //        performing tests near the edge where certain
 //        springs wouldn't have anything to connect to.
 //****************************************************
+void Cloth::connectNewSprings() {
+    for(int h = 0; h < this->height, h++) {
+        for(int w = 0; w < this->width; w++) {
+
+            // Only connect Springs To the Right & Downwards to avoid duplicates
+
+            // Connections to the Right
+            if(w < width - 1) {                    // If there is a vertex 1 spaces to the right
+                this->addStretch(w, h, w+1, h);
+
+                
+                if(w < width - 2) {                // If there is a vertex 2 spaces to the right
+                    this->addBend(w, h, w+2, h);
+                }
+            }
+
+            // Connect Downwards
+            if(h < height - 1) {
+                addStretch(w, h, w, h+1);
+
+                // If There are vertices 2 spaces down
+                if(h < height - 2) {
+                    addBend(w, h, w, h+2);
+                }
+            }
+            
+            // Add Down Right Shear
+            if(w < (width - 1) && h < (height - 1)) {
+                addShear(w, h, w+1, h+1);
+            }
+
+            // Add Down-Left Shear
+            if (w >= 1 && h < (height - 1)) {
+                addShear(w, h, w-1, h+1);
+            }
+        }
+    }
+}
+
+//****************************************************
+// Connect Springs:
+//      - Connects all of the springs in the cloths
+//        performing tests near the edge where certain
+//        springs wouldn't have anything to connect to.
+//****************************************************
 void Cloth::connectSprings() {
     for(int h = 0; h < height; h++) {
         for(int w = 0; w < width; w++) {
@@ -386,83 +431,38 @@ void Cloth::connectSprings() {
             if(w >= 1 && h <= (height - 2)) {
                 vert->connectShear(this->getVertex(w-1, h+1), 3);
             }
-
-
-
         }
     }
+}
 
-
-/*
-
-    for(int i = 0; i < width; i++) {
-        for(int j = 0; j < height; j++) {
-            Vertex* vert = this->getVertex(i, j);
-            
-            // Connections to the Left:
-            if(i >= 2) {
-                vert->connectBend(this->getVertex(i-2, j), 0);
-                vert->connectStretch(this->getVertex(i-1, j), 0);
-            } else {
-                if(i == 1) {
-                    vert->connectStretch(this->getVertex(i-1, j), 0);
-                }
-            }   
-
-            // Connections Upwards:
-            if(j >= 2) {
-                vert->connectBend(this->getVertex(i, j-2), 1);
-                vert->connectStretch(this->getVertex(i, j-1), 1);
-            } else {
-                if(j == 1) {
-                    vert->connectStretch(this->getVertex(i, j-1), 1);
-                }
-            }
-
-            // Connections to the Right
-            if(i <= width - 3) {
-                vert->connectBend(this->getVertex(i+2, j), 2);
-                vert->connectStretch(this->getVertex(i+1, j), 2);
-            } else {
-                if(i == width - 2) {
-                    vert->connectStretch(this->getVertex(i+1, j), 2);
-                }
-            }
-
-            // Connections Downwards:
-            if(j <= height - 3) {
-                vert->connectBend(this->getVertex(i, j+2), 3);
-                vert->connectStretch(this->getVertex(i, j+1), 3);   
-            } else {
-                if(j == height - 2) {
-                    vert->connectStretch(this->getVertex(i, j+1), 3);
-                }
-            }
-
-            // Diagonal Conections:
-            
-            // Connection Up-Left
-            if(i >= 1 && j >= 1) {
-                vert->connectShear(this->getVertex(i-1, j-1), 0);
-            }
-
-            // Conection Up-Right
-            if(i <= (width - 2) && j >= 1) {
-                vert->connectShear(this->getVertex(i+1, j-1), 1);
-            }
-
-            // Connection Down-Right:
-            if(i <= (width - 2) && j <= (height - 2)) {
-                vert->connectShear(this->getVertex(i+1, j+1), 2);
-            }
-
-            // Connection Down-Left:
-            if(i >= 1 && j <= (height - 2)) {
-                vert->connectShear(this->getVertex(i-1, j+1), 3);
-            }
-
-        }
-    }
-    */
+//****************************************************
+// Add Stretch
+//      - Adds a stretch spring to stretchMatrix
+//****************************************************
+void addStretch(int x1, int y1, int x2, int y2) {
+    Vertex* v1 = this->getVertex(x1, y1);
+    Vertex* v2 = this->getVertex(x2, y2);
+    Spring* temp = new Spring(v1, v2, "STRETCH");
+    stretchMatrix.push_back(temp);
+}
+//****************************************************
+// Add Shear
+//      - Adds a shear spring to shearMatrix
+//****************************************************
+void addShear(int x1, int y1, int x2, int y2) {
+    Vertex* v1 = this->getVertex(x1, y1);
+    Vertex* v2 = this->getVertex(x2, y2);
+    Spring* temp = new Spring(v1, v2, "SHEAR");
+    shearMatrix.push_back(temp);
+}
+//****************************************************
+// Add Bend
+//      - Adds a Bend spring to bendMatrix
+//****************************************************
+void addBend(int x1, int y1, int x2, int y2) {
+    Vertex* v1 = this->getVertex(x1, y1);
+    Vertex* v2 = this->getVertex(x2, y2);
+    Spring* temp = new Spring(v1, v2, "BEND");
+    bendMatrix.push_back(temp);   
 }
 

@@ -44,6 +44,13 @@ class Cloth {
     void createDefaultCloth(int w, int h);
     void createVertices(glm::vec3 upLeft, glm::vec3 vertStep, glm::vec3 horizStep); // height and width already instantiated
 
+    // Spring Setup Functions
+    void connectSprings();
+    void connectNewSprings();
+
+    void addStretch(int x1, int y1, int x2, int y2);
+    void addShear(int x1, int y1, int x2, int y2);
+    void andBend(int x1, int y1, int x2, int y2);
 
   public:
     // Constructors:
@@ -74,7 +81,7 @@ class Cloth {
 
 
     void setFixedCorners(bool c1, bool c2, bool c3, bool c4);
-    void connectSprings();
+
 
 };
 
