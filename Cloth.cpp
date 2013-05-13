@@ -320,7 +320,7 @@ void Cloth::setFixedCorners(bool c1, bool c2, bool c3, bool c4) {
 //        springs wouldn't have anything to connect to.
 //****************************************************
 void Cloth::connectNewSprings() {
-    for(int h = 0; h < this->height, h++) {
+    for(int h = 0; h < this->height; h++) {
         for(int w = 0; w < this->width; w++) {
 
             // Only connect Springs To the Right & Downwards to avoid duplicates
@@ -357,6 +357,39 @@ void Cloth::connectNewSprings() {
         }
     }
 }
+
+//****************************************************
+// Add Stretch
+//      - Adds a stretch spring to stretchMatrix
+//****************************************************
+void Cloth::addStretch(int x1, int y1, int x2, int y2) {
+    Vertex* v1 = this->getVertex(x1, y1);
+    Vertex* v2 = this->getVertex(x2, y2);
+    
+    Spring* temp = new Spring(v1, v2, "STRETCH");
+    stretchMatrix.push_back(temp);
+}
+//****************************************************
+// Add Shear
+//      - Adds a shear spring to shearMatrix
+//****************************************************
+void Cloth::addShear(int x1, int y1, int x2, int y2) {
+    Vertex* v1 = this->getVertex(x1, y1);
+    Vertex* v2 = this->getVertex(x2, y2);
+    Spring* temp = new Spring(v1, v2, "SHEAR");
+    shearMatrix.push_back(temp);
+}
+//****************************************************
+// Add Bend
+//      - Adds a Bend spring to bendMatrix
+//****************************************************
+void Cloth::addBend(int x1, int y1, int x2, int y2) {
+    Vertex* v1 = this->getVertex(x1, y1);
+    Vertex* v2 = this->getVertex(x2, y2);
+    Spring* temp = new Spring(v1, v2, "BEND");
+    bendMatrix.push_back(temp);   
+}
+
 
 //****************************************************
 // Connect Springs:
@@ -435,34 +468,4 @@ void Cloth::connectSprings() {
     }
 }
 
-//****************************************************
-// Add Stretch
-//      - Adds a stretch spring to stretchMatrix
-//****************************************************
-void addStretch(int x1, int y1, int x2, int y2) {
-    Vertex* v1 = this->getVertex(x1, y1);
-    Vertex* v2 = this->getVertex(x2, y2);
-    Spring* temp = new Spring(v1, v2, "STRETCH");
-    stretchMatrix.push_back(temp);
-}
-//****************************************************
-// Add Shear
-//      - Adds a shear spring to shearMatrix
-//****************************************************
-void addShear(int x1, int y1, int x2, int y2) {
-    Vertex* v1 = this->getVertex(x1, y1);
-    Vertex* v2 = this->getVertex(x2, y2);
-    Spring* temp = new Spring(v1, v2, "SHEAR");
-    shearMatrix.push_back(temp);
-}
-//****************************************************
-// Add Bend
-//      - Adds a Bend spring to bendMatrix
-//****************************************************
-void addBend(int x1, int y1, int x2, int y2) {
-    Vertex* v1 = this->getVertex(x1, y1);
-    Vertex* v2 = this->getVertex(x2, y2);
-    Spring* temp = new Spring(v1, v2, "BEND");
-    bendMatrix.push_back(temp);   
-}
 
