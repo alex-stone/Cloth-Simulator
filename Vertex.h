@@ -56,7 +56,7 @@ class Vertex {
     int getXPos() { return xPos; };
     int getYPos() { return yPos; };
 
-
+    void setMass(float m) { mass = m; };
     void setPosition(int x, int y);
     //void setSpringRestLengths(float stretch, float bend, float shear);
     void setFixedVertex(bool isFixed);

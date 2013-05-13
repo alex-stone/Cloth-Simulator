@@ -97,7 +97,7 @@ bool constantStep;
 int oldFrameNum = 0;
 float lastFPStime = 0.0f;
 
-int numTimeSteps = 30;
+int numTimeSteps = 5;
 const float STEP = 0.007f;
 
 const float STEP_INC = 0.001f;
@@ -1153,11 +1153,18 @@ void processFrame() {
 
     while((lastUpdateTime - frameStartTime) < frameDuration) {
 
-        lastUpdateTime = processCalculation(lastUpdateTime);
+        if(glutGet(GLUT_ELAPSED_TIME) - lastUpdateTime > 1) {
+
+            lastUpdateTime = processCalculation(lastUpdateTime);
+
+            numCalculations++;
+
+        }
+
 
         // Set lastTimeUpdated to be right after we updated the Cloth
         //lastUpdateTime = glutGet(GLUT_ELAPSED_TIME);
-        numCalculations++;
+
     }
 
     frameNum++;
@@ -1241,7 +1248,7 @@ void myDisplay() {
     lightReposition();
    
     if(wire) {
-        glDisable(GL_LIGHTING);
+        //glDisable(GL_LIGHTING);
         renderClothStructure();
 
     } else {
@@ -1252,6 +1259,8 @@ void myDisplay() {
 
         glDisable(GL_TEXTURE_2D);
     }
+
+
 
     // Draw Shapes:
     for(int i = 0; i < numShapes; i++) {
@@ -1301,7 +1310,7 @@ GLuint drawShape(Shape* s) {
         glColor3f(0.3f, 0.3f, 0.6f);
         
         // TODO: 
-        glutSolidSphere(s->getRadius() - 0.05, 50 ,50 );
+        glutSolidSphere(s->getRadius() - 0.1f, 50 ,50 );
         glPopMatrix();
     } 
 

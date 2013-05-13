@@ -40,6 +40,7 @@ class Spring {
 
     // Directly moves position instead of adding force
     void applyCorrection();
+    void lengthConstraint();
 
     // Prints Stats about Springs
     void static printStats();

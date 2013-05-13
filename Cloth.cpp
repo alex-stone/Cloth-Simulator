@@ -73,6 +73,7 @@ Cloth::Cloth(int density, Vertex* upLeft, Vertex* upRight, Vertex* downRight, Ve
     vertVec = vertVec / (float)(this->height - 1);
 
 
+    mass = 100.0f;
 
     // Create the vertices and Connect all the Springs
     createVertices(upLeft->getPos(), vertVec, horizVec);
@@ -105,7 +106,7 @@ Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, V
     glm::vec3 vertStep = vertVec / (float)(h-1);
     glm::vec3 horizStep = horizVec / (float)(w-1);
 
-
+    mass = 100.0f;
     createVertices(upLeft->getPos(), vertStep, horizStep);
 
     //connectSprings();
@@ -140,6 +141,7 @@ void Cloth::createDefaultCloth(int w, int h) {
     horizStep = horizStep / (float) (w - 1);
     vertStep = vertStep / (float) (h - 1);
 
+    mass = 100.0f;
     createVertices(upLeft, vertStep, horizStep);
     
     //connectSprings();
@@ -158,12 +160,18 @@ void Cloth::createVertices(glm::vec3 upLeft, glm::vec3 vertStep, glm::vec3 horiz
     
     // Sets the radius of the spheres that will be drawn for the points when drawing the structure
     pointDrawSize = glm::length(horizStep)*0.2;
+    std::cout << "Poind Draw Size = " << pointDrawSize << std::endl;
 
     // Sets size of the Vector holding the vertices to W * H
     numVertices = this->width * this->height;
     vertexMatrix.resize(numVertices);
 
-    actualWidth = glm::length(horizStep) * (this->width - 1);
+    mass = 100.0f;
+
+    float vertexMass = mass / (float) numVertices;
+    std::cout << "Vertex Mass = " << vertexMass << std::endl;
+
+    actualWidth = glm::length(horizStep) * (this->width - 1); 
     actualHeight = glm::length(vertStep) * (this->height - 1);
 
     /*
@@ -193,6 +201,7 @@ void Cloth::createVertices(glm::vec3 upLeft, glm::vec3 vertStep, glm::vec3 horiz
 
             // Sets its position in the Grid of the cloth
             vertexMatrix[vertIndex]->setPosition(w, h);
+            vertexMatrix[vertIndex]->setMass(vertexMass);
 
         }        
     }
@@ -212,6 +221,10 @@ void Cloth::update(float timestep) {
 
     for(int i = 0; i < height*width; i++) {
         vertexMatrix[i]->update(timestep, euler);
+    }
+
+    if(useSpringForce) {
+        applyLengthConstraints();
     }
 
     areNormalsUpdated = false;
@@ -252,6 +265,20 @@ void Cloth::updateSprings() {
         }
     }
 
+}
+
+void Cloth::applyLengthConstraints() {
+    for(int i = 0; i < stretchMatrix.size(); i++) {
+        stretchMatrix[i]->lengthConstraint();
+    }
+
+    for(int j = 0; j < shearMatrix.size(); j++) {
+        shearMatrix[j]->lengthConstraint();
+    }
+
+    for(int k = 0; k < stretchMatrix.size(); k++) {
+        stretchMatrix[k]->lengthConstraint();
+    }
 }
 
 
@@ -336,7 +363,7 @@ void Cloth::addTriangleForce(glm::vec3 force){
             Vertex* v1 = getVertex(w,h);
             Vertex* v2 = getVertex(w, h+1);
             Vertex* v3 = getVertex(w+1, h);
-            Vertex* v4 = getVertex(w+1, h+1);            
+            Vertex* v4 = getVertex(w+1, h+1);
 
             // Calculates Force Contribution on the first Triangle
             glm::vec3 triNormal1 = glm::normalize(v1->findNormal(v2,v3));

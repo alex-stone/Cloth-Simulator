@@ -12,7 +12,7 @@ const float DEF_BEND = 1000.0f;
 const float DEF_DAMP = 100.0f;
 */
 // New Useful Variables:
-const float DAMP_FACTOR = 0.004f;
+const float DAMP_FACTOR = 0.01f;
 
 bool DEBUG = true ;
 
@@ -426,9 +426,9 @@ void Vertex::updateAfterCollide(glm::vec3 newPos, glm::vec3 newVel) {
     
     //this->velocity = newVel;
 
-    this->velocity.x *= .6;
-    this->velocity.y *= .6;
-    this->velocity.z *= .6;
+    this->velocity.x *= .4;
+    this->velocity.y *= .4;
+    this->velocity.z *= .4;
     
 }
 

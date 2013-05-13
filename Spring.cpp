@@ -10,7 +10,7 @@
 //****************************************************
 // Spring Class - Constants
 //****************************************************
-const float UNIT_SPRING = 300.0f;
+const float UNIT_SPRING = 100.0f;
 int stretchCount = 0;
 int shearCount = 0;
 int bendCount = 0;
@@ -19,6 +19,9 @@ int bendCount = 0;
 int stretchConst;
 int shearConst;
 int bendConst;
+
+// Distance Constraint Variables
+float tolerance = 0.01f;
 
 //****************************************************
 // Spring Class - Constructors
@@ -34,6 +37,22 @@ Spring::Spring(Vertex* v1, Vertex* v2, std::string t) {
 	// Value Increases with smaller size
 	springConstant = UNIT_SPRING / restDistance;
 
+/*
+	if(t == "STRETCH") {
+		springConstant = 2450;
+	}
+
+
+	if(t == "SHEAR") {
+		springConstant = 1732;
+	}
+
+
+	if(t == "BEND") {
+		springConstant = 612;
+	}
+*/
+
 
 	// Sets the Constants to Class Variables for Display
 	if(t == "STRETCH" && stretchCount == 0) {
@@ -47,6 +66,8 @@ Spring::Spring(Vertex* v1, Vertex* v2, std::string t) {
 	}
 
 	if(t == "BEND" && bendCount == 0) {
+
+
 		bendConst = springConstant;
 		bendCount++;
 	}
@@ -111,6 +132,39 @@ void Spring::applyCorrection() {
 	vertex2->offsetCorrection(-correction);
 
 }
+
+
+void Spring::lengthConstraint() {
+
+	glm::vec3 v1 = vertex1->getPos();
+	glm::vec3 v2 = vertex2->getPos();
+
+	glm::vec3 springVec = v2-v1;
+
+	float length = glm::length(springVec);
+
+	float upperBound = restDistance * (1.0f + tolerance);
+	float lowerBound = restDistance * (1.0f - tolerance);
+
+	// If Longer Than Tolerance
+	if(length > upperBound) {
+
+		glm::vec3 correction = springVec * (1.0f - upperBound/length)*0.5f;
+
+		vertex1->offsetCorrection(correction);
+		vertex2->offsetCorrection(-correction);
+
+	}
+
+	if(length < lowerBound) {
+		glm::vec3 correction = springVec * (1.0f - lowerBound/length)*0.5f;
+
+		vertex1->offsetCorrection(correction);
+		vertex2->offsetCorrection(-correction);
+
+	}
+}
+
 
 //****************************************************
 // Print Stats

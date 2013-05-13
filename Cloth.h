@@ -18,6 +18,9 @@ class Cloth {
     float actualWidth;
     float actualHeight;
 
+    // Cloth has Set Mass and Each vertex is a portion of that
+    float mass;
+
     float pointDrawSize;
     
     // 2D Array of Vertices: vertexMatrix[i][j] == vertexMatrix(i*w + j)
@@ -88,7 +91,7 @@ class Cloth {
 
     // Call each spring to update Vertices
     void updateSprings();
-    
+    void applyLengthConstraints();
 
     void updateCollision(Shape* s);
 
