@@ -86,6 +86,10 @@ int frameNum = 0;
 float calcsPerFrame = 0.0f;
 int numCalculations = 0;
 
+// Drawing Cloth Structure Variables:
+const float DRAW_RADIUS = 0.02f;
+bool spherePoints = true;
+
 
 // If true, use constant STEP value. If false use constant FPS value
 bool constantStep;  
@@ -311,9 +315,6 @@ void initScene() {
     light = true;
     running = false;
     showOptions = false;
-
-    // TODO: Change this & Add keypress
-    drawStructure = true;
     
     // Initialize Animation Variables:
     frameDuration = 1000.0f / framesPerSecond;  
@@ -862,26 +863,52 @@ void drawTestLine() {
 //     - Draws all of the points in the cloth
 //****************************************************
 void drawClothPoints() {
+  
+    if(spherePoints) {
 
-    glBegin(GL_POINTS);
+         for(int h = 0; h < cloth->getHeight(); h++) {
 
-    glPointSize(2.0f);
+            for(int w = 0; w < cloth->getWidth(); w++) {
+                Vertex* vert = cloth->getVertex(w, h);
 
-    for(int h = 0; h < cloth->getHeight()-1; h++) {
+                glColor3f(1.0, 1.0, 1.0);
 
-        for(int w = 0; w < cloth->getWidth(); w++) {
-            Vertex* vert = cloth->getVertex(w, h);
+                glm::vec3 center = vert->getPos();
 
-            glColor3f(1.0, 1.0, 1.0);
+                glPushMatrix();
+                glTranslatef(center.x, center.y, center.z);
+                
+                glutSolidSphere(DRAW_RADIUS , 10 , 10 );
+                glPopMatrix();
 
-            glm::vec3 v = vert->getPos();
-
-            glVertex3f(v.x, v.y, v.z);
-
+            }
         }
-    }
-    glEnd();
 
+    } else {
+
+        glEnable(GL_POINT_SMOOTH);
+
+        glBegin(GL_POINTS);
+
+        glPointSize(100.0f);
+
+
+        for(int h = 0; h < cloth->getHeight(); h++) {
+
+            for(int w = 0; w < cloth->getWidth(); w++) {
+                Vertex* vert = cloth->getVertex(w, h);
+
+                glColor3f(1.0, 1.0, 1.0);
+
+                glm::vec3 v = vert->getPos();
+
+                glVertex3f(v.x, v.y, v.z);
+
+            }
+        }
+        glEnd();
+
+    }
 }
 
 //****************************************************
@@ -968,9 +995,6 @@ void drawBendSprings() {
 //****************************************************
 void renderClothStructure() {
 
-    // Draw all of the points of the vertices
-    drawClothPoints();
-
     // Draw the Bend Springs first so that the Stretch are drawn over it until the cloth goes out of plane
     drawBendSprings();
 
@@ -979,6 +1003,8 @@ void renderClothStructure() {
 
     // Draw the Shear Springs
     drawShearSprings();
+
+    drawClothPoints();
  
 }
 
@@ -1271,7 +1297,8 @@ GLuint drawShape(Shape* s) {
         glTranslatef(center.x, center.y, center.z);
         glColor3f(0.3f, 0.3f, 0.6f);
         
-        glutSolidSphere(s->getRadius()-0.1 ,50 ,50 );
+        // TODO: 
+        glutSolidSphere(s->getRadius(), 50 ,50 );
         glPopMatrix();
     } 
 
