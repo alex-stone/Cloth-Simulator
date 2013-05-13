@@ -49,9 +49,9 @@ GLuint*                 shapeDrawLists;
 int                     numShapes;
 
 // OpenGL Drawing Variables
-bool wire;
+bool wire;          // Draw Springs vs. not springs
 bool smooth;
-bool running;   // Is simulation running in real-time or paused for step through
+bool running;       // Is simulation running in real-time or paused for step through
 bool light;
 
 // Options Menu Drawing Variables
@@ -311,6 +311,9 @@ void initScene() {
     light = true;
     running = false;
     showOptions = false;
+
+    // TODO: Change this & Add keypress
+    drawStructure = true;
     
     // Initialize Animation Variables:
     frameDuration = 1000.0f / framesPerSecond;  
@@ -339,11 +342,12 @@ void glut3DSetup() {
         glDisable(GL_LIGHTING);
     }
 
+    /*
     if(wire) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     } else {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }
+    }*/
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -363,6 +367,7 @@ void glut3DSetup() {
 void glut2DSetup() {
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     glMatrixMode(GL_PROJECTION);
@@ -638,9 +643,9 @@ void displayShading(int leftBound, int upBound, glm::vec3 color) {
        // Print Smooth Shading Info:
     std::string wireOut;
     if(wire) {
-        wireOut = "Wireframe: ON";
+        wireOut = "Spring Wireframe: ON";
     } else {
-        wireOut = "Wireframe: OFF";
+        wireOut = "Spring Wireframe: OFF";
     }
 
     printText(leftBound, upBound + LARGE_LINE_SIZE + 5 + 3*LINE_SIZE, color.x, color.y, color.z, wireOut, GLUT_BITMAP_HELVETICA_12);
@@ -850,6 +855,131 @@ void drawTestLine() {
     
     glEnd();
 
+}
+
+//****************************************************
+// Draw Cloth Points
+//     - Draws all of the points in the cloth
+//****************************************************
+void drawClothPoints() {
+
+    glBegin(GL_POINTS);
+
+    glPointSize(2.0f);
+
+    for(int h = 0; h < cloth->getHeight()-1; h++) {
+
+        for(int w = 0; w < cloth->getWidth(); w++) {
+            Vertex* vert = cloth->getVertex(w, h);
+
+            glColor3f(1.0, 1.0, 1.0);
+
+            glm::vec3 v = vert->getPos();
+
+            glVertex3f(v.x, v.y, v.z);
+
+        }
+    }
+    glEnd();
+
+}
+
+//****************************************************
+// Draw Stretch Springs
+//     - Draws all of the stretch springs
+//****************************************************
+void drawStretchSprings() {
+    vector<Spring*> temp = cloth->getStretchSprings();
+
+    glBegin(GL_LINES);
+
+    glColor3f(1.0f, 0.0f, 0.0f);
+
+
+    for(int i = 0; i < temp.size(); i++) {
+        glm::vec3 p1 = temp[i]->getPos1();
+        glm::vec3 p2 = temp[i]->getPos2();
+
+        glVertex3f(p1.x, p1.y, p1.z);
+        glVertex3f(p2.x, p2.y, p2.z);
+
+    }
+
+    glEnd();
+
+}
+
+//****************************************************
+// Draw Cloth Points
+//     - Draws all of the shear springs in cloth
+//****************************************************
+void drawShearSprings() {
+    vector<Spring*> temp = cloth->getShearSprings();
+
+    glBegin(GL_LINES);
+
+    glColor3f(0.0f, 1.0f, 0.0f);
+
+
+    for(int i = 0; i < temp.size(); i++) {
+        glm::vec3 p1 = temp[i]->getPos1();
+        glm::vec3 p2 = temp[i]->getPos2();
+
+        glVertex3f(p1.x, p1.y, p1.z);
+        glVertex3f(p2.x, p2.y, p2.z);
+
+    }
+
+    glEnd();
+
+}
+
+//****************************************************
+// Draw Cloth Points
+//      - Draws all of the bend springs in the cloth
+//      - Not useful visually until out of plane
+//          movement
+//****************************************************
+void drawBendSprings() {
+    vector<Spring*> temp = cloth->getBendSprings();
+
+    glBegin(GL_LINES);
+
+    glColor3f(0.0f, 0.0f, 1.0f);
+
+
+    for(int i = 0; i < temp.size(); i++) {
+        glm::vec3 p1 = temp[i]->getPos1();
+        glm::vec3 p2 = temp[i]->getPos2();
+
+        glVertex3f(p1.x, p1.y, p1.z);
+        glVertex3f(p2.x, p2.y, p2.z);
+
+    }
+
+    glEnd();
+}
+
+//****************************************************
+// Render Cloth Structure
+//      - Renders each vertex of the cloth
+//      - Renders The Springs based on variables:
+//             - shear, stretch, bend
+//****************************************************
+void renderClothStructure() {
+
+    // Draw all of the points of the vertices
+    drawClothPoints();
+
+    // Draw the Bend Springs first so that the Stretch are drawn over it until the cloth goes out of plane
+    drawBendSprings();
+
+    // Draw the Stretch Springs
+    drawStretchSprings();
+
+    // Draw the Shear Springs
+    drawShearSprings();
+ 
 }
 
 //****************************************************
@@ -1081,11 +1211,18 @@ void myDisplay() {
     // Set Light & Material Values
     lightReposition();
    
-    // Renders 3D Objects 
-    glEnable(GL_TEXTURE_2D);
-    renderCloth(); 
+    if(wire) {
+        glDisable(GL_LIGHTING);
+        renderClothStructure();
 
-    glDisable(GL_TEXTURE_2D);
+    } else {
+
+        // Renders 3D Objects 
+        glEnable(GL_TEXTURE_2D);
+        renderCloth(); 
+
+        glDisable(GL_TEXTURE_2D);
+    }
 
     // Draw Shapes:
     for(int i = 0; i < numShapes; i++) {
@@ -1435,11 +1572,12 @@ void keyPress(unsigned char key, int x, int y) {
 
         case 'w':           // Toggle Wireframe Mode
             wire = !wire;
+            /*
             if(wire) {
                 glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             } else {
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            }
+            }*/
             break;
 
         case '1':   // Checkerboard Texture

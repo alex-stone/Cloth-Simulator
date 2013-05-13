@@ -64,6 +64,10 @@ class Cloth {
     int getWidth() { return width; };
     int getHeight() { return height; };    
 
+    std::vector<Spring*> getStretchSprings() { return stretchMatrix; };
+    std::vector<Spring*> getShearSprings() { return shearMatrix; };
+    std::vector<Spring*> getBendSprings() { return bendMatrix; };
+
     // Width oriented vector
     Vertex* getVertex(int w, int h) { return vertexMatrix[h*width + w]; };
 
