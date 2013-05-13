@@ -56,7 +56,7 @@ bool light;
 
 // Options Menu Drawing Variables
 bool showOptions;
-bool reopenOptions;
+bool reopenOptions;     // Indicates to reopen Options menu if resized to width > 700.
 
 // OpenGL Perspective Variables & Constants:
 GLdouble aspectRatio;
@@ -124,6 +124,7 @@ const int LARGE_LINE_SIZE = 20;
 std::string currentTexture="";
 GLuint texture0;
 GLuint texture1;
+GLuint texture2;
 
 //****************************************************
 // Light & Material Property Functions
@@ -148,9 +149,6 @@ void lightReposition() {
 //      - Sets the Light Ambient, Diffuse, Specular
 //****************************************************
 void lightSetup() {
-    // Light Specific Values
-//    GLfloat light_ambient[]=  { 0.4f, 0.6f, 0.8f, 1.0f};
-//    GLfloat light_diffuse[]=  { 0.7f, 0.6f, 0.5f, 1.0f};
     
     GLfloat light_specular[] = { 0.3, 0.3, 0.3, 1.0f};
     GLfloat light_ambient[]=  { 0.0f, 0.0f, 0.0f, 1.0f};
@@ -179,8 +177,6 @@ void lightSetup() {
 //          Diffuse values using glColor
 //****************************************************
 void materialSetup() {
-//    GLfloat mat_specular[] = { 0.5, 0.5, 0.5, 1.0};
-//    GLfloat mat_shininess[] = { 60.0 };
 
     GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0};
     GLfloat mat_shininess[] = { 20.0 };
@@ -192,6 +188,12 @@ void materialSetup() {
     glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 
 }
+
+//****************************************************
+// Texture Setup Functions:
+//      - Sets the settings, to correctly show the 
+//          textures mapped onto the cloth.
+//****************************************************
 
 void textureSetup() {
 
@@ -205,6 +207,10 @@ void textureSetup() {
 
 }
 
+//****************************************************
+// Load Texture:
+//      - Loads a single texture from a file
+//****************************************************
 void loadTexture(const char* filename) {
     int width, height;
     unsigned char* data;
@@ -229,9 +235,13 @@ void loadTexture(const char* filename) {
     gluBuild2DMipmaps(GL_TEXTURE_2D, 3, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
 
     free(data);
-
 }
 
+//****************************************************
+// Initialize Textures:
+//      - Generates 'names' for each texture, and then
+//          binds the textures so they can be loaded.
+//****************************************************
 void initTextures() {
     glGenTextures(1, &texture0);
     glBindTexture(GL_TEXTURE_2D, texture0);
@@ -243,8 +253,12 @@ void initTextures() {
 
     loadTexture("textures/texture1.raw");
 
-}
+    glGenTextures(1, &texture2);
+    glBindTexture(GL_TEXTURE_2D, texture2);
 
+    loadTexture("textures/texture2.raw");
+
+}
 
 //****************************************************
 // Glut Functions
@@ -353,6 +367,7 @@ void glut2DSetup() {
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
+
     glOrtho(0, viewport.w, viewport.h, 0, -1, 1);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -368,12 +383,14 @@ void myReshape(int w, int h) {
         std::cout << "myReshape Called" << std::endl;
     }
 
+    // If the window was resized from a smaller size and Options were open, then reopen.
     if(w > 700 && reopenOptions) {
         showOptions = true;
         reopenOptions = false;
     }
 
-    if(w < 700) {
+    // If Options were open, and window resized to a window smaller than 700, set it to reopen
+    if(w < 700 && showOptions) {
         showOptions = false;
         reopenOptions = true;
     }
@@ -644,7 +661,6 @@ void displayCamera(int leftBound, int upBound, glm::vec3 color) {
     // Print Camera Header:
     printText(leftBound+5, upBound + LARGE_LINE_SIZE, color.x, color.y, color.z, "SIMULATION: ", GLUT_BITMAP_HELVETICA_18);
 
-
     // Print Running Info:
     std::string runOut;
     if(running) {
@@ -729,11 +745,8 @@ void printSideOptions() {
 //****************************************************
 void printOptions() {
 
+    // Black Text for White Background
     glm::vec3 color(0.0f, 0.0f, 0.0f);
-
-    float r = 0.0f;
-    float g = 0.0f;
-    float b = 0.0f;
 
     int topHeight = viewport.h - 150;
 
@@ -747,16 +760,16 @@ void printOptions() {
         glVertex2f(viewport.w, viewport.h-150);
     glEnd();
 
+    // Sets width of each Section
     int width = viewport.w/4;
 
-
+    // Draw each individual Section
     displayPerformance(5, topHeight, color);
     displayCamera(width+5, topHeight, color);
     displayForce(2*width + 5, topHeight, color);
     displayShading(3*width+5, topHeight, color);
     
-
-
+    // Draws Lines Around each section.
     glBegin(GL_LINES);
         glVertex2f(0, topHeight);
         glVertex2f(viewport.w, topHeight);
@@ -777,6 +790,12 @@ void printOptions() {
 
 }
 
+//****************************************************
+// Print Options Header:
+//      - Prints the Header for the Options Bar
+//      - Always shows, even if Options Bar isn't
+//          showing, so has 2 possible positions.
+//****************************************************
 void printOptionsHeader() {
 
     glm::vec3 color(0.0f, 0.0f, 0.0f);
@@ -847,7 +866,17 @@ void drawTestLine() {
 //
 //****************************************************
 void renderCloth() {
+
+    if(debugFunc) {
+        cout << "Render Cloth Called" << endl;
+    }
+
+
     cloth->updateNormals();
+
+    if(debugFunc) {
+        cout << "Successfully Update Normals" << endl;
+    }
  
     for(int h = 0; h < cloth->getHeight()-1; h++) {
         glBegin(GL_TRIANGLE_STRIP);    
@@ -858,19 +887,26 @@ void renderCloth() {
             glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
             Vertex* temp = cloth->getVertex(w, h);
+
+            // Sets Normal Values from Vertex.
             glNormal3f(temp->getNorm().x, temp->getNorm().y, temp->getNorm().z);
 
-            // Texture Coordinate Values
+            // Sets the Texture Coordinate Values to map to Current Texture
             float s = (float) w / (float) (cloth->getWidth()-1);
-            float t = 1.0f - (float) h / (float) (cloth->getHeight()-1);
-
+            float t = (float) h / (float) (cloth->getHeight()-1);
             glTexCoord2d(s,t);
+
+            // Sets actual Vertex
             glVertex3f(temp->getPos().x, temp->getPos().y, temp->getPos().z);
 
+            // Vertex 2:
             temp = cloth->getVertex(w, h+1);
+
+            // Vertex 2's Normal values
             glNormal3f(temp->getNorm().x, temp->getNorm().y, temp->getNorm().z);
 
-            t = 1.0f - (float) (h+1) / (float) (cloth->getHeight()-1);
+            // Texture Coordinates, only t value changes.
+            t = (float) (h+1) / (float) (cloth->getHeight()-1);
 
             glTexCoord2d(s,t);
             glVertex3f(temp->getPos().x, temp->getPos().y, temp->getPos().z);
@@ -878,6 +914,11 @@ void renderCloth() {
         }
         glEnd();
     }
+
+    if(debugFunc) {
+        std:cout << "Render Cloth Completed" << std::endl;
+    }
+
 }
 
 //****************************************************
@@ -900,7 +941,6 @@ void preUpdateCalculation() {
     // Clear Acceleration Here:
     cloth->resetAccel();
 
-
     // Note: Needs to be done before wind
     cloth->updateNormals();
 
@@ -912,7 +952,6 @@ void preUpdateCalculation() {
         cloth->addTriangleForce(windForce);
     }
 
-    //updateCollisions();
 }
 
 
@@ -925,11 +964,10 @@ float processCalculation(float lastUpdateTime) {
     
     preUpdateCalculation();
 
+
     float currentTime = glutGet(GLUT_ELAPSED_TIME);
 
     float timeChange = (currentTime - lastUpdateTime + 0.0f)/1000.0f;
-
-    //cloth->update(timestep);
 
     cloth->update(timeChange);
 
@@ -1388,9 +1426,10 @@ void keyPress(unsigned char key, int x, int y) {
         case 'l':           // Toggle Lighting
             light = !light;
             if(light) {
-                 glEnable(GL_LIGHTING);
+                std::cout << "Setting Light On" << std::endl;
+               // glEnable(GL_LIGHTING);
             } else {
-                 glDisable(GL_LIGHTING);
+               // glDisable(GL_LIGHTING);
             }
             break;
 
@@ -1411,6 +1450,11 @@ void keyPress(unsigned char key, int x, int y) {
         case '2':   // American Flag Texture
             glBindTexture(GL_TEXTURE_2D, texture1);
             currentTexture = "AMERICAN_FLAG";
+            break;
+
+        case '3':   // American Flag Texture
+            glBindTexture(GL_TEXTURE_2D, texture2);
+            currentTexture = "GRADIENT";
             break;
 
         case 'o':           // Toggles whether the Options List is shown

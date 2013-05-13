@@ -15,7 +15,7 @@ const float UNIT_SHEAR = 100.0f;
 const float UNIT_BEND = 50.0f;
 
 // Debug Variables
-bool debug = true;
+bool debug = false;
 
 //****************************************************
 // Cloth Class - Constructors
@@ -139,10 +139,6 @@ void Cloth::createVertices(glm::vec3 upLeft, glm::vec3 vertStep, glm::vec3 horiz
     float bendLength = 2 * stretchLength;
     float shearLength = sqrt(2 * stretchLength * stretchLength);
 
-    if(debug) {
-        std::cout << "STRETCH LENGTH = " << stretchLength << std::endl;
-    }
-
     stretchConst = UNIT_STRETCH / stretchLength;
     shearConst = UNIT_SHEAR / shearLength;
     bendConst = UNIT_BEND / bendLength;
@@ -151,10 +147,6 @@ void Cloth::createVertices(glm::vec3 upLeft, glm::vec3 vertStep, glm::vec3 horiz
     // Iterate through and create each Vertex
     for(int h = 0; h < this->height; h++) {
         for(int w = 0; w < this->width; w++) {
-
-           if(debug) {
-                std::cout << "Row # " << h << "  Col # " << w << std::endl;
-            }
 
             //I*W + j indexes vertexMatrix like a 2D array vertexMatrix[i][j]; 
             int vertIndex = h * (this->width) + w;
@@ -203,17 +195,8 @@ void Cloth::updateCollision(Shape* s) {
 //****************************************************
 void Cloth::updateNormals() {
 
-    bool debug = true;
-
-    if(debug) {
-        std::cout << "Update Normals Called" << std::endl;
-    }
-
     for(int h = 0; h < this->height - 1; h++) {
         for(int w = 0; w < this->width - 1; w++) {
-            if(debug) {
-                std::cout << "Row # " << h << "  Col # " << w << std::endl;
-            }
 
             // Get Vertex must be called (width, height);
             Vertex* v1 = getVertex(w, h);
@@ -221,14 +204,13 @@ void Cloth::updateNormals() {
             Vertex* v3 = getVertex(w+1, h);
             Vertex* v4 = getVertex(w+1, h+1);
 
-
-            glm::vec3 triNormal1 = glm::normalize(v2->findNormal(v1,v3));
+            glm::vec3 triNormal1 = glm::normalize(v1->findNormal(v2,v3));
 
             v1->updateNormal(triNormal1);
             v2->updateNormal(triNormal1);
             v3->updateNormal(triNormal1);
 
-            glm::vec3 triNormal2 = glm::normalize(v4->findNormal(v2,v3));
+            glm::vec3 triNormal2 = glm::normalize(v4->findNormal(v3,v2));
             
             v2->updateNormal(triNormal2);
             v3->updateNormal(triNormal2);
@@ -257,7 +239,7 @@ void Cloth::addTriangleForce(glm::vec3 force){
             Vertex* v4 = getVertex(w+1, h+1);            
 
             // Calculates Force Contribution on the first Triangle
-            glm::vec3 triNormal1 = glm::normalize(v2->findNormal(v1,v3));
+            glm::vec3 triNormal1 = glm::normalize(v1->findNormal(v2,v3));
             glm::vec3 triForce1 = triNormal1 * glm::dot(triNormal1, force);
 
             v1->addForce(triForce1);
@@ -265,7 +247,7 @@ void Cloth::addTriangleForce(glm::vec3 force){
             v3->addForce(triForce1);
 
             // Calculates Force Contribution on the Second Triangle
-            glm::vec3 triNormal2 = glm::normalize(v4->findNormal(v2,v3));
+            glm::vec3 triNormal2 = glm::normalize(v4->findNormal(v3,v2));
             glm::vec3 triForce2 = triNormal2 * glm::dot(triNormal2, force);
 
             v2->addForce(triForce2);
@@ -344,7 +326,7 @@ void Cloth::connectSprings() {
             Vertex* vert = this->getVertex(w, h);
 
             // Connections to the Left:
-            if(i >= 2) {
+            if(w >= 2) {
                 vert->connectBend(this->getVertex(w-2, h), 0);
                 vert->connectStretch(this->getVertex(w-1, h), 0);
             } else {
