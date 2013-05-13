@@ -218,6 +218,7 @@ void Cloth::update(float timestep) {
     // Iterate through vertexMatrix, and update each individual particle
 
     updateSprings();
+    addAerodynamicDrag();
 
     for(int i = 0; i < height*width; i++) {
         vertexMatrix[i]->update(timestep, euler);
@@ -305,7 +306,7 @@ void Cloth::updateCollision(Shape* s) {
 void Cloth::updateNormals() {
 
     // Only Update if they are not updated
-    if(!areNormalsUpdated) {
+    if(true) {
 
         for(int h = 0; h < this->height - 1; h++) {
             for(int w = 0; w < this->width - 1; w++) {
@@ -383,6 +384,61 @@ void Cloth::addTriangleForce(glm::vec3 force){
 
         }
     }
+}
+
+void calcDragOnTriangle(Vertex* v1, Vertex* v2, Vertex* v3) {
+
+    // Velocity is Triangle Velocity - Air Velocity
+
+    glm::vec3 avgVel = (v1->getVelocity() + v2->getVelocity() + v3->getVelocity())/(3.0f*0.007f);
+   
+
+    std::cout << "Avg Velocity = " << avgVel.x << ", " << avgVel.y << ", " << avgVel.z << ")" << std::endl;
+
+
+    glm::vec3 cross = glm::cross(v1->vectorTo(v2), v1->vectorTo(v3));
+
+    // To Do: Test if this is correct
+
+    float rho = 1.1f;
+    float dragCoeff = 1.0f;
+
+    glm::vec3 factor = cross * (glm::length(avgVel) * glm::dot(avgVel, cross) / (2 * glm::length(cross)));
+
+
+
+    std::cout << "FACTOR LENGTH = " << glm::length(factor) << std::endl;
+
+    glm::vec3 force = (0.5f) * rho * dragCoeff * factor;
+
+    v1->addForce(force/3.0f);
+    v2->addForce(force /3.0f);
+    v3->addForce(force/3.0f);
+
+    std::cout << "Aerodynamic Force = (" << force.x << ", " << force.y << ", " << force.z << ")" << std::endl;
+
+}
+
+//****************************************************
+// Add Aerodynamic Drag
+//****************************************************
+void Cloth::addAerodynamicDrag() {
+
+    for(int h = 0; h < this->height - 1; h++) {
+        for(int w = 0; w < this->width - 1; w++) {
+            Vertex* v1 = getVertex(w,h);
+            Vertex* v2 = getVertex(w, h+1);
+            Vertex* v3 = getVertex(w+1, h);
+            Vertex* v4 = getVertex(w+1, h+1);
+
+            calcDragOnTriangle(v1, v2, v3);
+
+            calcDragOnTriangle(v4, v3, v2);
+
+
+        }
+    }
+
 }
 
 

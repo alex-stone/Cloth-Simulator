@@ -99,6 +99,8 @@ class Cloth {
     void addConstantAccel(glm::vec3 accel);
     void addTriangleForce(glm::vec3 force);
 
+    void addAerodynamicDrag();
+
     void resetAccel();  
 
     void setFixedCorners(bool c1, bool c2, bool c3, bool c4);
