@@ -12,11 +12,8 @@ else
 endif
 
 
-SOURCES = Scene.cpp Vertex.cpp Cloth.cpp Sphere.cpp
-OBJECTS = Scene.o Vertex.o Cloth.o Sphere.o
-
-SOURCES = Scene.cpp Vertex.cpp Cloth.cpp Sphere.cpp Plane.cpp
-OBJECTS = Scene.o Vertex.o Cloth.o Sphere.o Plane.o
+SOURCES = Scene.cpp Vertex.cpp Cloth.cpp Sphere.cpp Plane.cpp Spring.cpp
+OBJECTS = Scene.o Vertex.o Cloth.o Sphere.o Plane.o Spring.o
 
 
 RM = /bin/rm -f
