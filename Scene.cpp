@@ -21,12 +21,43 @@ using namespace std;
 // Global Variables
 //****************************************************
 bool debugStats = true;
+float DEF_DAMP = 0.015f;
+float DEF_TOL = 0.01f;
+float DEF_SPRING = 100.0f;
 
 //****************************************************
 // Scene Constructor:
 //****************************************************
 Scene::Scene(const char* clothFile, const char* sceneFile, bool isEuler, bool isFloor) {
     resetScene(clothFile, sceneFile, isEuler, isFloor);
+
+    changeDamp(DEF_DAMP);
+    changeTolerance(DEF_TOL);
+    changeSpringConstant(DEF_SPRING);
+}
+
+void Scene::resetCloth() {
+    this->cloth = NULL;
+    this->loadCloth(inputFile);
+
+}
+
+void Scene::changeDamp(float newDamp) {
+    currentDamp = newDamp;
+
+    cloth->changeDamp(newDamp);
+}
+
+void Scene::changeTolerance(float newTolerance) {
+    currentTolerance = newTolerance;
+
+    cloth->changeTolerance(newTolerance);
+}
+
+void Scene::changeSpringConstant(float newSpring) {
+    currentSpringConstant = newSpring;
+
+    cloth->changeSpringConstant(newSpring);
 
 }
 
@@ -36,6 +67,7 @@ Scene::Scene(const char* clothFile, const char* sceneFile, bool isEuler, bool is
 void Scene::resetScene(const char* newCloth, const char* newScene, bool isEuler, bool isFloor) {
     
     useFloor = isFloor;
+
     euler = isEuler;
 
     // Reset the Cloth with a new Cloth
@@ -80,9 +112,6 @@ void Scene::updateCollisions() {
 //      - Adds Floor to the Shapes List
 //****************************************************
 void Scene::addFloor() {
-
-    std::cout << "ADDED FLOOR" << std::endl;
-        std::cout << "ADDED FLOOR" << std::endl;
 
     numShapes++;
 

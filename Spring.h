@@ -14,8 +14,13 @@ class Spring {
   	Vertex* vertex2;
 
   	// Spring Information
+    float unitConstant;
+
   	float springConstant;
   	float restDistance;
+
+    float tolerance;
+
 
   	// Type, "STRETCH", "SHEAR", "BEND"
   	std::string type;
@@ -34,9 +39,13 @@ class Spring {
     glm::vec3 getPos1() { return vertex1->getPos(); };
     glm::vec3 getPos2() { return vertex2->getPos(); };
 
+
   	// Force Due to Spring:
   	glm::vec3 getForce();
   	void applyForce();
+
+    void setTolerance(float newTolerance);
+    void setSpringConstant(float newSpring);
 
     // Directly moves position instead of adding force
     void applyCorrection();

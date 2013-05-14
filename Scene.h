@@ -26,6 +26,10 @@ class Scene {
     bool euler;
     bool useFloor;
 
+    float currentDamp;
+    float currentTolerance;
+    float currentSpringConstant;
+
   public:
     Cloth* cloth;
 
@@ -44,8 +48,13 @@ class Scene {
 
 
     // Sets up new Cloth, and new Scenes
+    void resetCloth();
     void resetScene(const char* newCloth, const char* newScene, bool isEuler, bool isFloor);
   
+    void changeDamp(float newDamp);
+    void changeTolerance(float newTolerance);
+    void changeSpringConstant(float newSpring);
+
     // Functions to Load New Cloth / Shapes
     void loadShapes(const char* shapeInput);
     void loadCloth(const char* input);

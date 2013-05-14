@@ -32,7 +32,7 @@ class Vertex {
     bool euler;
 
 
-    float dampConstant;
+    float dampFactor;
 
     // Function Initializations:
   //  void initSpringToNull();
@@ -53,13 +53,23 @@ class Vertex {
     glm::vec3 getAccel() { return acceleration; };
     glm::vec3 getNorm() { return glm::normalize(normal); };
 
+
+
+    //glm::vec3 getVel() { return velocity / (oldTimeChange+0.001f); };
+
     int getXPos() { return xPos; };
     int getYPos() { return yPos; };
+
+    glm::vec3 getOldPosition() { return oldPos; };
 
     void setMass(float m) { mass = m; };
     void setPosition(int x, int y);
     //void setSpringRestLengths(float stretch, float bend, float shear);
     void setFixedVertex(bool isFixed);
+
+
+    void setDamp(float newDamp);
+
 
     // Updates Position based on Acceleration & Timestep
     void update(float timeChange, bool euler);

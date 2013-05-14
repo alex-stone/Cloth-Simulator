@@ -12,7 +12,7 @@ const float DEF_BEND = 1000.0f;
 const float DEF_DAMP = 100.0f;
 */
 // New Useful Variables:
-const float DAMP_FACTOR = 0.01f;
+const float DAMP_FACTOR = 0.015f;
 
 bool DEBUG = true ;
 
@@ -88,7 +88,10 @@ void Vertex::initPhysicalProps(float a, float b, float c) {
     this->acceleration = glm::vec3(0.0f);
 
     this->oldPos = glm::vec3(a, b, c);  // Initializes oldPos to currentPos
+    
     mass = 1.0f;
+
+    dampFactor = DAMP_FACTOR;
 
     //mass = 1.0f;
 
@@ -121,6 +124,10 @@ void Vertex::setFixedVertex(bool isFixed) {
     fixed = isFixed;
 }
 
+void Vertex::setDamp(float newDamp) {
+    dampFactor = newDamp;
+}
+
 
 //****************************************************
 // Vertex Class - Functions
@@ -147,7 +154,7 @@ void Vertex::updateVerlet(float timeChange) {
 
     glm::vec3 temp = position;
 
-    position = position + (position - oldPos)*(1.0f - DAMP_FACTOR) + acceleration * (timeChange * timeChange);
+    position = position + (position - oldPos)*(1.0f - dampFactor) + acceleration * (timeChange * timeChange);
 
     if(oldTimeChange == 0.0f) {
         oldTimeChange = 0.1f;
@@ -161,9 +168,11 @@ void Vertex::updateVerlet(float timeChange) {
     //position = position + (position - oldPos)*(timeChange/oldTimeChange) + acceleration * (timeChange * timeChange);
 
     oldPos = temp;
+    velocity = position - oldPos;
     acceleration = glm::vec3(0.0f, 0.0f, 0.0f);
 
     oldTimeChange = timeChange;
+
 
     // Works but is really slow
    //glm::vec3 newPos = position + (position - oldPos)*(timeChange/oldTimeChange)+ acceleration * (timeChange * timeChange);
@@ -424,11 +433,12 @@ void Vertex::setNormal(glm::vec3 newNormal) {
 void Vertex::updateAfterCollide(glm::vec3 newPos, glm::vec3 newVel) {
     this->position = newPos;
     
-    //this->velocity = newVel;
-
+    this->velocity = newVel;
+/*
     this->velocity.x *= .4;
     this->velocity.y *= .4;
     this->velocity.z *= .4;
+    */
     
 }
 
@@ -439,7 +449,7 @@ void Vertex::updateAfterCollide(glm::vec3 newPos, glm::vec3 newVel) {
 //          Formula.
 //****************************************************
 glm::vec3 Vertex::getDampForce() {
-    glm::vec3 returnVec = -velocity * dampConstant;
+    glm::vec3 returnVec = -velocity * dampFactor;
 
     return returnVec;
 }

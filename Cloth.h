@@ -88,10 +88,14 @@ class Cloth {
     void update(float timestep);
     void updateNormals();
 
+    void changeDamp(float newDamp);
+    void changeTolerance(float newTolerance);
+    void changeSpringConstant(float newSpring);
 
     // Call each spring to update Vertices
     void updateSprings();
     void applyLengthConstraints();
+    void applyCorrection();
 
     void updateCollision(Shape* s);
 

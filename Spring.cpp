@@ -21,7 +21,8 @@ int shearConst;
 int bendConst;
 
 // Distance Constraint Variables
-float tolerance = 0.01f;
+float DEF_TOLERANCE = 0.01f;
+
 
 //****************************************************
 // Spring Class - Constructors
@@ -32,27 +33,12 @@ Spring::Spring(Vertex* v1, Vertex* v2, std::string t) {
 
 	type = t;
 
+	tolerance = DEF_TOLERANCE;
+
 	restDistance = glm::length(v2->getPos() - v1->getPos());
 
 	// Value Increases with smaller size
 	springConstant = UNIT_SPRING / restDistance;
-
-/*
-	if(t == "STRETCH") {
-		springConstant = 2450;
-	}
-
-
-	if(t == "SHEAR") {
-		springConstant = 1732;
-	}
-
-
-	if(t == "BEND") {
-		springConstant = 612;
-	}
-*/
-
 
 	// Sets the Constants to Class Variables for Display
 	if(t == "STRETCH" && stretchCount == 0) {
@@ -82,6 +68,16 @@ Spring::Spring(Vertex* v1, Vertex* v2, float kconstant, std::string t) {
 
 	type = t;
 }
+
+void Spring::setTolerance(float newTolerance) {
+	tolerance = newTolerance;
+}
+
+void Spring::setSpringConstant(float newUnitSpring){
+	unitConstant = newUnitSpring;
+	springConstant = unitConstant / restDistance;
+}
+
 
 //****************************************************
 // Spring Class - Magnitude of Force due to Spring

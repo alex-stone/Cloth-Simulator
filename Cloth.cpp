@@ -126,6 +126,45 @@ void Cloth::initCounts() {
     areNormalsUpdated = false;
 }
 
+void Cloth::changeDamp(float newDamp) {
+    for(int i = 0; i < width*height; i++) {
+        vertexMatrix[i]->setDamp(newDamp);
+    }
+}
+
+void Cloth::changeTolerance(float newTolerance) {
+    for(int i = 0; i < stretchMatrix.size(); i++) {
+        stretchMatrix[i]->setTolerance(newTolerance);
+    }
+
+    for(int j = 0; j < shearMatrix.size(); j++) {
+        shearMatrix[j]->setTolerance(newTolerance);
+    }
+
+    for(int k = 0; k < stretchMatrix.size(); k++) {
+        stretchMatrix[k]->setTolerance(newTolerance);
+    }
+}
+
+void Cloth::changeSpringConstant(float newSpring) {
+    for(int i = 0; i < stretchMatrix.size(); i++) {
+        stretchMatrix[i]->setSpringConstant(newSpring);
+    }
+
+    for(int j = 0; j < shearMatrix.size(); j++) {
+        shearMatrix[j]->setSpringConstant(newSpring);
+    }
+
+    for(int k = 0; k < stretchMatrix.size(); k++) {
+        stretchMatrix[k]->setSpringConstant(newSpring);
+    }
+
+}
+
+
+
+
+
 
 //****************************************************
 // Cloth Constructor Helpers:
@@ -218,19 +257,34 @@ void Cloth::update(float timestep) {
     // Iterate through vertexMatrix, and update each individual particle
 
     updateSprings();
-    addAerodynamicDrag();
+    //addAerodynamicDrag();
 
     for(int i = 0; i < height*width; i++) {
         vertexMatrix[i]->update(timestep, euler);
     }
 
     if(useSpringForce) {
+        //. applyCorrection();
         applyLengthConstraints();
     }
 
     areNormalsUpdated = false;
 }
 
+
+void Cloth::applyCorrection() {
+    for(int i = 0; i < stretchMatrix.size(); i++) {
+        stretchMatrix[i]->applyCorrection();
+    }
+
+    for(int j = 0; j < shearMatrix.size(); j++) {
+        shearMatrix[j]->applyCorrection();
+    }
+
+    for(int k = 0; k < stretchMatrix.size(); k++) {
+        stretchMatrix[k]->applyCorrection();
+    }
+}
 
 //****************************************************
 // Update Springs:
@@ -253,17 +307,7 @@ void Cloth::updateSprings() {
         }
 
     } else {
-        for(int i = 0; i < stretchMatrix.size(); i++) {
-            stretchMatrix[i]->applyCorrection();
-        }
-
-        for(int j = 0; j < shearMatrix.size(); j++) {
-            shearMatrix[j]->applyCorrection();
-        }
-
-        for(int k = 0; k < stretchMatrix.size(); k++) {
-            stretchMatrix[k]->applyCorrection();
-        }
+        applyCorrection();
     }
 
 }
@@ -390,7 +434,7 @@ void calcDragOnTriangle(Vertex* v1, Vertex* v2, Vertex* v3) {
 
     // Velocity is Triangle Velocity - Air Velocity
 
-    glm::vec3 avgVel = (v1->getVelocity() + v2->getVelocity() + v3->getVelocity())/(3.0f*0.007f);
+    glm::vec3 avgVel = (v1->getVelocity() + v2->getVelocity() + v3->getVelocity())/(3.0f);
    
 
     std::cout << "Avg Velocity = " << avgVel.x << ", " << avgVel.y << ", " << avgVel.z << ")" << std::endl;
