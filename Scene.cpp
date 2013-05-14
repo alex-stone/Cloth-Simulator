@@ -95,7 +95,6 @@ int numCalculations = 0;
 // Drawing Cloth Structure Variables:
 bool spherePoints = true;
 
-
 // If true, use constant STEP value. If false use constant FPS value
 bool constantStep;  
 
@@ -135,23 +134,146 @@ const int LARGE_LINE_SIZE = 20;
 std::string currentTexture="";
 
 GLuint* textures;
+//int numTextures;
 GLuint* floorTextures;
 
 int currentTex;
 int currentFloor;
 
-/*
-GLuint texture0;
-GLuint texture1;
-GLuint texture2;
+// Menu Variables:
+static int menu_id;
+static int submenu_id;
+static int texture_sub_id;
+static int cloth_sub_id;
+static int scene_sub_id;
+static int variables_sub_id;
+static int integration_sub_id;
+static int value = 0;
 
-GLuint floor0;
-GLuint floor1;
-GLuint floor2;
-*/
+// Variables For Working with Value:
+static int textureBase;
+static int numTextures;
+static int clothBase;
+static int numCloths;
+static int sceneBase;
+static int numScenes;
+static int integrationBase;
+static int numIntegrationMethods;
+
+
 //****************************************************
-// Light & Material Property Functions
+// Reset Scene Function:
 //****************************************************
+void resetScene(const char* newCloth, const char* newScene) {
+    
+    // Reset the Cloth with a new Cloth
+    if(newCloth != inputFile) {
+        inputFile = cloth;
+
+        cloth = NULL;
+        loadCloth(cloth);
+        frameNum = 0;
+    }
+
+    // Reset the Scene with new Scene
+    if(newScene != shapeFile) {
+        shapeFile = scene;
+
+
+        // Reset Scene Variables
+        shapes.clear();
+        numShapes = 0;
+
+        loadShapes(scene);
+
+        // Reset Shape Variables
+        shapeDrawLists = NULL;
+
+        if(useFloor) {
+             addFloor();
+        }
+
+        // Initialize Shape Draw Lists
+        shapeDrawLists = new GLuint[numShapes]; 
+        makeDrawLists();
+
+    }
+
+}
+
+//****************************************************
+// GLUT Menu Setup
+//****************************************************
+void menu(int num) {
+    if(num == 0) {
+        std::exit(1);
+        //glutDestroyWindow();
+    } else {
+        value = num;
+    }
+
+    glutPostRedisplay();
+}
+
+
+void createMenu() {
+    //submenu_id = glutCreateMenu(menu);
+
+    // Number of Items in Menus
+    numTextures = 3;
+    numCloths = 3;
+    numScenes = 3;
+    numIntegrationMethods = 2;
+
+    textureBase = 2;
+    clothBase = textureBase + numTextures;
+    sceneBase = clothBase + numCloths;
+    integrationBase = sceneBase + numScenes;
+
+    // Create SubMenu for Textures
+    texture_sub_id = glutCreateMenu(menu);
+    glutAddMenuEntry("Checkerboard", textureBase);
+    glutAddMenuEntry("American Flag", textureBase+1);
+    glutAddMenuEntry("Test", textureBase+2);
+
+    // Create Sub Menu for Cloths
+    cloth_sub_id = glutCreateMenu(menu);
+    glutAddMenuEntry("Free Fall", clothBase);
+    glutAddMenuEntry("Four Corners", clothBase+1);
+    glutAddMenuEntry("Flag", clothBase+2);
+
+    // Create Sub Menu for Scenes
+    scene_sub_id = glutCreateMenu(menu);
+    glutAddMenuEntry("Empty", sceneBase);
+    glutAddMenuEntry("Ball", sceneBase+1);
+    glutAddMenuEntry("4 Balls", sceneBase+2);
+
+    // Create Sub Menu For Integration Methods
+    integration_sub_id = glutCreateMenu(menu);
+    glutAddMenuEntry("Euler", integrationBase);
+    glutAddMenuEntry("Verlet", integrationBase+1);
+
+    menu_id = glutCreateMenu(menu);
+
+    glutAddSubMenu("Textures", texture_sub_id);
+    glutAddSubMenu("Cloths", cloth_sub_id);
+    glutAddSubMenu("Scenes", scene_sub_id);
+    glutAddSubMenu("Integration Method", integration_sub_id);
+    
+    glutAddMenuEntry("Reset", 1);
+    glutAddSubMenu("Draw", submenu_id);
+    glutAddMenuEntry("Quit", 0);     
+
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
+
+}
+
+void handleMenu() {
+
+    std::cout << "Value = " << value << std::endl;
+
+}
+
 
 //****************************************************
 // Light Reposition
@@ -278,24 +400,8 @@ void initTextures() {
     glBindTexture(GL_TEXTURE_2D, textures[2]);
     loadTexture("textures/texture2.raw");
 
-/*
-    glGenTextures(1, &texture0);
-    glBindTexture(GL_TEXTURE_2D, texture0);
 
-    loadTexture("textures/texture0.raw");
-
-    glGenTextures(1, &texture1);
-    glBindTexture(GL_TEXTURE_2D, texture1);
-
-    loadTexture("textures/texture1.raw");
-
-    glGenTextures(1, &texture2);
-    glBindTexture(GL_TEXTURE_2D, texture2);
-
-    loadTexture("textures/texture2.raw");
-
-*/
-
+    // Generate Floor Textures
     glGenTextures(3, floorTextures);
 
     glBindTexture(GL_TEXTURE_2D, floorTextures[0]);
@@ -306,23 +412,6 @@ void initTextures() {
 
     glBindTexture(GL_TEXTURE_2D, floorTextures[2]);
     loadTexture("textures/floor2.raw");
-
-    /*
-    glGenTextures(1, &floor0);
-    glBindTexture(GL_TEXTURE_2D, floor0);
-
-    loadTexture("textures/floor0.raw");
-
-    glGenTextures(1, &floor1);
-    glBindTexture(GL_TEXTURE_2D, floor1);
-
-    loadTexture("textures/floor1.raw");
-
-    glGenTextures(1, &floor2);
-    glBindTexture(GL_TEXTURE_2D, floor2);
-
-    loadTexture("textures/floor2.raw"); */
-
 
 }
 
@@ -341,6 +430,8 @@ void initScene() {
     glutInitWindowSize(viewport.w, viewport.h);
     glutInitWindowPosition(0,0);
     glutCreateWindow("CS184 - Final Project");
+
+    createMenu();
   
     // Enables OpenGL to use Z-Buffer & Depth Testing
     glEnable(GL_DEPTH_TEST);
@@ -357,6 +448,7 @@ void initScene() {
 
     textures = new GLuint[3];
     floorTextures = new GLuint[3];
+
 
     initTextures();
 
@@ -1380,6 +1472,8 @@ void myDisplay() {
     if(debugFunc) {
         std::cout << "myDisplay Called" << std::endl;
     }
+
+    handleMenu();
 
     // Sets OpenGL Variables to Render 3D
     glut3DSetup();
