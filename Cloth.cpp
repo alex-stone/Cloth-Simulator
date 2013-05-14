@@ -108,8 +108,6 @@ Cloth::Cloth(int w, int h, Vertex* upLeft, Vertex* upRight, Vertex* downRight, V
 
     mass = 100.0f;
     createVertices(upLeft->getPos(), vertStep, horizStep);
-
-    //connectSprings();
     
     connectNewSprings();
 }
@@ -161,11 +159,6 @@ void Cloth::changeSpringConstant(float newSpring) {
 
 }
 
-
-
-
-
-
 //****************************************************
 // Cloth Constructor Helpers:
 //****************************************************
@@ -213,17 +206,6 @@ void Cloth::createVertices(glm::vec3 upLeft, glm::vec3 vertStep, glm::vec3 horiz
     actualWidth = glm::length(horizStep) * (this->width - 1); 
     actualHeight = glm::length(vertStep) * (this->height - 1);
 
-    /*
-    // Set Spring Rest Lengths   
-    float stretchLength = glm::length(horizStep);
-    float bendLength = 2 * stretchLength;
-    float shearLength = sqrt(2 * stretchLength * stretchLength);
-
-    stretchConst = UNIT_STRETCH / stretchLength;
-    shearConst = UNIT_SHEAR / shearLength;
-    bendConst = UNIT_BEND / bendLength;
-    */
-
     // Iterate through and create each Vertex
     for(int h = 0; h < this->height; h++) {
         for(int w = 0; w < this->width; w++) {
@@ -234,9 +216,6 @@ void Cloth::createVertices(glm::vec3 upLeft, glm::vec3 vertStep, glm::vec3 horiz
             glm::vec3 temp = upLeft + ((float)h * vertStep) + ((float)w * horizStep);
             
             vertexMatrix[vertIndex] = new Vertex(temp.x, temp.y, temp.z);
-
-            //vertexMatrix[vertIndex] = new Vertex(temp.x, temp.y, temp.z, stretchConst, shearConst, bendConst);
-            //vertexMatrix[vertIndex]->setSpringRestLengths(stretchLength, bendLength, shearLength); 
 
             // Sets its position in the Grid of the cloth
             vertexMatrix[vertIndex]->setPosition(w, h);

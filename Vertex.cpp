@@ -4,14 +4,7 @@
 
 #include "Vertex.h"
 
-/*
-// Spring Constants for 1meter, i.e. 1 unit length of 
-const float DEF_STRETCH = 1000.0f;
-const float DEF_SHEAR = 1000.0f;
-const float DEF_BEND = 1000.0f;
-const float DEF_DAMP = 100.0f;
-*/
-// New Useful Variables:
+// Default Damp Factor
 const float DAMP_FACTOR = 0.015f;
 
 bool DEBUG = true ;
@@ -21,8 +14,6 @@ bool DEBUG = true ;
 //****************************************************
 Vertex::Vertex() {
     initPhysicalProps(0.0f, 0.0f, 0.0f); 
-    //initSpringToNull(); 
-    //initSpringConstants(DEF_STRETCH, DEF_SHEAR, DEF_BEND, DEF_DAMP);
     
     fixed = false;
     lastTimeUpdated = 0.0f;
@@ -30,8 +21,6 @@ Vertex::Vertex() {
 
 Vertex::Vertex(float a, float b, float c) {
     initPhysicalProps(a, b, c);
-    //initSpringToNull(); 
-   // initSpringConstants(DEF_STRETCH, DEF_SHEAR, DEF_BEND, DEF_DAMP);
 
     fixed = false;
     lastTimeUpdated = 0.0f;
@@ -39,48 +28,14 @@ Vertex::Vertex(float a, float b, float c) {
 
 Vertex::Vertex(float a, float b, float c, bool isFixed) {
     initPhysicalProps(a, b, c);
-    //initSpringToNull();
-   // initSpringConstants(DEF_STRETCH, DEF_SHEAR, DEF_BEND, DEF_DAMP);
     
     fixed = isFixed;
     lastTimeUpdated = 0.0f;
 }
 
-/*Vertex::Vertex(float a, float b, float c, float stretchConst, float shearConst, float bendConst) {
-    initPhysicalProps(a, b, c);
-    initSpringToNull();
-    //initSpringConstants(stretchConst, shearConst, bendConst, DEF_DAMP);
-
-    fixed = false;
-    lastTimeUpdated = 0.0f;
-}
-
-Vertex::Vertex(float a, float b, float c, float stretchConst, float shearConst, float bendConst, bool isFixed) {
-    initPhysicalProps(a, b, c);
-    initSpringToNull();
-    //initSpringConstants(stretchConst, shearConst, bendConst, DEF_DAMP);
-
-    fixed = isFixed;
-    lastTimeUpdated = 0.0f;
-
-}*/
-
-
 //****************************************************
 // Vertex Class - Private Functions
 //****************************************************
-/*
-void Vertex::initSpringToNull() {
-    stretch = new Vertex*[4];
-    shear = new Vertex*[4];
-    bend = new Vertex*[4];
-
-    for(int i = 0; i < 4; i++) {
-        stretch[i] = NULL;
-        shear[i] = NULL;
-        bend[i] = NULL;
-    }
-}*/
 
 void Vertex::initPhysicalProps(float a, float b, float c) {
     this->position = glm::vec3(a, b, c);
@@ -105,20 +60,6 @@ void Vertex::setPosition(int x, int y) {
     xPos = x;   // X is width
     yPos = y;   // Y is Height
 }
-/*
-void Vertex::setSpringRestLengths(float stretch, float bend, float shear) {
-    stretchRestDist = stretch;
-    shearRestDist = shear;
-    bendRestDist = bend;
-}
-
-void Vertex::initSpringConstants(float stretchConst, float shearConst, float bendConst, float dampConst) {
-    stretchConstant = stretchConst;
-    shearConstant = shearConst;
-    bendConstant = bendConst;
-
-    dampConstant = dampConst;
-}*/
 
 void Vertex::setFixedVertex(bool isFixed) {
     fixed = isFixed;
@@ -127,24 +68,6 @@ void Vertex::setFixedVertex(bool isFixed) {
 void Vertex::setDamp(float newDamp) {
     dampFactor = newDamp;
 }
-
-
-//****************************************************
-// Vertex Class - Functions
-//****************************************************
-/*
-
-void Vertex::connectStretch(Vertex* a, int n) {
-    stretch[n] = a;
-}
-
-void Vertex::connectShear(Vertex* a, int n) {
-    shear[n] = a;
-}
-
-void Vertex::connectBend(Vertex* a, int n) {
-    bend[n] = a;
-}*/
 
 //****************************************************
 // Verlet Integration - Update Position      
@@ -251,32 +174,6 @@ void Vertex::offsetCorrection(glm::vec3 correctionVec) {
 
 }
 
-
-//****************************************************
-// Update Internal Forces:
-//      - Update Acceleration given Internal Forces
-//****************************************************
-
-/*
-void Vertex::updateInternal() {
-    glm::vec3 spring = this->getSpringForce();
-    //glm::vec3 damp = this->getDampForce();
-    //glm::vec3 internalAccel = (spring + damp) / mass;
-
-    glm::vec3 internalAccel = spring / mass;
-
-    acceleration += internalAccel;
-
-    if(xPos == 1 && yPos == 1 && DEBUG) {
-        std::cout << "Internal Acceleration " << "(" << internalAccel.x << ", " << internalAccel.y << ", " << internalAccel.z << ")" << std::endl;
-
-    } 
-
-
-    // Net Acceleration = Sum of 3 vectors
-    //acceleration = (spring + damp + externalForces) / mass;
-} */
-
 //****************************************************
 // Reset Acceleration:
 //      - Sets Acceleration to 0.
@@ -284,7 +181,6 @@ void Vertex::updateInternal() {
 void Vertex::resetAccel() {
     acceleration = glm::vec3(0.0f, 0.0f, 0.0f);
 }
-
 
 //****************************************************
 // Add Acceleration:
@@ -326,89 +222,6 @@ glm::vec3 Vertex::findNormal(Vertex *v2, Vertex *v3){
     return glm::cross(temp_v1,temp_v2);
 }
 
-
-//****************************************************
-// GetAccelFromSpring       From a Single Spring 
-//      - springVec
-//              Direction of Force
-//              Length;
-//****************************************************
-
-/*
-glm::vec3 Vertex::getForceFromSpring(float restLength, float springConstant, Vertex* v2) {//glm::vec3 springVec) {
-
-    // Displacement
-    glm::vec3 springVec = this->vectorTo(v2);
-
-    float dist = glm::length(springVec);
-
-    float diff = (dist - restLength) / dist;
-
-    // Direction of Force
-    glm::vec3 returnVec = glm::normalize(springVec);
-    
-    // ReturnVec = (k * x) * direction
-    returnVec = returnVec * springConstant * diff;
-
-    // Stiffness Proportional damping
-
-    float kd = 0.5*springConstant;
-
-    float len = glm::length(springVec);
-
-    glm::vec3 damp = - kd * (springVec) * (glm::dot(springVec, springVec)) / (len * len);
-
-    // Mass Proportional Damping
-
-    glm::vec3 springDir = glm::normalize(springVec);
-    glm::vec3 vel1 = springDir * glm::dot(velocity, springDir);
-    
-    glm::vec3 vel2 = springDir * glm::dot(v2->getVelocity(), springDir);
-
-
- //   glm::vec3 damp = (-.5f) * (vel1 - vel2);
-
-    if(glm::length(damp) > 0.8 * glm::length(returnVec)) {
-        damp = glm::normalize(damp) * 0.5f* glm::length(returnVec);
-
-    }
-
-
-    //returnVec += damp;
-
-    return returnVec;
-}*/
-
-//****************************************************
-// GetSpringAccel
-//      - Calculates the net Acceleration from all
-//        12 of the springs.
-//****************************************************
-
-/*
-glm::vec3 Vertex::getSpringForce() {
-    // Iterate through each spring connection and calculate force 
-
-    glm::vec3 stretchVec, shearVec, bendVec;
-    //glm::vec3 returnVec(0.0f, 0.0f, 0.0f);
-
-    for(int i = 0; i < 4; i++) {
-        if(stretch[i] != NULL) {
-            stretchVec += getForceFromSpring(stretchRestDist, stretchConstant, stretch[i]); //this->vectorTo(stretch[i]));
-        }
-
-        if(shear[i] != NULL) {
-            shearVec += getForceFromSpring(shearRestDist, shearConstant, shear[i]);//this->vectorTo(shear[i]));
-        }
-
-        if(bend[i] != NULL) {
-            bendVec += getForceFromSpring(bendRestDist, bendConstant, bend[i]);//this->vectorTo(bend[i]));
-        }
-  
-    }
-
-    return stretchVec + shearVec + bendVec;
-} */
 
 //****************************************************
 // Reset Normal:
