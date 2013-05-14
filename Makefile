@@ -12,25 +12,19 @@ else
 endif
 
 
-SOURCES = Scene.cpp Vertex.cpp Cloth.cpp Sphere.cpp Plane.cpp Spring.cpp
-OBJECTS = Scene.o Vertex.o Cloth.o Sphere.o Plane.o Spring.o
+SOURCES = Main.cpp Scene.cpp Vertex.cpp Cloth.cpp Sphere.cpp Plane.cpp Spring.cpp
+OBJECTS = Main.o Scene.o Vertex.o Cloth.o Sphere.o Plane.o Spring.o
 
 
 RM = /bin/rm -f
 all: main
-#main: $(OBJECTS)
-#	$(CC) $(CFLAGS) -o bezier bezier.o $(LDFLAGS) 
 
 main: $(OBJECTS)
-	$(CC) $(CFLAGS) -o Scene $(OBJECTS) $(LDFLAGS)
+	$(CC) $(CFLAGS) -o Main $(OBJECTS) $(LDFLAGS)
 
-Scene.o: Scene.cpp
+Main.o: main.cpp
 	$(CC) $(CFLAGS) -c $(SOURCES)
 
-#bezier.o: bezier.cpp
-#	$(CC) $(CFLAGS) -c bezier.cpp -o bezier.o
-
-
 clean: 
-	$(RM) *.o Scene
+	$(RM) *.o Main 
 

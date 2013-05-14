@@ -13,7 +13,7 @@
 
 // Debug Variables
 bool debug = false;
-bool useSpringForce = true;
+bool useSpringForce = false;
 
 //****************************************************
 // Cloth Class - Constructors
@@ -139,8 +139,8 @@ void Cloth::changeTolerance(float newTolerance) {
         shearMatrix[j]->setTolerance(newTolerance);
     }
 
-    for(int k = 0; k < stretchMatrix.size(); k++) {
-        stretchMatrix[k]->setTolerance(newTolerance);
+    for(int k = 0; k < bendMatrix.size(); k++) {
+        bendMatrix[k]->setTolerance(newTolerance);
     }
 }
 
@@ -153,8 +153,8 @@ void Cloth::changeSpringConstant(float newSpring) {
         shearMatrix[j]->setSpringConstant(newSpring);
     }
 
-    for(int k = 0; k < stretchMatrix.size(); k++) {
-        stretchMatrix[k]->setSpringConstant(newSpring);
+    for(int k = 0; k < bendMatrix.size(); k++) {
+        bendMatrix[k]->setSpringConstant(newSpring);
     }
 
 }
@@ -260,8 +260,8 @@ void Cloth::applyCorrection() {
         shearMatrix[j]->applyCorrection();
     }
 
-    for(int k = 0; k < stretchMatrix.size(); k++) {
-        stretchMatrix[k]->applyCorrection();
+    for(int k = 0; k < bendMatrix.size(); k++) {
+        bendMatrix[k]->applyCorrection();
     }
 }
 
@@ -281,8 +281,8 @@ void Cloth::updateSprings() {
             shearMatrix[j]->applyForce();
         }
 
-        for(int k = 0; k < stretchMatrix.size(); k++) {
-            stretchMatrix[k]->applyForce();
+        for(int k = 0; k < bendMatrix.size(); k++) {
+            bendMatrix[k]->applyForce();
         }
 
     } else {
@@ -300,8 +300,8 @@ void Cloth::applyLengthConstraints() {
         shearMatrix[j]->lengthConstraint();
     }
 
-    for(int k = 0; k < stretchMatrix.size(); k++) {
-        stretchMatrix[k]->lengthConstraint();
+    for(int k = 0; k < bendMatrix.size(); k++) {
+        bendMatrix[k]->lengthConstraint();
     }
 }
 
